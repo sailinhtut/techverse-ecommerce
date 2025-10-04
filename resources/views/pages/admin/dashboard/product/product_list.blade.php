@@ -77,20 +77,34 @@
                                             <p class="text-lg font-semibold py-0">{{ $product['title'] }}</p>
                                             <div class="mt-4 space-y-2">
                                                 <p><strong>ID:</strong> {{ $product['id'] ?? 'No ID' }}</p>
+                                                <p><strong>Status:</strong>
+                                                    {{ $product['is_active'] ? 'Live' : 'Disable' }}</p>
                                                 <p><strong>Slug:</strong> {{ $product['slug'] ?? 'No Slug' }}
                                                 </p>
                                                 <p><strong>Short Description:</strong>
                                                     {{ $product['short_description'] ?? 'No Description' }}</p>
                                                 <p><strong>Long Description:</strong>
                                                     {{ $product['long_description'] ?? 'No Description' }}</p>
+                                                <p><strong>SKU (Stock Keeping Unit):</strong>
+                                                    {{ $product['sku'] ?? 'Not Set' }}</p>
+                                                <p><strong>Regular Price:</strong>
+                                                    {{ $product['regular_price'] ?? 'No Price Set' }}</p>
                                                 <p><strong>Regular Price:</strong>
                                                     {{ $product['regular_price'] ?? 'No Price Set' }}</p>
                                                 <p><strong>Sale Price:</strong>
                                                     {{ $product['sale_price'] ?? 'No Price Set' }}</p>
                                                 <p><strong>Stock:</strong>
                                                     {{ $product['stock'] ?? 'No Stock Set' }}</p>
-                                                <p><strong>Category ID:</strong>
-                                                    {{ $product['category_id'] ?? 'No Category Set' }}</p>
+                                                <p><strong>Stock Status:</strong>
+                                                    {{ $product['enable_stock'] ? 'Enable' : 'Disable' }}</p>
+                                                <p>
+                                                    <strong>Category ID:</strong>
+                                                    {{ $product['category_id'] ?? 'No Category Set' }}
+                                                </p>
+                                                <p>
+                                                    <strong>Category:</strong>
+                                                    {{ $product['category'] ? $product['category']['title'] : '' }}
+                                                </p>
 
                                                 <!-- Main Image -->
                                                 <p><strong>Image:</strong></p>

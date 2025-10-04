@@ -16,9 +16,7 @@ class ProductController extends Controller
 {
     public function showProductListUser()
     {
-        // $response = Http::get('https://fakestoreapi.com/products');
-        // $products = $response->json();
-        $products = Product::all();
+        $products = Product::where('is_active', true)->get();
 
         $products = $products->map(function ($product) {
             return $product->serializeJson();
@@ -30,7 +28,7 @@ class ProductController extends Controller
     public function showProductDetail(Request $request, string $slug)
     {
         try {
-            $product = Product::where('slug', $slug)->firstOrFail();
+            $product = Product::with('category')->where('slug', $slug)->firstOrFail();
             $product = $product->serializeJson();
 
             return view('pages.user.core.product_detail', compact('product'));
@@ -43,7 +41,7 @@ class ProductController extends Controller
 
     public function showProductListAdmin()
     {
-        $products = Product::orderBy('id', 'desc')->paginate(10);
+        $products = Product::with('category')->orderBy('id', 'desc')->paginate(10);
 
         $products->getCollection()->transform(function ($product) {
             return $product->serializeJson();
@@ -67,102 +65,10 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Not Found Product');
         }
         $edit_product = $edit_product->serializeJson();
-        
+
         return view('pages.admin.dashboard.product.edit_product', ['edit_product' => $edit_product, 'product_categories' => $product_categories]);
     }
 
-    public function seedProductData(Request $request)
-    {
-        try {
-            $response = Http::get('https://fakestoreapi.com/products');
-
-            if (!$response->successful()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to fetch products from FakeStore API'
-                ], 500);
-            }
-
-            $categoryId = $request->query('category');
-            $refresh = $request->query('refresh') ?? false;
-
-
-            if (!$categoryId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Category ID is required'
-                ], 400);
-            }
-
-            $refresh = filter_var($refresh, FILTER_VALIDATE_BOOL);
-            $categoryId = intval($categoryId);
-
-            $found_category = ProductCategory::find($categoryId);
-
-            if (!$found_category) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "No Category Found (ID:{$categoryId})"
-                ], 400);
-            }
-
-
-            $fakeProducts = $response->json();
-
-            if ($refresh) {
-                Product::truncate();
-            }
-
-            foreach ($fakeProducts as $item) {
-                Product::create([
-                    'title' => $item['title'],
-                    'short_description' => substr($item['description'], 0, 255),
-                    'long_description' => $item['description'],
-                    'regular_price' => $item['price'],
-                    'sale_price' => null,
-                    'stock' => rand(1, 100),
-                    'image' => $item['image'],
-                    'image_gallery' => [
-                        [
-                            "label" => $item['title'],
-                            "image" => $item['image']
-                        ],
-                        [
-                            "label" => $item['title'],
-                            "image" => $item['image']
-                        ],
-                        [
-                            "label" => $item['title'],
-                            "image" => $item['image']
-                        ],
-                    ],
-                    'category_id' => $categoryId,
-                ]);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Products imported successfully',
-                'count'   => count($fakeProducts)
-            ]);
-        } catch (Exception $error) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Something went wrong',
-                'error'   => $error->getMessage()
-            ], 500);
-        }
-    }
-
-    public function getProducts(Request $request)
-    {
-        try {
-            $products = Product::all();
-            return response()->json($products);
-        } catch (Exception $error) {
-            return handleErrors($error, "Something Went Wrong");
-        }
-    }
 
     public function addProduct(Request $request)
     {
@@ -171,7 +77,10 @@ class ProductController extends Controller
             'short_description' => 'nullable|string|max:255',
             'long_description' => 'nullable|string',
             'regular_price' => 'required|numeric',
+            'sku' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
             'sale_price' => 'nullable|numeric',
+            'enable_stock' => 'nullable|boolean',
             'stock' => 'nullable|integer',
             'image' => 'nullable|image|max:2048',
             'image_gallery' => 'nullable|array',
@@ -203,14 +112,15 @@ class ProductController extends Controller
                 }
             }
 
-
-
             $new_product = Product::create([
                 'title' => $validated['title'],
                 'short_description' => $validated['short_description'] ?? null,
                 'long_description' => $validated['long_description'] ?? null,
+                'sku' => $validated['sku'] ?? null,
+                'is_active' => $validated['is_active'] ?? true,
                 'regular_price' => $validated['regular_price'],
                 'sale_price' => $validated['sale_price'] ?? null,
+                'enable_stock' => $validated['enable_stock'] ?? true,
                 'stock' => $validated['stock'] ?? 0,
                 'image' => $imagePath,
                 'image_gallery' => $galleryPaths,
@@ -231,59 +141,17 @@ class ProductController extends Controller
         }
     }
 
-    //     public function updateProduct(Request $request, string $id)
-    //     {
-    //         $validated = $request->validate([
-    //             'title' => 'nullable|string|max:255',
-    //             'short_description' => 'nullable|string|max:255',
-    //             'long_description' => 'nullable|string',
-    //             'regular_price' => 'nullable|numeric',
-    //             'sale_price' => 'nullable|numeric',
-    //             'stock' => 'nullable|integer',
-    //             'image' => 'nullable|string',
-    //             'image_gallery' => 'nullable|array',
-    //             'image_gallery.*.label' => 'required_with:image_gallery|string|max:255',
-    //             'image_gallery.*.image' => 'required_with:image_gallery|string',
-    //             'category_id' => 'nullable|exists:product_categories,id'
-    //         ]);
-    // 
-    //         try {
-    //             $product = Product::findOrFail($id);
-    // 
-    //             $product->update([
-    //                 'title' => $validated['title'] ?? $product->title,
-    //                 'short_description' => $validated['short_description'] ?? $product->short_description,
-    //                 'long_description' => $validated['long_description'] ?? $product->long_description,
-    //                 'regular_price' => $validated['regular_price'] ?? $product->regular_price,
-    //                 'sale_price' => $validated['sale_price'] ?? $product->sale_price,
-    //                 'stock' => $validated['stock'] ?? $product->stock,
-    //                 'image' => array_key_exists('image', $validated) ? $validated['image'] : $product->image,
-    //                 'image_gallery' => array_key_exists('image_gallery', $validated) ?  $validated['image_gallery'] : $product->image_gallery,
-    //                 'category_id' => $validated['category_id'] ?? $product->category_id,
-    //             ]);
-    // 
-    //             if ($request->expectsJson()) {
-    //                 return response()->json([
-    //                     'success' => true,
-    //                     'message' => 'Product Updated Successfully',
-    //                     'data' => $product
-    //                 ]);
-    //             }
-    // 
-    //             return redirect()->back()->with('success', 'Product Updated Successfully');
-    //         } catch (\Exception $error) {
-    //             return handleErrors($error, "Something Went Wrong");
-    //         }
-    //     }
-
     public function updateProduct(Request $request, string $id)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'short_description' => 'nullable|string|max:255',
             'long_description' => 'nullable|string',
+            'sku' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
             'regular_price' => 'required|numeric',
             'sale_price' => 'nullable|numeric',
+            'enable_stock' => 'nullable|boolean',
             'stock' => 'nullable|integer',
             'image' => 'nullable|image|max:2048',
             'remove_image' => 'nullable|boolean',
@@ -341,8 +209,11 @@ class ProductController extends Controller
                 'title' => $validated['title'],
                 'short_description' => $validated['short_description'] ?? null,
                 'long_description' => $validated['long_description'] ?? null,
+                'sku' => $validated['sku'] ?? null,
+                'is_active' => $validated['is_active'] ?? true,
                 'regular_price' => $validated['regular_price'],
                 'sale_price' => $validated['sale_price'] ?? null,
+                'enable_stock' => $validated['enable_stock'] ?? true,
                 'stock' => $validated['stock'] ?? null,
                 'category_id' => $validated['category_id'],
                 'image_gallery' => $gallery,

@@ -26,6 +26,17 @@
             <input type="text" name="title" id="title" class="input input-sm"
                 value="{{ old('title', $edit_product['title'] ?? '') }}" required>
 
+            <label class="label">
+                <input type="hidden" name="is_active" value="0">
+                <input type="checkbox" class="toggle toggle-sm toggle-primary" name="is_active" value="1"
+                    {{ old('is_active', $edit_product['is_active'] ?? 1) ? 'checked' : '' }} />
+                Enable Stock
+            </label>
+
+            <label for="sku" class="text-sm">SKU (Stock Keeping Unit)</label>
+            <input type="text" name="sku" id="sku" class="input input-sm"
+                value="{{ old('sku', $edit_product['sku'] ?? '') }}">
+
             {{-- Prices --}}
             <label for="regular_price" class="text-sm">Regular Price</label>
             <input type="number" name="regular_price" id="regular_price" class="input input-sm"
@@ -35,7 +46,6 @@
             <input type="number" name="sale_price" id="sale_price" class="input input-sm"
                 value="{{ old('sale_price', $edit_product['sale_price'] ?? '') }}">
 
-            {{-- Thumbnail --}}
             <label for="image" class="text-sm">Thumbnail Image</label>
             @if (!empty($edit_product['image']))
                 <div class="flex items-center gap-2 mb-2">
@@ -80,12 +90,18 @@
                 <button type='button' class="btn btn-sm mt-2 w-fit" id="add-gallery-row">+ Add Image</button>
             </div>
 
-            {{-- Stock --}}
+            <label class="label">
+                <input type="hidden" name="enable_stock" value="0">
+                <input type="checkbox" class="toggle toggle-sm toggle-primary" name="enable_stock" value="1"
+                    {{ old('enable_stock', $edit_product['enable_stock'] ?? 1) ? 'checked' : '' }} />
+                Enable Stock Availability
+            </label>
+
             <label for="stock" class="text-sm">Stock</label>
             <input type="number" name="stock" id="stock" class="input input-sm"
                 value="{{ old('stock', $edit_product['stock'] ?? '') }}">
 
-            {{-- Category --}}
+
             <label for="stock" class="text-sm">Category</label>
             <select name="category_id" class="select select-sm" required>
                 @foreach ($product_categories as $category)

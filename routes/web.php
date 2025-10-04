@@ -5,17 +5,25 @@ use App\Http\Controllers\Buying\CartController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\StorageManager;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/debug', '__');
-Route::get('/seed-products', [ProductController::class, 'seedProductData']);
+Route::get('/test', function () {
+    $products = Product::orderBy('id', 'desc')->paginate(10);
+    $products_1 = Product::all();
+    $products_2 = Product::where('category_id', '1')->get();
+    $product_3 = Product::with('category')->where('title', 'like', '%men%')->get();
+    dd($products, $products_1, $products_2, $product_3, $product_3->toArray(), $product_3->toJson());
+});
 
-
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/api/test', function () {
-        return response()->json(['message' => 'Good To Go']);
+Route::get('/test-2',function(){
+    $categories = ProductCategory::with('products.category')->get();
+    $categories->transform(function($category){
+        return $category->toArray();
     });
+    return dd($categories);
 });
 
 // User Routes

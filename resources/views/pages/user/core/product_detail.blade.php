@@ -96,7 +96,7 @@
 
                 <p class="text-xl font-semibold mb-0 mt-5">{{ $product['title'] }}</p>
 
-                <p class="font-semibold mb-1">
+                <p class="font-semibold">
                     Price -
                     @if ($product['sale_price'])
                         <span
@@ -107,13 +107,15 @@
                         <span>${{ number_format($product['sale_price'] ?? $product['regular_price'], 2) }}</span>
                     @endif
 
-                    <span class="{{ $product['stock'] > 0 ? 'text-green-800' : 'text-red-800' }} text-sm ml-2">
-                        {{ $product['stock'] > 0 ? 'In Stock' : 'Out of Stock' }}
-                    </span>
+                    @if ($product['enable_stock'])
+                        <span class="{{ $product['stock'] > 0 ? 'text-green-800' : 'text-red-800' }} text-sm ml-2">
+                            {{ $product['stock'] > 0 ? 'In Stock' : 'Out of Stock' }}
+                        </span>
+                    @endif
                 </p>
 
                 @if ($product['stock'] > 0)
-                    <div class="join join-horizontal" x-data>
+                    <div class="join join-horizontal mt-3" x-data>
                         <div class="w-10">
                             <input class="input join-item -z-10" name="quantity"
                                 :value="$store.cart.items[{{ $product['id'] }}] ? $store.cart.items[{{ $product['id'] }}]
@@ -133,6 +135,16 @@
                         </button>
                     </div>
                 @endif
+
+                <div class="mt-3">
+                    <p class='font-semibold'>Properties</p>
+                    @if ($product['category'])
+                        <p class="text-sm">
+                            Category -
+                            <span>{{ $product['category']['title'] }}</span>
+                        </p>
+                    @endif
+                </div>
 
                 <div class="mt-3">
                     <p class="font-semibold mb-1">Description</p>

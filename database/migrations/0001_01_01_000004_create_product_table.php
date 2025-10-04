@@ -17,9 +17,15 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('short_description')->nullable();
             $table->text('long_description')->nullable();
+
+            $table->string('sku')->unique()->nullable();
+            $table->boolean('is_active')->nullable()->default(true);
+
             $table->decimal('regular_price', 10, 2);
             $table->decimal('sale_price', 10, 2)->nullable();
+            $table->boolean('enable_stock')->nullable()->default(true);
             $table->unsignedInteger('stock')->nullable();
+
             $table->string('image')->nullable();
             $table->json('image_gallery')->nullable();
             $table->unsignedBigInteger('category_id')->nullable();

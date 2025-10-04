@@ -14,13 +14,22 @@ class Product extends Model
     protected $fillable = [
         'title',
         'slug',
+
         'short_description',
         'long_description',
+
+        'sku',
+        'is_active',
+
         'regular_price',
         'sale_price',
+
+        'enable_stock',
         'stock',
+
         'image',
         'image_gallery',
+
         'category_id'
     ];
 
@@ -28,7 +37,13 @@ class Product extends Model
     {
         return [
             'image_gallery' => 'array',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(ProductCategory::class);
     }
 
     public function serializeJson(): array
@@ -58,16 +73,21 @@ class Product extends Model
             'slug' => $this->slug,
             'short_description' => $this->short_description,
             'long_description' => $this->long_description,
+            'sku' => $this->sku,
+            'is_active' => $this->is_active,
             'regular_price' => $this->regular_price,
             'sale_price' => $this->sale_price,
+            'enable_stock' => $this->enable_stock,
             'stock' => $this->stock,
             'image' => $imagePath,
             'image_gallery' => $gallery,
             'category_id' => $this->category_id,
+            'category' => $this->category ? $this->category->toArray() : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
     }
+
 
     protected static function boot()
     {

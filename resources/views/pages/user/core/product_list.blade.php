@@ -2,8 +2,11 @@
 
 @section('web_content')
     @include('components.shop_navbar')
-    <div class="p-4 lg:p-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-2 lg:gap-5">
-
+    <div
+        class=" p-4 lg:p-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-2 lg:gap-5">
+        @if (count($products) === 0)
+            <p class="text-gray-500 min-h-screen">No Product Found</p>
+        @endif
         @foreach ($products as $product)
             <div
                 class="bg-base-100 border border-base-300 shadow-md rounded-lg select-none overflow-hidden hover:shadow-lg transition">
@@ -66,18 +69,3 @@
     </div>
     @include('components.web_footer')
 @endsection
-
-@push('script')
-    <script>
-        function addToCart(product) {
-            console.log(product)
-            // $store.cart.addItem({
-            //     id: {{ $product['id'] }},
-            //     title: "{{ $product['title'] }}",
-            //     slug: "{{ $product['slug'] }}",
-            //     price: {{ $product['regular_price'] }},
-            //     image: "{{ $product['image'] }}"
-            // })
-        }
-    </script>
-@endpush

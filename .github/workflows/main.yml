@@ -20,4 +20,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./          
           server-dir: domains/masterseller.shop/public_html/
-          git-ftp-args: --insecure
+          git-ftp-args: --insecure --syncroot ./ --force

@@ -8,14 +8,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     @if (!View::hasSection('head'))
-        <title>Product Detail | Tech Verse</title>
-        <meta name="description" content="Detailed info about this product.">
+        <title>{{ config('app.name') }}</title>
+        <meta name="description" content="">
         <meta name="keywords" content="product, tech, ecommerce">
         <meta name="author" content="Tech Verse">
         <meta name="robots" content="index, follow">
 
         <!-- Open Graph -->
-        <meta property="og:title" content="Product Detail | Tech Verse" />
+        <meta property="og:title" content="{{ config('app.name') }}" />
         <meta property="og:description" content="Detailed info about this product." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="{{ url()->current() }}" />
@@ -24,7 +24,7 @@
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="Product Detail | Tech Verse">
+        <meta name="twitter:title" content="{{ config('app.name') }}">
         <meta name="twitter:description" content="Detailed info about this product.">
         <meta name="twitter:image" content="{{ asset('assets/images/techverse_green_logo.png') }}">
     @endif

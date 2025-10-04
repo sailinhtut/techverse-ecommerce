@@ -5,7 +5,7 @@
     <div class="p-6 lg:p-7 mt-[60px] max-w-4xl mx-auto">
         <p class="text-xl md:text-2xl font-semibold text-gray-800">Contact Us</p>
         <p class="text-gray-600 leading-relaxed mb-6">
-            At <span class="font-semibold text-gray-900">Tech Verse Computer Store</span>,
+            At <span class="font-semibold text-gray-900">{{ config('app.name') }} Computer Store</span>,
             we value communication and are here to assist you with any inquiries.
             Whether it’s product details, order support, or partnership opportunities,
             feel free to reach out. Our team will respond promptly to ensure your

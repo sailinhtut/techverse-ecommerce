@@ -4,9 +4,9 @@
     <div class="min-h-screen flex bg-gradient-to-br from-green-200 to-black/10 relative">
         <div class="xl:w-1/2 w-screen min-h-screen px-6 pt-10 xl:pt-50 xl:px-50 flex flex-col justify-start items-center">
             <div class="w-full max-w-sm mx-auto flex flex-col justify-start items-start">
-                <img src="{{ asset('assets/images/techverse_black_logo.png') }}" alt="Tech Verse Logo"
+                <img src="{{ asset('assets/images/techverse_black_logo.png') }}" alt="{{ config('app.name') }}"
                     class="w-32 mb-6 xl:hidden">
-                <p class="text-xl font-semibold mb-6">Tech Verse Computer Store</p>
+                <p class="text-xl font-semibold mb-6">{{ config('app.name') }}</p>
                 <p class="font-semibold mb-2 text-gray-700">Log In Your Account</p>
 
                 <form method="POST" action="{{ route('login') }}" class="space-y-3 w-full">

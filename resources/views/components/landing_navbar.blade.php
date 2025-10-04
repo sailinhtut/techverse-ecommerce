@@ -2,7 +2,7 @@
     :class="scrolled ? 'bg-white shadow-sm border-b border-base-300' : 'bg-transparent'"
     class="fixed top-0 left-0 right-0 flex flex-row justify-between items-center px-2 lg:px-5 py-0 !h-[60px] z-50">
     <a href="/" class="my-0 flex flex-row items-center text-sm lg:text-base font-semibold">
-        <img src="{{ asset('assets/images/techverse_green_logo.png') }}" alt="Tech Verse Logo" class="h-8 mr-2">
+        <img src="{{ asset('assets/images/techverse_green_logo.png') }}" alt="{{ config('app.name') }}" class="h-8 mr-2">
         {{ config('app.name') }}
     </a>
 
@@ -64,7 +64,7 @@
                 <label for="mobile-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
                 <ul class="menu w-60 min-h-full bg-base-100 text-base-content space-y-2 relative">
 
-                    <p class="font-semibold px-2 py-1">Tech Verse Menu</p>
+                    <p class="font-semibold px-2 py-1">{{ config('app.name') }}</p>
 
                     <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'active' : '' }}">Shop</a>
                     </li>

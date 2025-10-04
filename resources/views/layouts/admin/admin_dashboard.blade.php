@@ -4,9 +4,9 @@
     <nav
         class="z-50 bg-base-100 border-b border-base-300 sticky top-0 flex flex-row justify-between items-center px-2 lg:px-3 py-0 !h-[50px] ">
         <a href="/" class="my-0 flex flex-row items-center text-sm lg:text-base font-semibold">
-            <img src="{{ asset('assets/images/techverse_green_logo.png') }}" alt="Tech Verse Admin Panel"
+            <img src="{{ asset('assets/images/techverse_green_logo.png') }}" alt="{{ config('app.name') }} Admin Panel"
                 class="h-6 mr-2 text-sm">
-            Tech Verse Admin Dashboard
+            {{ config('app.name') }} Admin Dashboard
         </a>
 
         <ul class="my-0 hidden lg:flex flex-row items-center px-1 gap-5">
@@ -62,7 +62,7 @@
                     <label for="mobile-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 
                     <ul class="menu w-60 min-h-full bg-base-100 gap-1">
-                        <p class="font-semibold px-2 py-1">Tech Verse Admin Dashboard</p>
+                        <p class="font-semibold px-2 py-1">{{ config('app.name') }} Admin Dashboard</p>
 
                         <li><a href="{{ route('home.get') }}" class="{{ request()->is('') ? 'active' : '' }}">Visit Site</a>
                         </li>

@@ -5,7 +5,7 @@
     <div class="p-6 lg:p-7 mt-[60px] max-w-4xl mx-auto">
         <p class="text-xl md:text-2xl font-semibold text-gray-800 mb-4">About Us</p>
         <p class="text-gray-600 leading-relaxed mb-6">
-            Welcome to <span class="font-semibold text-gray-900">Tech Verse Computer Store</span>,
+            Welcome to <span class="font-semibold text-gray-900">{{ config('app.name') }}</span>,
             your trusted destination for cutting-edge technology devices and computer products.
             As an <span class="font-medium">E-Commerce retailer</span>, we aim to deliver a seamless shopping
             experience where innovation meets convenience.
@@ -13,7 +13,7 @@
 
         <p class="text-lg font-semibold text-gray-800 mb-3">What We Do</p>
         <p class="text-gray-600 leading-relaxed mb-6">
-            At Tech Verse, we provide a wide selection of laptops, desktops, accessories,
+            At {{ config('app.name') }}, we provide a wide selection of laptops, desktops, accessories,
             and the latest tech devices from top global brands. Whether you are a student,
             a professional, or a gamer, we strive to equip you with the technology
             you need to stay connected and empowered.

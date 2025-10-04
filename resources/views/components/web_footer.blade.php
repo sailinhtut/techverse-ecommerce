@@ -2,7 +2,7 @@
     <div class="pt-10 pb-10 px-6 lg:px-20 md:flex md:justify-between md:items-start gap-10">
 
         <div class="mb-6 md:mb-0 md:w-1/3">
-            <p class="text-xl font-semibold mb-3">Tech Verse Computer Store</p>
+            <p class="text-xl font-semibold mb-3">{{ config('app.name') }}</p>
             <p class="text-sm">
                 Your one-stop shop for computers, peripherals, and tech accessories.
                 We provide high-quality products with excellent customer support.
@@ -84,7 +84,7 @@
     <div class="border-t border-base-300 "></div>
 
     <div class="py-2 text-center text-sm px-2">
-        &copy; {{ date('Y') }} Tech Verse Computer Store. All rights reserved.
+        &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
     </div>
 </footer>
 

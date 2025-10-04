@@ -7,7 +7,7 @@
         <p class="text-sm text-gray-600 mb-6">Last updated: September 21, 2025</p>
 
         <p class="mb-4">
-            At <strong>Tech Verse Computer Store</strong>, we value your privacy and are committed to protecting your
+            At <strong>{{ config('app.name') }} Computer Store</strong>, we value your privacy and are committed to protecting your
             personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you
             interact with our website, services, and products.
         </p>
@@ -71,7 +71,7 @@
             For questions or concerns regarding this Privacy Policy, please contact us at:
         </p>
         <p class="mt-2">
-            <strong>Tech Verse Computer Store</strong><br>
+            <strong>{{ config('app.name') }} Computer Store</strong><br>
             Email: privacy@techverse.com<br>
             Phone: +95 (252) 203-838
         </p>

@@ -7,7 +7,7 @@
         <p class="text-sm text-gray-600 mb-6">Last updated: September 21, 2025</p>
 
         <p class="mb-4">
-            Welcome to <strong>Tech Verse Computer Store</strong>. These Terms and Conditions govern your use of our
+            Welcome to <strong>{{ config('app.name') }} Computer Store</strong>. These Terms and Conditions govern your use of our
             website, products, and services. By accessing or using our platform, you agree to comply with and be bound
             by these terms. If you do not agree, you should discontinue using our services immediately.
         </p>
@@ -20,7 +20,7 @@
 
         <p class="text-lg font-semibold mt-6 mb-2">2. Accounts</p>
         <p class="mb-4">
-            When you register an account with Tech Verse Computer Store, you agree to provide accurate and complete
+            When you register an account with {{ config('app.name') }} Computer Store, you agree to provide accurate and complete
             information. You are responsible for maintaining the confidentiality of your account and for all activities
             under it. We reserve the right to suspend or terminate accounts that violate our policies.
         </p>
@@ -41,7 +41,7 @@
 
         <p class="text-lg font-semibold mt-6 mb-2">5. Limitation of Liability</p>
         <p class="mb-4">
-            Tech Verse Computer Store is not liable for indirect, incidental, or consequential damages arising from
+            {{ config('app.name') }} Computer Store is not liable for indirect, incidental, or consequential damages arising from
             the use of our website or products. We do not guarantee uninterrupted or error-free service, though we
             strive to maintain the highest level of reliability.
         </p>
@@ -64,7 +64,7 @@
             If you have any questions about these Terms & Conditions, please contact us at:
         </p>
         <p class="mt-2">
-            <strong>Tech Verse Computer Store</strong><br>
+            <strong>{{ config('app.name') }} Computer Store</strong><br>
             Email: support@techverse.com<br>
             Phone: +95 (252) 203-838
         </p>

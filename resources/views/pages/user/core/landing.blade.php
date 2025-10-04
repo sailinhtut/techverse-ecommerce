@@ -6,7 +6,7 @@
     <div
         class="lg:min-h-[90vh] flex flex-col-reverse lg:flex-row items-center bg-gradient-to-br from-primary/30 to-purple-100">
         <div class="w-full lg:w-1/2 p-6 lg:p-16 text-center lg:text-left">
-            <p class="text-2xl font-semibold mb-3 pt-12 lg:pt-48">Welcome to Tech Verse Ecommerce Store</p>
+            <p class="text-2xl font-semibold mb-3 pt-12 lg:pt-48">Welcome to {{ config('app.name') }} Ecommerce Store</p>
             <p class="mb-4 text-sm lg:text-base">
                 Discover premium devices, accessories, and cutting-edge technology with exclusive discounts and deals.
                 Shop smarter and upgrade your digital lifestyle today.
@@ -118,7 +118,7 @@
                 <p class="mt-3 font-semibold">– David K.</p>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
-                <p class="text-sm italic">“I trust Tech Verse for all my accessories. Reliable and affordable.”</p>
+                <p class="text-sm italic">“I trust {{ config('app.name') }} for all my accessories. Reliable and affordable.”</p>
                 <p class="mt-3 font-semibold">– Emma W.</p>
             </div>
         </div>

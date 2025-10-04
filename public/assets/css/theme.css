@@ -1,0 +1,8 @@
+:root {
+    --bs-primary: #1abc9c; /* teal */
+    --bs-secondary: #34495e; /* dark blue-gray */
+    --bs-success: #2ecc71; /* green */
+    --bs-danger: #e74c3c; /* red */
+    --bs-warning: #f1c40f; /* yellow */
+    --bs-info: #3498db; /* blue */
+}

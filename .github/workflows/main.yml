@@ -18,6 +18,6 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./           # local folder to upload
-          server-dir: ${{ secrets.FTP_PATH }}
+          local-dir: ./          
+          server-dir: domains/masterseller.shop/public_html/
           git-ftp-args: --insecure

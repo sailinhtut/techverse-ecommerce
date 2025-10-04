@@ -19,5 +19,5 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./          
-          server-dir: domains/masterseller.shop/public_html/
+          server-dir: /home/zplszwh4/domains/masterseller.shop/public_html/
           dangerous-clean-slate: true

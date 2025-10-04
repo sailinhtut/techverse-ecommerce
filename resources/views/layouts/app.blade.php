@@ -33,7 +33,7 @@
 
     <!-- PWA / Mobile App -->
     <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <meta name="theme-color" content="#FFBF00">
+    <!-- <meta name="theme-color" content="#FFBF00"> -->
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">

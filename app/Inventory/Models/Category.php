@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Inventory\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ProductCategory extends Model
+class Category extends Model
 {
     protected $table = 'product_categories';
 

@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers\Product;
 
-use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\ProductCategory;
-use Error;
+use App\Inventory\Models\Category;
+use App\Inventory\Models\Product;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
-class ProductController extends Controller
+class ProductController
 {
     public function showProductListUser()
     {
@@ -52,13 +49,13 @@ class ProductController extends Controller
 
     public function showAddProduct()
     {
-        $product_categories = ProductCategory::all();
+        $product_categories = Category::all();
         return view('pages.admin.dashboard.product.edit_product', compact('product_categories'));
     }
 
     public function showEditProduct(Request $request, string $id)
     {
-        $product_categories = ProductCategory::all();
+        $product_categories = Category::all();
 
         $edit_product = Product::find($id);
         if (!$edit_product) {

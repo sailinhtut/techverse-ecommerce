@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Core\Controllers;
 
 use Exception;
 use Illuminate\Http\Request;
@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 
-class StorageManager extends Controller
+class StorageManager
 {
     protected $disk = 'public';
 

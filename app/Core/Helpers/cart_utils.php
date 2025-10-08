@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Session;
 
 if (!function_exists('getCartItemQuantity')) {
     function getCartItemQuantity($itemId)

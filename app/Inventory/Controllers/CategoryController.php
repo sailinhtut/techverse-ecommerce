@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Product;
+namespace App\Inventory\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use App\Inventory\Models\Category;
 
-class ProductCategoryController extends Controller
+class CategoryController
 {
     public function showCategories()
     {
-        $product_categories = ProductCategory::orderBy('id', 'desc')->paginate(10);
+        $product_categories = Category::orderBy('id', 'desc')->paginate(10);
         return view('pages.admin.dashboard.product_category.product_category_list', compact('product_categories'));
     }
 
@@ -21,7 +20,7 @@ class ProductCategoryController extends Controller
 
     public function showEditCategory(Request $request, string $id)
     {
-        $edit_category = ProductCategory::find($id);
+        $edit_category = Category::find($id);
         if (!$edit_category) {
             return redirect()->back()->with('error', 'Not Found Category');
         }
@@ -37,7 +36,7 @@ class ProductCategoryController extends Controller
                 'description' => 'nullable|string|max:255'
             ]);
 
-            $new_category = ProductCategory::create([
+            $new_category = Category::create([
                 'title' => $validated['title'],
                 'description' => $validated['description']
             ]);
@@ -59,7 +58,7 @@ class ProductCategoryController extends Controller
     public function updateCategory(Request $request, string $id)
     {
         try {
-            $category = ProductCategory::findOrFail($id);
+            $category = Category::findOrFail($id);
 
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
@@ -87,7 +86,7 @@ class ProductCategoryController extends Controller
     public function deleteCategory(string $id)
     {
         try {
-            $category = ProductCategory::findOrFail($id);
+            $category = Category::findOrFail($id);
             $category->delete();
 
             if (request()->expectsJson()) {

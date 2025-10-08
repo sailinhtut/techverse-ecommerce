@@ -2,13 +2,12 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Config;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
@@ -19,10 +18,37 @@ return new class extends Migration
             $table->string('phone_one')->nullable();
             $table->string('phone_two')->nullable();
             $table->date('date_of_birth')->nullable();
-
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
+            $table->timestamps();
+        });
 
+        Schema::create('permissions', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('display_name')->nullable();
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('user_roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('display_name')->nullable();
+            $table->text('description')->nullable();
+            $table->json('permissions')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('title');
+            $table->text('message');
+            $table->enum('type', ['system', 'order', 'payment', 'custom'])->default('custom');
+            $table->string('link')->nullable();
+            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
 
@@ -40,15 +66,26 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        /**
+         * ✅ Populate default permissions from config
+         */
+        $userPermissions = Config::get('user_permissions', []);
+
+        if (!empty($userPermissions)) {
+            DB::table('permissions')->insert($userPermissions);
+        } else {
+            // No need to echo (migrations run silently in many environments)
+            info("⚠️ No permission data found in config/user_permissions.php");
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('user_roles');
+        Schema::dropIfExists('permissions');
+        Schema::dropIfExists('users');
     }
 };

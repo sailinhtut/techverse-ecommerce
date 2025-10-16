@@ -54,7 +54,7 @@ class AuthController
 
     public function login(Request $request)
     {
-        
+
         try {
             $credentials = $request->validate([
                 'email' => 'required|email|exists:users,email',
@@ -69,9 +69,10 @@ class AuthController
             if (!Auth::attempt($credentials)) {
                 throw (new Exception('Incorrect Password'));
             }
+
+            $request->session()->regenerate();
             
-            // $request->session()->regenerate();
-            return redirect('/shop');
+            return view('pages.user.core.product_list');
         } catch (Exception $e) {
             return handleErrors($e);
         }

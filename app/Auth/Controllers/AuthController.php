@@ -54,6 +54,7 @@ class AuthController
 
     public function login(Request $request)
     {
+        
         try {
             $credentials = $request->validate([
                 'email' => 'required|email|exists:users,email',

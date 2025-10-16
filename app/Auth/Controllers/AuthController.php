@@ -68,10 +68,8 @@ class AuthController
             if (!Auth::attempt($credentials)) {
                 throw (new Exception('Incorrect Password'));
             }
-
-            $request->session()->regenerate();
-
-
+            
+            // $request->session()->regenerate();
             return redirect('/shop');
         } catch (Exception $e) {
             return handleErrors($e);

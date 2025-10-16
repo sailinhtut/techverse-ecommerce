@@ -135,6 +135,7 @@ class OrderController
 
             if (!$user->addresses()->where('is_default_shipping', true)->exists()) {
                 Address::create(array_merge($shipping_address, [
+                    'label' => $shipping_address['recipient_name'],
                     'user_id' => $user->id,
                     'is_default_shipping' => true,
                     'type' => 'shipping',
@@ -143,6 +144,7 @@ class OrderController
 
             if (!$user->addresses()->where('is_default_billing', true)->exists()) {
                 Address::create(array_merge($billing_address, [
+                    'label' => $billing_address['recipient_name'],
                     'user_id' => $user->id,
                     'is_default_billing' => true,
                     'type' => 'billing',

@@ -31,7 +31,8 @@
                     class="w-32 mb-6 xl:hidden">
                 <p class="text-xl font-semibold mb-6">{{ config('app.name') }}</p>
                 <p class="font-semibold mb-2 text-gray-700">Log In Your Account</p>
-                <form method="POST" action="{{ route('register.post') }}" class="space-y-2 w-full ">
+                <form method="POST" action="{{ route('register.post') }}" class="space-y-2 w-full" x-data="{ signingUp: false }"
+                    @submit="signingUp=true">
                     @csrf
                     <label for="name" class="form-label block text-sm font-medium text-gray-700">Name</label>
                     <input id="name" type="text" name="name" value="{{ old('name') }}" required
@@ -94,9 +95,14 @@
                     @endif
 
                     <button type="submit"
-                        class="mt-3 btn btn-primary w-full py-2 rounded-lg text-white font-semibold shadow-sm">
-                        Sign Up
+                        class="mt-3 btn btn-primary w-full py-2 rounded-lg text-white font-semibold shadow-sm"
+                        :disabled="signingUp">
+                        <span x-show="signingUp" class="loading loading-spinner loading-sm mr-2"></span>
+                        <span x-show="signingUp">Signing Up</span>
+                        <span x-show="!signingUp">Sign Up</span>
                     </button>
+
+                  
                     <a href="{{ route('shop.get') }}"
                         class="xl:!hidden mt-2 btn btn-light w-full py-2 rounded-lg text-black font-semibold shadow-sm">
                         Skip To Shopping

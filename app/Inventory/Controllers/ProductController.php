@@ -14,8 +14,6 @@ class ProductController
 {
     public function showProductListUser(Request $request)
     {
-       
-
         $products = Product::with('category')->orderBy('id', 'desc')->paginate(20);
 
         $products->getCollection()->transform(function ($product) {
@@ -27,7 +25,6 @@ class ProductController
             $wishlists = Wishlist::where('user_id', auth()->id())->get();
             $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
         }
-
 
         return view('pages.user.core.product_list', compact('products', 'wishlists'));
     }

@@ -44,13 +44,13 @@
 </head>
 
 <body>
-    
+
     @yield('app_content')
-   
+
     @stack('script')
 
 
-   
+
 
 
     @if (session('success') || session('error') || true)
@@ -58,8 +58,7 @@
             @if (session('success'))
                 <div id="status-success"
                     class="alert flex justify-between items-center shadow-lg border rounded-lg
-                       bg-green-100
-                       dark:bg-black dark:text-green-100 dark:border-gray-700 transition-all">
+                       bg-black text-green-100 border-gray-700 transition-all">
                     <div class="flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             class="h-6 w-6 shrink-0 stroke-primary">
@@ -77,8 +76,7 @@
             @if (session('error'))
                 <div id="status-error"
                     class="alert flex justify-between items-center shadow-lg border rounded-lg
-                       bg-green-100
-                       dark:bg-black dark:text-green-100 dark:border-gray-700 transition-all">
+                       bg-black text-green-100 border-gray-700 transition-all">
                     <div class="flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-error" fill="none"
                             viewBox="0 0 24 24">

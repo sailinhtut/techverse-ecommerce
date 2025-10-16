@@ -5,15 +5,13 @@
 
         <div class="xl:w-1/2 w-screen min-h-screen px-6 pt-10 xl:pt-50 xl:px-50 flex flex-col justify-start items-center">
             <div class="w-full max-w-sm mx-auto flex flex-col justify-start items-start">
-                <pre class="w-[300px] p-2 bg-black rounded text-sm text-white overflow-x-auto">
-                {{ json_encode(['session_id' => session()->getId(), 'data' => session()->all()], JSON_PRETTY_PRINT) }}</pre>
-
                 <img src="{{ asset('assets/images/techverse_black_logo.png') }}" alt="{{ config('app.name') }}"
                     class="w-32 mb-6 xl:hidden">
                 <p class="text-xl font-semibold mb-6">{{ config('app.name') }}</p>
                 <p class="font-semibold mb-2 text-gray-700">Log In Your Account</p>
 
-                <form method="POST" action="{{ route('login') }}" class="space-y-3 w-full">
+                <form x-data="{ logging: false }" method="POST" action="{{ route('login') }}" class="space-y-3 w-full"
+                    @submit="logging=true">
                     @csrf
 
                     <div>
@@ -50,9 +48,10 @@
                         </div>
                     @endif
 
-                    {{-- Submit Button --}}
-                    <button type="submit" class="w-full mt-3 btn btn-primary">
-                        Log In
+                    <button type="submit" class="w-full mt-3 btn btn-primary" :disabled="logging">
+                        <span x-show="logging" class="loading loading-spinner loading-sm mr-2"></span>
+                        <span x-show="logging">Logging In</span>
+                        <span x-show="!logging">Log In</span>
                     </button>
 
                     <a href="{{ route('shop.get') }}"

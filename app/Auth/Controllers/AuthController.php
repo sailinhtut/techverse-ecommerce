@@ -46,6 +46,8 @@ class AuthController
 
             Auth::login($user);
 
+            $request->session()->regenerate();
+
             return redirect()->route('shop.get');
         } catch (Exception $e) {
             return handleErrors($e);
@@ -72,7 +74,7 @@ class AuthController
 
             $request->session()->regenerate();
 
-            return redirect('/shop')->with('rege');
+            return redirect('/shop');
         } catch (Exception $e) {
             return handleErrors($e);
         }

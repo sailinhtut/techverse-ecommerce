@@ -7,7 +7,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 Route::view('/debug', '_');
 Route::post('/debug', function (Request $request) {
-    $request->session()->regenerate();
     throw new TokenMismatchException();
 });
 

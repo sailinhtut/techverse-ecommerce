@@ -10,6 +10,11 @@ class CategoryController
     public function showCategories()
     {
         $product_categories = Category::orderBy('id', 'desc')->paginate(10);
+
+        $product_categories->getCollection()->transform(function ($category) {
+            return $category->jsonResponse();
+        });
+
         return view('pages.admin.dashboard.product_category.product_category_list', compact('product_categories'));
     }
 
@@ -32,12 +37,12 @@ class CategoryController
     {
         try {
             $validated = $request->validate([
-                'title' => 'required|string|max:255',
+                'name' => 'required|string|max:255',
                 'description' => 'nullable|string|max:255'
             ]);
 
             $new_category = Category::create([
-                'title' => $validated['title'],
+                'name' => $validated['name'],
                 'description' => $validated['description']
             ]);
 
@@ -49,7 +54,7 @@ class CategoryController
                 ]);
             }
 
-            return redirect()->back()->with('success', "{$validated['title']} is created successfully");
+            return redirect()->back()->with('success', "{$validated['name']} is created successfully");
         } catch (\Exception $error) {
             return handleErrors($error, "Something Went Wrong");
         }
@@ -61,12 +66,12 @@ class CategoryController
             $category = Category::findOrFail($id);
 
             $validated = $request->validate([
-                'title' => 'required|string|max:255',
+                'name' => 'required|string|max:255',
                 'description' => 'nullable|string|max:255'
             ]);
 
             $category->update([
-                'title' => $validated['title'],
+                'name' => $validated['name'],
                 'description' => $validated['description']
             ]);
 
@@ -77,7 +82,7 @@ class CategoryController
                     'data' => $category
                 ]);
             }
-            return redirect()->back()->with('success', "{$validated['title']} is updated successfully");
+            return redirect()->back()->with('success', "{$validated['name']} is updated successfully");
         } catch (\Exception $error) {
             return handleErrors($error, "Something Went Wrong");
         }
@@ -96,7 +101,7 @@ class CategoryController
                 ]);
             }
 
-            return redirect()->back()->with('success', "{$category->title} is deleted successfully");
+            return redirect()->back()->with('success', "{$category->name} is deleted successfully");
         } catch (\Exception $error) {
             return handleErrors($error, "Something Went Wrong");
         }

@@ -29,7 +29,9 @@
                         {{ auth()->user()->name }}</button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a href="/profile" class="dropdown-item">User Profile</a></li>
-                        <li><a href="/admin/dashboard" class="dropdown-item">Admin Dashboard</a></li>
+                        @if (auth()->user()->hasRole('admin'))
+                            <li><a href="/admin/dashboard" class="dropdown-item">Admin Dashboard</a></li>
+                        @endif
                         <li>
                             <form method="POST" action="{{ route('logout.post') }}">
                                 @csrf

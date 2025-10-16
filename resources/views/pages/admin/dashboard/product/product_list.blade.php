@@ -11,7 +11,7 @@
                         <tr>
                             <th class="w-[50px]">No.</th>
                             <th class="w-[50px]">Image</th>
-                            <th class="w-[200px]">Title</th>
+                            <th class="w-[200px]">name</th>
                             <th>Stock</th>
                             <th>Price</th>
                             <th>Sale</th>
@@ -27,16 +27,16 @@
                                 <td class="w-[50px]">
 
                                     @if ($product['image'])
-                                        <img src="{{ $product['image'] }}" alt="{{ $product['title'] }}"
+                                        <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
                                             class="w-[20px] h-auto object-contain">
                                     @else
                                         <img src="{{ asset('assets/images/techverse_green_logo.png') }}"
-                                            alt="{{ $product['title'] }}" class="w-[30px] h-auto">
+                                            alt="{{ $product['name'] }}" class="w-[30px] h-auto">
                                     @endif
                                 </td>
                                 <td class="w-[200px] h-[30px] line-clamp-1">
                                     <div onclick="document.getElementById('detailModal{{ $product['id'] }}').showModal()"
-                                        class="cursor-default hover:underline">{{ $product['title'] }}</div>
+                                        class="cursor-default hover:underline">{{ $product['name'] }}</div>
                                 </td>
                                 <td>{{ $product['stock'] ?? 'Non Stock' }}</td>
                                 <td>{{ $product['regular_price'] ?? '-' }}</td>
@@ -74,7 +74,7 @@
                                                 <button
                                                     class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                             </form>
-                                            <p class="text-lg font-semibold py-0">{{ $product['title'] }}</p>
+                                            <p class="text-lg font-semibold py-0">{{ $product['name'] }}</p>
                                             <div class="mt-4 space-y-2">
                                                 <p><strong>ID:</strong> {{ $product['id'] ?? 'No ID' }}</p>
                                                 <p><strong>Status:</strong>
@@ -103,7 +103,7 @@
                                                 </p>
                                                 <p>
                                                     <strong>Category:</strong>
-                                                    {{ $product['category'] ? $product['category']['title'] : '' }}
+                                                    {{ $product['category'] ? $product['category']['name'] : '' }}
                                                 </p>
 
                                                 <!-- Main Image -->
@@ -124,7 +124,7 @@
                                                                 <img src="{{ $img['image'] }}"
                                                                     alt="{{ $img['label'] ?? 'Gallery Image' }}"
                                                                     class="object-cover w-[100px] h-[100px] rounded-lg"
-                                                                    title="{{ $img['label'] ?? '' }}">
+                                                                    name="{{ $img['label'] ?? '' }}">
                                                             </div>
                                                         @endforeach
                                                     </div>
@@ -152,7 +152,7 @@
 
                                             <p class="py-2 mb-0 text-sm">
                                                 Are you sure you want to delete
-                                                <span class="italic text-error">{{ $product['title'] }}</span> ?
+                                                <span class="italic text-error">{{ $product['name'] }}</span> ?
                                             </p>
                                             <div class="modal-action mt-0">
                                                 <form method="dialog">

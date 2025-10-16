@@ -3,118 +3,128 @@
 namespace App\Inventory\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 
 class Product extends Model
 {
     protected $table = 'products';
+    protected $with = ['category', 'brand'];
 
     protected $fillable = [
-        'title',
-        'slug',
-
-        'short_description',
-        'long_description',
-
+        'name',
         'sku',
         'is_active',
-
-        'regular_price',
-        'sale_price',
-
-        'enable_stock',
-        'stock',
-
+        'slug',
         'image',
         'image_gallery',
-
-        'category_id'
+        'product_type',
+        'short_description',
+        'long_description',
+        'regular_price',
+        'sale_price',
+        'enable_stock',
+        'stock',
+        'category_id',
+        'brand_id',
+        'tags',
+        'specifications',
+        'shipping_methods',
+        'tax_methods',
+        'payment_methods',
     ];
 
     protected function casts(): array
     {
         return [
-            'image_gallery' => 'array',
-            'is_active' => 'boolean',
+            'is_active'        => 'boolean',
+            'enable_stock'     => 'boolean',
+            'regular_price'    => 'decimal:2',
+            'sale_price'       => 'decimal:2',
+            'stock'            => 'integer',
+            'image_gallery'    => 'array',
+            'tags'             => 'array',
+            'specifications'   => 'array',
+            'shipping_methods' => 'array',
+            'tax_methods'      => 'array',
+            'payment_methods'  => 'array',
+            'category_id'      => 'integer',
+            'brand_id'         => 'integer',
         ];
     }
 
     public function category()
     {
-        return $this->belongsTo(ProductCategory::class);
+        return $this->belongsTo(Category::class);
     }
 
-    public function serializeJson(): array
+
+    public function brand()
     {
-        // Handle main image
-        $imagePath = $this->image;
-        if ($imagePath && !Str::startsWith($imagePath, ['http://', 'https://'])) {
-            $imagePath = Storage::disk('public')->url($imagePath);
-        }
+        return $this->belongsTo(Brand::class);
+    }
 
-        // Handle gallery
-        $gallery = $this->image_gallery ?? [];
-        $gallery = array_map(function ($item) {
-            $imagePath = $item['image'] ?? null;
-            if ($imagePath && !Str::startsWith($imagePath, ['http://', 'https://'])) {
-                $imagePath = Storage::disk('public')->url($imagePath);
-            }
-            return [
-                'label' => $item['label'] ?? null,
-                'image' => $imagePath,
-            ];
-        }, $gallery);
 
-        return [
+    public function jsonResponse(array $eager_list = []): array
+    {
+        $image = getDownloadableLink($this->image);
+
+        $gallery = collect($this->image_gallery ?? [])->map(fn($item) => [
+            'label' => $item['label'] ?? null,
+            'image' => getDownloadableLink($item['image'] ?? null),
+        ])->all();
+
+        $response = [
             'id' => $this->id,
-            'title' => $this->title,
+            'name' => $this->name,
             'slug' => $this->slug,
-            'short_description' => $this->short_description,
-            'long_description' => $this->long_description,
             'sku' => $this->sku,
             'is_active' => $this->is_active,
+            'product_type' => $this->product_type,
+            'short_description' => $this->short_description,
+            'long_description' => $this->long_description,
             'regular_price' => $this->regular_price,
             'sale_price' => $this->sale_price,
             'enable_stock' => $this->enable_stock,
             'stock' => $this->stock,
-            'image' => $imagePath,
+            'image' => $image,
             'image_gallery' => $gallery,
             'category_id' => $this->category_id,
-            'category' => $this->category ? $this->category->toArray() : null,
+            'brand_id' => $this->brand_id,
+            'tags' => $this->tags,
+            'specifications' => $this->specifications,
+            'shipping_methods' => $this->shipping_methods,
+            'tax_methods' => $this->tax_methods,
+            'payment_methods' => $this->payment_methods,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+
+        if (in_array('category', $eager_list) && $this->category_id) {
+            $response['category'] = $this->category->jsonResponse();
+        }
+
+        if (in_array('brand', $eager_list) && $this->brand_id) {
+            $response['brand'] = $this->brand->jsonResponse();
+        }
+
+        return $response;
     }
 
 
     protected static function boot()
     {
         parent::boot();
-
-        static::creating(function ($product) {
-            $product->slug = static::generateUniqueSlug($product->title);
-        });
-
-        static::updating(function ($product) {
-            if ($product->isDirty('title')) {
-                $product->slug = static::generateUniqueSlug($product->title);
+        static::saving(function ($product) {
+            if ($product->isDirty('name')) {
+                $base = Str::slug($product->name);
+                $slug = $base;
+                $i = 1;
+                while (self::where('slug', $slug)->where('id', '!=', $product->id)->exists()) {
+                    $slug = "{$base}-" . $i++;
+                }
+                $product->slug = $slug;
             }
         });
-    }
-
-    public static function generateUniqueSlug($title)
-    {
-        $slug = Str::slug($title);
-        $originalSlug = $slug;
-        $count = 1;
-
-        while (self::where('slug', $slug)->exists()) {
-            $slug = "{$originalSlug}-{$count}";
-            $count++;
-        }
-
-        return $slug;
     }
 }

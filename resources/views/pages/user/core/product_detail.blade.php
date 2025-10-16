@@ -2,14 +2,14 @@
 
 @section('head')
     <!-- Page Title & Meta -->
-    <title>{{ $product['title'] }} | {{ config('app.name') }}</title>
+    <title>{{ $product['name'] }} | {{ config('app.name') }}</title>
     <meta name="description" content="{{ $product['short_description'] }}">
     <meta name="keywords" content="{{ implode(',', $product['tags'] ?? []) }}">
     <meta name="author" content="{{ config('app.name') }}">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph (Facebook / LinkedIn) -->
-    <meta property="og:title" content="{{ $product['title'] }}" />
+    <meta property="og:ttile" content="{{ $product['name'] }}" />
     <meta property="og:description" content="{{ $product['short_description'] }}" />
     <meta property="og:type" content="product" />
     <meta property="og:url" content="{{ url()->current() }}" />
@@ -18,7 +18,7 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $product['title'] }}">
+    <meta name="twitter:title" content="{{ $product['name'] }}">
     <meta name="twitter:description" content="{{ $product['short_description'] }}">
     <meta name="twitter:image" content="{{ $product['image'] }}">
 @endsection
@@ -30,10 +30,10 @@
             <div class="flex flex-col justify-start items-center lg:p-10">
                 <div class="overflow-hidden p-5">
                     @if (!empty($product['image']))
-                        <img src="{{ $product['image'] }}" alt="{{ $product['title'] }}"
+                        <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
                             class="w-[300px] h-auto object-cover rounded">
                     @else
-                        <img src="{{ asset('assets/images/computer_accessories.png') }}" alt="{{ $product['title'] }}"
+                        <img src="{{ asset('assets/images/computer_accessories.png') }}" alt="{{ $product['name'] }}"
                             class="w-[300px] h-auto object-cover rounded">
                     @endif
                 </div>
@@ -94,7 +94,9 @@
 
             <div class="flex flex-col gap-2 lg:p-10">
 
-                <p class="text-xl font-semibold mb-0 mt-5">{{ $product['title'] }}</p>
+                <p class="text-xl font-semibold mb-0 mt-5">{{ $product['name'] }}</p>
+
+
 
                 <p class="font-semibold">
                     Price -
@@ -114,34 +116,73 @@
                     @endif
                 </p>
 
-                @if ($product['stock'] > 0)
-                    <div class="join join-horizontal mt-3" x-data>
-                        <div class="w-10">
-                            <input class="input join-item -z-10" name="quantity"
-                                :value="$store.cart.items[{{ $product['id'] }}] ? $store.cart.items[{{ $product['id'] }}]
-                                    .quantity : 0"
-                                min="1" max="{{ $product['stock'] }}" readonly />
-                        </div>
+                <div class="mt-3 flex gap-2 flex-wrap">
+                    @if (($product['enable_stock'] && $product['stock'] > 0) || !$product['enable_stock'])
+                        <div class="join join-horizontal" x-data>
+                            <div class="w-10">
+                                <input class="input join-item -z-10" name="quantity"
+                                    :value="$store.cart.items[{{ $product['id'] }}] ? $store.cart.items[{{ $product['id'] }}]
+                                        .quantity : 0"
+                                    min="1" max="{{ $product['stock'] }}" readonly />
+                            </div>
 
-                        <button type="button" class="btn join-item"
-                            @click='$store.cart.addItem({
-                                id: {{ $product['id'] }},
-                                title: @json($product['title']),
-                                slug: @json($product['slug']),
-                                price: {{ $product['regular_price'] }},
-                                image: @json($product['image'])
-                            })'>
-                            Add to Cart
-                        </button>
-                    </div>
-                @endif
+                            <button type="button" class="btn join-item"
+                                @click='$store.cart.addItem({
+                                    id: {{ $product['id'] }},
+                                    name: @json($product['name']),
+                                    slug: @json($product['slug']),
+                                    price: {{ $product['regular_price'] }},
+                                    image: @json($product['image'])
+                                })'>
+                                Add to Cart
+                            </button>
+                        </div>
+                    @endif
+
+                    @auth
+                        @php
+                            $wishlistItem = collect($wishlists)->firstWhere('product_id', $product['id']);
+                        @endphp
+
+                        @if ($wishlistItem)
+                            <form action="{{ route('wishlist.id.delete', $wishlistItem['id']) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                                <input type="hidden" name="product_id" value="{{ $product['id'] }}">
+                                <button type="submit" class="btn btn-square">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                        class="size-6 text-primary">
+                                        <path
+                                            d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                    </svg>
+                                </button>
+                            </form>
+                        @else
+                            <form action="{{ route('wishlist.post') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                                <input type="hidden" name="product_id" value="{{ $product['id'] }}">
+                                <button type="submit" class="btn btn-square">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-6 text-primary">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                    </svg>
+
+                                </button>
+                            </form>
+                        @endif
+                    @endauth
+                </div>
 
                 <div class="mt-3">
                     <p class='font-semibold'>Properties</p>
                     @if ($product['category'])
                         <p class="text-sm">
                             Category -
-                            <span>{{ $product['category']['title'] }}</span>
+                            <span>{{ $product['category']['name'] }}</span>
                         </p>
                     @endif
                 </div>

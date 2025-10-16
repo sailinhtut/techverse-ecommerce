@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Product;
+namespace App\Inventory\Controllers;
 
+use App\Auth\Models\Wishlist;
 use App\Inventory\Models\Category;
 use App\Inventory\Models\Product;
 use Exception;
@@ -13,22 +14,35 @@ class ProductController
 {
     public function showProductListUser()
     {
-        $products = Product::where('is_active', true)->get();
+        $products = Product::with('category')->orderBy('id', 'desc')->paginate(20);
 
-        $products = $products->map(function ($product) {
-            return $product->serializeJson();
+        $products->getCollection()->transform(function ($product) {
+            return $product->jsonResponse(['category', 'brand']);
         });
 
-        return view('pages.user.core.product_list', compact('products'));
+        $wishlists = [];
+        if (auth()->check()) {
+            $wishlists = Wishlist::where('user_id', auth()->id())->get();
+            $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
+        }
+
+
+        return view('pages.user.core.product_list', compact('products', 'wishlists'));
     }
 
     public function showProductDetail(Request $request, string $slug)
     {
         try {
             $product = Product::with('category')->where('slug', $slug)->firstOrFail();
-            $product = $product->serializeJson();
+            $product = $product->jsonResponse(['category', 'brand']);
 
-            return view('pages.user.core.product_detail', compact('product'));
+            $wishlists = [];
+            if (auth()->check()) {
+                $wishlists = Wishlist::where('user_id', auth()->id())->get();
+                $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
+            }
+
+            return view('pages.user.core.product_detail', compact('product', 'wishlists'));
         } catch (ModelNotFoundException $error) {
             return redirect()->back()->with('status', 'Not Found Product');
         } catch (Exception $error) {
@@ -38,10 +52,10 @@ class ProductController
 
     public function showProductListAdmin()
     {
-        $products = Product::with('category')->orderBy('id', 'desc')->paginate(10);
+        $products = Product::orderBy('id', 'desc')->paginate(10);
 
         $products->getCollection()->transform(function ($product) {
-            return $product->serializeJson();
+            return $product->jsonResponse(['category', 'brand']);
         });
 
         return view('pages.admin.dashboard.product.product_list', compact('products'));
@@ -61,7 +75,7 @@ class ProductController
         if (!$edit_product) {
             return redirect()->back()->with('error', 'Not Found Product');
         }
-        $edit_product = $edit_product->serializeJson();
+        $edit_product = $edit_product->jsonResponse(['category', 'brand']);
 
         return view('pages.admin.dashboard.product.edit_product', ['edit_product' => $edit_product, 'product_categories' => $product_categories]);
     }
@@ -70,7 +84,7 @@ class ProductController
     public function addProduct(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'short_description' => 'nullable|string|max:255',
             'long_description' => 'nullable|string',
             'regular_price' => 'required|numeric',
@@ -83,7 +97,7 @@ class ProductController
             'image_gallery' => 'nullable|array',
             'image_gallery.*.label' => 'required_with:image_gallery|string|max:255',
             'image_gallery.*.image' => 'required_with:image_gallery|image|max:2048',
-            'category_id' => 'required|exists:product_categories,id'
+            'category_id' => 'required|exists:categories,id'
         ]);
 
         try {
@@ -110,7 +124,7 @@ class ProductController
             }
 
             $new_product = Product::create([
-                'title' => $validated['title'],
+                'name' => $validated['name'],
                 'short_description' => $validated['short_description'] ?? null,
                 'long_description' => $validated['long_description'] ?? null,
                 'sku' => $validated['sku'] ?? null,
@@ -141,7 +155,7 @@ class ProductController
     public function updateProduct(Request $request, string $id)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'short_description' => 'nullable|string|max:255',
             'long_description' => 'nullable|string',
             'sku' => 'nullable|string|max:255',
@@ -156,7 +170,7 @@ class ProductController
             'image_gallery.*.label' => 'required_with:image_gallery|string|max:255',
             'image_gallery.*.image' => 'nullable|image|max:2048',
             'remove_gallery' => 'nullable|array',
-            'category_id' => 'required|exists:product_categories,id'
+            'category_id' => 'required|exists:categories,id'
         ]);
 
         try {
@@ -203,7 +217,7 @@ class ProductController
             }
 
             $product->fill([
-                'title' => $validated['title'],
+                'name' => $validated['name'],
                 'short_description' => $validated['short_description'] ?? null,
                 'long_description' => $validated['long_description'] ?? null,
                 'sku' => $validated['sku'] ?? null,

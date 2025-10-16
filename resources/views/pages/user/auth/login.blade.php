@@ -58,8 +58,20 @@
                 </form>
 
                 <div class="text-center mt-4 w-full">
-                    <a href="{{ route('register.get') }}" class=" hover:underline mx-auto w-fit">Create an account</a>
+
                 </div>
+                <div class="text-center mt-4 w-full">
+                    <p class="text-sm text-gray-600">
+                        Do not have account yet ?
+                        <a href="{{ route('register.get') }}" class=" hover:underline mx-auto w-fit">Create an account</a>
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        <a href="{{ route('forgot-password.get') }}" class="hover:underline w-fit mx-auto">Forgot
+                            Password ?</a>
+                    </p>
+                </div>
+
+
             </div>
         </div>
         <div class="xl:w-1/2 xl:flex hidden min-h-screen flex-col items-center justify-start pt-30 px-20 bg-white">
@@ -79,7 +91,8 @@
                         <img src="{{ asset('assets/images/computer_shelf.png') }}" alt="Computer Store" class="size-72">
                     </div> --}}
                     <div class="carousel-item">
-                        <img src="{{ asset('assets/images/computer_promotion.png') }}" alt="Computer Store" class="size-72">
+                        <img src="{{ asset('assets/images/computer_promotion.png') }}" alt="Computer Store"
+                            class="size-72">
                     </div>
 
                 </div>

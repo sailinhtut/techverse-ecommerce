@@ -33,7 +33,7 @@
 
                                 <td class="w-[200px] h-[30px] line-clamp-1">
                                     <a :href="`/shop/${item.slug}`" class="cursor-default hover:underline"
-                                        x-text="item.title"></a>
+                                        x-text="item.name"></a>
                                 </td>
                                 <td x-text="item.price.toFixed(2)"></td>
 
@@ -87,21 +87,6 @@
         </div>
 
 
-        {{-- <div class="w-full md:w-[500px] mt-3 ml-auto">
-            <p class="font-semibold mb-0">Cart Summary</p>
-
-            <div class="table w-full">
-                <div class="table-row">
-                    <div class="table-cell py-2">Total Items</div>
-                    <div class="table-cell text-right font-medium">{{ getCartTotalItems() }}</div>
-                </div>
-                <div class="table-row">
-                    <div class="table-cell py-2">Total Cost</div>
-                    <div class="table-cell text-right font-medium">${{ getCartTotalCost() }}</div>
-                </div>
-            </div>
-
-        </div> --}}
 
         <div class="w-full md:w-[500px] mt-3 ml-auto">
             <p class="font-semibold mb-0">Cart Summary</p>
@@ -130,26 +115,17 @@
                 <a href="{{ route('shop.get') }}" class="btn  lg:btn-md">Back</a>
             </div>
 
-            <form action="{{ route('shop.get') }}" @submit.prevent="handleCheckout()">
-                <button class="btn  lg:btn-md btn-primary" :disabled="$store.cart.totalItems() === 0">
-                    Proceed Checkout
-                </button>
-            </form>
+
+            <a href="{{ route('checkout.get') }}" class="btn lg:btn-md btn-primary"
+                :disabled="$store.cart.totalItems() === 0">
+                Proceed Checkout
+            </a>
+
         </div>
 
     </div>
 @endsection
 
 @push('script')
-    <script>
-        function handleCheckout(e) {
-            const cartEmpty = {{ session('cart_items', []) ? 'false' : 'true' }};
-            if (cartEmpty) {
-                e.preventDefault();
-                Toast.show("Your cart is empty!");
-                return false;
-            }
-            return true;
-        }
-    </script>
+    <script></script>
 @endpush

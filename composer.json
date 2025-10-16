@@ -30,7 +30,8 @@
         },
         "files": [
             "app/Core/Helpers/cart_utils.php",
-            "app/Core/Helpers/error_utils.php"
+            "app/Core/Helpers/error_utils.php",
+            "app/Core/Helpers/general_utils.php"
         ]
     },
     "autoload-dev": {

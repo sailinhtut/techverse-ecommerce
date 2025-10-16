@@ -15,6 +15,9 @@ return [
 
     'name' => env('APP_NAME', 'Master Seller'),
 
+    'logo_link' => '/debug',
+    'admin_logo_link' => '/debug',
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -122,5 +125,7 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+
 
 ];

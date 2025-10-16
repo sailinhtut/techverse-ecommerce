@@ -14,3 +14,4 @@ window.Toast = Toast;
 
 Alpine.store("cart", cartState);
 Alpine.start(); // required line
+Alpine.debug = true;

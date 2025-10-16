@@ -23,7 +23,7 @@
 
                                 <td class="w-[200px] h-[30px] line-clamp-1">
                                     <div onclick="document.getElementById('detailModal{{ $category['id'] }}').showModal()"
-                                        class="cursor-default hover:underline">{{ $category['title'] }}</div>
+                                        class="cursor-default hover:underline">{{ $category['name'] }}</div>
                                 </td>
                                 <td>{{ $category['description'] ?? 'No Description' }}</td>
                                 <td>
@@ -59,12 +59,12 @@
                                                 <button
                                                     class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                             </form>
-                                            <p class="text-lg font-semibold py-0">{{ $category['title'] }}</p>
+                                            <p class="text-lg font-semibold py-0">{{ $category['name'] }}</p>
                                             <div class="mt-4 space-y-2">
                                                 <p><strong>ID:</strong> {{ $category['id'] ?? 'No ID' }}</p>
 
                                                 <p><strong>Title:</strong>
-                                                    {{ $category['title'] ?? 'No Title' }}</p>
+                                                    {{ $category['name'] ?? 'No Title' }}</p>
                                                 <p><strong>Description:</strong>
                                                     {{ $category['description'] ?? 'Description' }}</p>
                                             </div>
@@ -88,7 +88,7 @@
 
                                             <p class="py-2 mb-0 text-sm">
                                                 Are you sure you want to delete
-                                                <span class="italic text-error">{{ $category['title'] }}</span> ?
+                                                <span class="italic text-error">{{ $category['name'] }}</span> ?
                                             </p>
                                             <div class="modal-action mt-0">
                                                 <form method="dialog">

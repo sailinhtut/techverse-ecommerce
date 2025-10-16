@@ -109,6 +109,10 @@
                         Already have an account?
                         <a href="{{ route('login') }}" class="hover:underline w-fit mx-auto">Log In</a>
                     </p>
+                    <p class="text-sm text-gray-600">
+                        <a href="{{ route('forgot-password.get') }}" class="hover:underline w-fit mx-auto">Forgot
+                            Password ?</a>
+                    </p>
                 </div>
             </div>
         </div>

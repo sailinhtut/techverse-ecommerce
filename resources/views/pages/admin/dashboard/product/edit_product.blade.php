@@ -22,9 +22,9 @@
             @csrf
 
             {{-- Title --}}
-            <label for="title" class="text-sm">Product Name</label>
-            <input type="text" name="title" id="title" class="input input-sm"
-                value="{{ old('title', $edit_product['title'] ?? '') }}" required>
+            <label for="name" class="text-sm">Product Name</label>
+            <input type="text" name="name" id="name" class="input input-sm"
+                value="{{ old('name', $edit_product['name'] ?? '') }}" required>
 
             <label class="label">
                 <input type="hidden" name="is_active" value="0">
@@ -107,7 +107,7 @@
                 @foreach ($product_categories as $category)
                     <option value="{{ $category['id'] }}"
                         {{ old('category_id', $edit_product['category_id'] ?? '') == $category['id'] ? 'selected' : '' }}>
-                        {{ $category['title'] }}
+                        {{ $category['name'] }}
                     </option>
                 @endforeach
             </select>

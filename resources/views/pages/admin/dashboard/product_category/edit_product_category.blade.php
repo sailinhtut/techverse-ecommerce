@@ -21,9 +21,9 @@
             method="POST" class="lg:w-[300px] flex flex-col gap-3">
             @csrf
 
-            <label for="title" class="text-sm">Category Name</label>
-            <input type="text" name="title" id="title" class="input input-sm"
-                value="{{ old('title', $edit_category->title ?? '') }}" required>
+            <label for="name" class="text-sm">Category Name</label>
+            <input type="text" name="name" id="name" class="input input-sm"
+                value="{{ old('name', $edit_category->name ?? '') }}" required>
 
             <label for="description" class="text-sm">Description (Optional)</label>
             <textarea name="description" id="description" class="textarea textarea-sm" rows="4">{{ old('description', $edit_category->description ?? '') }}</textarea>

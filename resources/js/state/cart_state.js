@@ -23,11 +23,28 @@ export const cartState = {
         );
     },
 
+    // 'cart_items' => 'required|array|min:1',
+    // 'cart_items.*.id' => 'required|integer|exists:products,id',
+    // 'cart_items.*.name' => 'required|string|max:150',
+    // 'cart_items.*.slug' => 'required|string|max:150',
+    // 'cart_items.*.price' => 'required|numeric|min:0',
+    // 'cart_items.*.quantity' => 'required|integer|min:1',
+    // 'cart_items.*.tax' => 'nullable|numeric|min:0',
+    // 'cart_items.*.shipping_cost' => 'nullable|numeric|min:0',
+    // 'cart_items.*.discount' => 'nullable|numeric|min:0',
+
     addItem(product) {
         if (this.items[product.id]) {
-            this.items[product.id].quantity++;
+            let selectedItem = this.items[product.id];
+            selectedItem.quantity++;
         } else {
-            this.items[product.id] = { ...product, quantity: 1 };
+            this.items[product.id] = {
+                ...product,
+                tax: 20,
+                shipping_cost: 40,
+                discount: 20,
+                quantity: 1,
+            };
         }
         saveToStorage(this.items);
     },

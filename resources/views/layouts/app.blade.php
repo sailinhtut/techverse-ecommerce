@@ -44,8 +44,13 @@
 </head>
 
 <body>
+    
     @yield('app_content')
+   
     @stack('script')
+
+
+   
 
 
     @if (session('success') || session('error') || true)

@@ -2,8 +2,12 @@
 
 @section('web_content')
     @include('components.shop_navbar')
-
+     <pre class="w-[400px] p-2 bg-black rounded text-sm text-white overflow-x-auto">
+    {{ json_encode(['session_id'=> session()->getId(),'data'=>session()->all()], JSON_PRETTY_PRINT) }}</pre>
+    
     <div class=" p-4 lg:p-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-2 lg:gap-5">
+       
+
         @if (count($products) === 0)
             <p class="text-gray-500 min-h-screen">No Product Found</p>
         @endif
@@ -118,7 +122,6 @@
         <script>
             console.log('Clear cart triggered from backend');
             localStorage.removeItem('cart_state');
-
         </script>
     @endif
 

@@ -12,8 +12,10 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController
 {
-    public function showProductListUser()
+    public function showProductListUser(Request $request)
     {
+       
+
         $products = Product::with('category')->orderBy('id', 'desc')->paginate(20);
 
         $products->getCollection()->transform(function ($product) {

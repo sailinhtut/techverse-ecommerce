@@ -71,8 +71,8 @@ class AuthController
             }
 
             $request->session()->regenerate();
-            
-            return view('pages.user.core.product_list');
+
+            return redirect('/shop')->with('rege');
         } catch (Exception $e) {
             return handleErrors($e);
         }

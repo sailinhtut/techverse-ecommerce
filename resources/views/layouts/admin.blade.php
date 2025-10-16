@@ -1,5 +1,5 @@
 @extends('layouts.app') @section('app_content')
-    @if (session('success') || session('error'))
+    {{-- @if (session('success') || session('error'))
         <div class="fixed top-16 right-3 flex flex-col align-items-end gap-2 z-50">
             @if (session('success'))
                 <div id="status-success" class="flex items-start bg-black rounded-lg px-3 py-2 w-fit text-white shadow-md">
@@ -21,7 +21,7 @@
                 </div>
             @endif
         </div>
-    @endif
+    @endif --}}
     @yield('admin_content')
 @endsection
 @push('script')

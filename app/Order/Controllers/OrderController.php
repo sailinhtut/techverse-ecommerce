@@ -50,7 +50,7 @@ class OrderController
         }
     }
 
-    public function viewAdminOrdersPage()
+    public function viewAdminOrderListPage()
     {
         try {
             $orders = OrderService::getOrders();

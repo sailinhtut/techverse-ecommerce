@@ -76,8 +76,6 @@ class UserController
         }
     }
 
-
-
     public function getProfile(Request $request, string $id)
     {
         try {

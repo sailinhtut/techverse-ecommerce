@@ -8,5 +8,5 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::controller(PaymentController::class)->group(function () {
-    Route::get('/payment', 'viewUserInvoicesPage')->name('payment.get');
+    Route::get('/payment', 'viewUserInvoiceListPage')->name('payment.get');
 });

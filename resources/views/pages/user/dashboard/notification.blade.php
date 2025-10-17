@@ -29,7 +29,7 @@
                                         <img src="{{ $notification['image'] }}" alt="{{ $notification['title'] }}"
                                             class="w-[20px] h-auto object-contain">
                                     @else
-                                        <img src="{{ asset('assets/images/techverse_green_logo.png') }}"
+                                        <img src="{{ asset(config('app.app_logo_bare_path')) }}"
                                             alt="{{ $notification['title'] }}" class="w-[30px] h-auto">
                                     @endif
                                 </td>
@@ -75,7 +75,7 @@
                                                         alt="{{ $notification['title'] }}"
                                                         class="w-[100px] h-auto object-contain">
                                                 @else
-                                                    <img src="{{ asset('assets/images/techverse_green_logo.png') }}"
+                                                    <img src="{{ asset(config('app.app_logo_bare_path')) }}"
                                                         alt="{{ $notification['title'] }}" class="w-[100px] h-auto">
                                                 @endif
                                                 <p><strong>ID:</strong> {{ $notification['id'] ?? 'No ID' }}</p>

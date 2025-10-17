@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class ShippingClassController
 {
-    public function viewShippingClassListPage()
+    public function viewAdminShippingClassListPage()
     {
         try {
             return view('pages.admin.dashboard.shipping.shipping_class_list', []);

@@ -1,7 +1,7 @@
 @extends('layouts.admin.admin_dashboard')
 @section('admin_dashboard_content')
     <div class="p-5 min-h-screen ">
-        <p class="lg:text-lg font-semibold mb-3">User List</p>
+        <p class="lg:text-lg font-semibold mb-3">Users</p>
 
         <div class="card overflow-x-auto shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 ">
@@ -70,7 +70,6 @@
                                         </ul>
                                     </div>
 
-                                    {{-- DETAIL MODAL --}}
                                     <dialog id="detail_modal_{{ $user['id'] }}" class="modal">
                                         <div class="modal-box max-w-2xl max-h-[85vh] overflow-y-auto">
                                             <form method="dialog">
@@ -92,28 +91,57 @@
                                                 </div>
                                             </div>
 
-                                            <div class="text-sm space-y-2">
-                                                <p><strong>ID:</strong> {{ $user['id'] }}</p>
-                                                <p><strong>Name:</strong> {{ $user['name'] }}</p>
-                                                <p><strong>Email:</strong> {{ $user['email'] }}</p>
-                                                <p><strong>Phone 1:</strong> {{ $user['phone_one'] ?? '-' }}</p>
-                                                <p><strong>Phone 2:</strong> {{ $user['phone_two'] ?? '-' }}</p>
-                                                <p><strong>Email Verified:</strong>
-                                                    @if ($user['email_verified_at'])
-                                                        <span class="badge badge-success badge-outline">Verified</span>
-                                                    @else
-                                                        <span class="badge badge-warning badge-outline">Unverified</span>
-                                                    @endif
-                                                </p>
-                                                <p><strong>Created At:</strong>
-                                                    {{ \Carbon\Carbon::parse($user['created_at'])->format('Y-m-d H:i') }}
-                                                </p>
-
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
+                                                    <label class="text-sm">User ID</label>
+                                                    <input type="text"
+                                                        class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                        value="{{ $user['id'] }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Name</label>
+                                                    <input type="text"
+                                                        class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                        value="{{ $user['name'] }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Email</label>
+                                                    <input type="text"
+                                                        class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                        value="{{ $user['email'] }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Phone 1</label>
+                                                    <input type="text"
+                                                        class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                        value="{{ $user['phone_one'] ?? '-' }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Phone 2</label>
+                                                    <input type="text"
+                                                        class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                        value="{{ $user['phone_two'] ?? '-' }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Email Verified State</label>
+                                                    <input type="text"
+                                                        class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                        value="{{ $user['email_verified_at'] ? 'Verified' : 'Not Verified' }}"
+                                                        readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Created At</label>
+                                                    <input type="text"
+                                                        class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                        value="{{ \Carbon\Carbon::parse($user['created_at'])->format('Y-m-d H:i') }}"
+                                                        readonly>
+                                                </div>
+
+                                                <div class="md:col-span-2">
                                                     <p class="mb-2"><strong>Role Information</strong></p>
                                                     @if ($user['role'])
                                                         <div class="bg-base-200 rounded-box p-3 text-sm">
-                                                            <p><strong>Role Name:</strong> {{ $user['role']['name'] }}</p>
+                                                            <p><strong>Role Name:</strong> {{ $user['role']['display_name'] }}</p>
                                                             <p><strong>Description:</strong>
                                                                 {{ $user['role']['description'] ?? '-' }}</p>
 
@@ -155,7 +183,6 @@
                                         </div>
                                     </dialog>
 
-                                    {{-- DELETE DIALOG --}}
                                     <dialog id="delete_modal_{{ $user['id'] }}" class="modal">
                                         <div class="modal-box">
                                             <form method="dialog">
@@ -187,7 +214,6 @@
                     </tbody>
                 </table>
 
-                {{-- PAGINATION --}}
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
                         <span class="font-semibold">{{ $users->firstItem() }}</span>

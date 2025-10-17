@@ -2,7 +2,7 @@
     :class="scrolled ? 'bg-white shadow-sm border-b border-base-300' : 'bg-transparent'"
     class="fixed top-0 left-0 right-0 flex flex-row justify-between items-center px-2 lg:px-5 py-0 !h-[60px] z-50">
     <a href="{{ config('app.logo_link') }}" class="my-0 flex flex-row items-center text-sm lg:text-base font-semibold">
-        <img src="{{ asset('assets/images/techverse_green_logo.png') }}" alt="{{ config('app.name') }}" class="h-8 mr-2">
+        <img src="{{ asset(config('app.app_logo_bare_path')) }}" alt="{{ config('app.name') }}" class="h-8 mr-2">
         {{ config('app.name') }}
     </a>
 

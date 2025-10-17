@@ -49,7 +49,7 @@ class ProductController
         }
     }
 
-    public function showProductListAdmin()
+    public function viewAdminProductListPage()
     {
         $products = Product::orderBy('id', 'desc')->paginate(10);
 
@@ -60,13 +60,13 @@ class ProductController
         return view('pages.admin.dashboard.product.product_list', compact('products'));
     }
 
-    public function showAddProduct()
+    public function viewAdminProductAddPage()
     {
         $product_categories = Category::all();
         return view('pages.admin.dashboard.product.edit_product', compact('product_categories'));
     }
 
-    public function showEditProduct(Request $request, string $id)
+    public function viewAdminProductEditPage(Request $request, string $id)
     {
         $product_categories = Category::all();
 

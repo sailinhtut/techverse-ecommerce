@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class TaxClassController
 {
-    public function viewTaxClassListPage()
+    public function viewAdminTaxClassListPage()
     {
         try {
             return view('pages.admin.dashboard.tax.tax_class_list', []);

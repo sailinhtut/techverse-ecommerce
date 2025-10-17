@@ -1,7 +1,7 @@
 @extends('layouts.admin.admin_dashboard')
 @section('admin_dashboard_content')
     <div class="p-5 min-h-screen">
-        <p class="lg:text-lg font-semibold mb-3">Invoice List</p>
+        <p class="lg:text-lg font-semibold mb-3">Invoices</p>
 
         <div class="card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">

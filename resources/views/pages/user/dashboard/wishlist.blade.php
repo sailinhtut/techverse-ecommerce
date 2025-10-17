@@ -29,7 +29,7 @@
                                         <img src="{{ $wishlist['product']['image'] }}"
                                             alt="{{ $wishlist['product']['name'] }}" class="w-[20px] h-auto object-contain">
                                     @else
-                                        <img src="{{ asset('assets/images/techverse_green_logo.png') }}"
+                                        <img src="{{ asset(config('app.app_logo_bare_path')) }}"
                                             alt="{{ $wishlist['product']['name'] }}" class="w-[30px] h-auto">
                                     @endif
                                 </td>

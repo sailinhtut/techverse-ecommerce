@@ -8,7 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();

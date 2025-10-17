@@ -26,7 +26,7 @@
                                 <td x-text="index+1"></td>
                                 <td class="">
                                     <img :src="item.image ? item.image :
-                                        '{{ asset('assets/images/techverse_green_logo.png') }}'"
+                                        '{{ asset(config('app.app_logo_bare_path')) }}'"
                                         :alt="item.title" class="w-[20px] h-auto object-contain">
                                 </td>
 

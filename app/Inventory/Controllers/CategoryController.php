@@ -7,7 +7,7 @@ use App\Inventory\Models\Category;
 
 class CategoryController
 {
-    public function showCategories()
+    public function viewAdminCategoryListPage()
     {
         $product_categories = Category::orderBy('id', 'desc')->paginate(10);
 
@@ -15,21 +15,21 @@ class CategoryController
             return $category->jsonResponse();
         });
 
-        return view('pages.admin.dashboard.product_category.product_category_list', compact('product_categories'));
+        return view('pages.admin.dashboard.category.category_list', compact('product_categories'));
     }
 
-    public function showAddCategory()
+    public function viewAdminAddCategoryPage()
     {
-        return view('pages.admin.dashboard.product_category.edit_product_category');
+        return view('pages.admin.dashboard.category.edit_category');
     }
 
-    public function showEditCategory(Request $request, string $id)
+    public function viewAdminEditCategoryPage(Request $request, string $id)
     {
         $edit_category = Category::find($id);
         if (!$edit_category) {
             return redirect()->back()->with('error', 'Not Found Category');
         }
-        return view('pages.admin.dashboard.product_category.edit_product_category', ['edit_category' => $edit_category]);
+        return view('pages.admin.dashboard.category.edit_category', ['edit_category' => $edit_category]);
     }
 
 

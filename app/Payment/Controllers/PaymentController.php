@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 class PaymentController
 {
-    public function viewUserInvoicesPage()
+    public function viewUserInvoiceListPage()
     {
         try {
             if (!auth()->check()) abort(403, 'Unauthenticated');
@@ -33,23 +33,7 @@ class PaymentController
         }
     }
 
-    public function viewAdminInvoicesPage()
-    {
-        try {
-            $invoices = Invoice::orderBy('id', 'desc')->paginate(20);
-
-            $invoices->getCollection()->transform(function ($invoice) {
-                return $invoice->jsonResponse(['order']);
-            });
-            return view('pages.admin.dashboard.payment.invoice_list', [
-                'invoices' => $invoices
-            ]);
-        } catch (Exception $e) {
-            return handleErrors($e);
-        }
-    }
-
-    public function viewAdminPaymentsPage()
+    public function viewAdminPaymentListPage()
     {
         try {
             $payments = Payment::orderBy('id', 'desc')->paginate(20);
@@ -59,22 +43,6 @@ class PaymentController
             });
             return view('pages.admin.dashboard.payment.payment_list', [
                 'payments' => $payments
-            ]);
-        } catch (Exception $e) {
-            return handleErrors($e);
-        }
-    }
-
-    public function viewAdminTransactionsPage()
-    {
-        try {
-            $transactions = Transaction::orderBy('id', 'desc')->paginate(20);
-
-            $transactions->getCollection()->transform(function ($transaction) {
-                return $transaction->jsonResponse(['user']);
-            });
-            return view('pages.admin.dashboard.payment.transaction_list', [
-                'transactions' => $transactions
             ]);
         } catch (Exception $e) {
             return handleErrors($e);

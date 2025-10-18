@@ -33,12 +33,14 @@
                 Enable Stock
             </label>
 
-            <label for="sku" class="text-sm">SKU (Stock Keeping Unit)</label>
+            <label for="sku" class="text-sm">SKU (Stock Keeping
+                Unit)</label>
             <input type="text" name="sku" id="sku" class="input input-sm"
                 value="{{ old('sku', $edit_product['sku'] ?? '') }}">
 
             {{-- Prices --}}
-            <label for="regular_price" class="text-sm">Regular Price</label>
+            <label for="regular_price" class="text-sm">Regular
+                Price</label>
             <input type="number" name="regular_price" id="regular_price" class="input input-sm"
                 value="{{ old('regular_price', $edit_product['regular_price'] ?? '') }}" required>
 
@@ -58,8 +60,20 @@
             @endif
             <input type="file" name="image" id="image" class="file-input file-input-sm">
 
-            <div>
+            <div x-data="{
+                galleryInputs: [],
+                addRow() {
+                    this.galleryInputs.push({
+                        label: '',
+                        file: null
+                    });
+                },
+                removeRow(index) {
+                    this.galleryInputs.splice(index, 1);
+                }
+            }">
                 <label class="text-sm">Image Gallery</label>
+
                 @php
                     $gallery = old('image_gallery', $edit_product['image_gallery'] ?? []);
                 @endphp
@@ -70,7 +84,7 @@
                             @if (!empty($item['image']))
                                 <div class="tooltip" data-tip="{{ $item['label'] }}">
                                     <img src="{{ $item['image'] }}"
-                                        class="size-8 object-cover rounded border border-base-300 "
+                                        class="size-8 object-cover rounded border border-base-300"
                                         title="{{ $item['label'] ?? 'No Label' }}">
                                 </div>
                             @endif
@@ -83,12 +97,25 @@
                         </div>
                     @endforeach
 
-
-                    <div class=" flex flex-col justify-start items-start gap-2" id='gallery-input-box'> </div>
+                    <!-- Dynamic gallery input rows -->
+                    <div class="flex flex-col justify-start items-start gap-2" id="gallery-input-box">
+                        <template x-for="(item, index) in galleryInputs" :key="index">
+                            <div class="flex justify-center items-center gap-2">
+                                <input type="text" :name="`image_gallery[${index}][label]`" placeholder="Title"
+                                    class="w-25 input input-sm" required x-model="item.label">
+                                <input type="file" :name="`image_gallery[${index}][image]`"
+                                    class="file-input file-input-sm" required @change="item.file = $event.target.files[0]">
+                                <button type="button" class="btn btn-sm btn-circle" @click="removeRow(index)">✕</button>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
-                <button type='button' class="btn btn-sm mt-2 w-fit" id="add-gallery-row">+ Add Image</button>
+                <button type="button" class="btn btn-sm mt-2 w-fit" @click="addRow()">+ Add Image</button>
             </div>
+
+
+
 
             <label class="label">
                 <input type="hidden" name="enable_stock" value="0">
@@ -112,14 +139,35 @@
                 @endforeach
             </select>
 
-            {{-- Descriptions --}}
-            <label for="short_description" class="text-sm">Short Description (Optional)</label>
+            <label for="short_description" class="text-sm">Short
+                Description (Optional)</label>
             <textarea name="short_description" id="short_description" class="textarea textarea-sm" rows="4">{{ old('short_description', $edit_product['short_description'] ?? '') }}</textarea>
 
-            <label for="long_description" class="text-sm">Long Description (Optional)</label>
+            <label for="long_description" class="text-sm">Long Description
+                (Optional)</label>
             <textarea name="long_description" id="long_description" class="textarea textarea-sm" rows="10">{{ old('long_description', $edit_product['long_description'] ?? '') }}</textarea>
 
-            <button type="submit" class="btn btn-primary w-fit">
+            <div x-data="paymentSelector()" class="mt-4">
+                <p class="text-sm mb-3">Payment Methods</p>
+
+                <div class="flex flex-wrap gap-4">
+                    <template x-for="method in paymentMethods" :key="method.id">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="checkbox checkbox-sm" :value="method.id"
+                                :checked="selected.includes(method.id)" @change="toggle(method.id)">
+                            <span x-text="method.name" class="text-sm"></span>
+                        </label>
+                    </template>
+                </div>
+
+                <template x-for="id in selected" :key="id">
+                    <input type="hidden" name="payment_methods[]" :value="id">
+                </template>
+            </div>
+
+
+
+            <button type="submit" class="mt-10 btn btn-primary w-fit">
                 {{ isset($edit_product) ? 'Update Product' : 'Add Product' }}
             </button>
         </form>
@@ -128,25 +176,18 @@
 
 @push('script')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('add-gallery-row').addEventListener('click', function() {
-                const galleryInputBox = document.getElementById('gallery-input-box');
-                const index = galleryInputBox.children.length;
-                const div = document.createElement('div');
-                div.className = " flex justify-center items-center gap-2";
-                div.innerHTML = `
-                    <input type="text" name="image_gallery[${index}][label]" placeholder="Title" class="w-25 input input-sm" required>
-                    <input type="file" name="image_gallery[${index}][image]" class=" file-input file-input-sm" required>
-                    <button type="button" class="btn btn-sm btn-circle remove-gallery-row">✕</button>
-                `;
-                galleryInputBox.appendChild(div);
-            });
-
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-gallery-row')) {
-                    e.target.parentElement.remove();
+        function paymentSelector() {
+            return {
+                paymentMethods: @json($payment_methods),
+                selected: @json(collect($edit_product['payment_methods'])->pluck('id')->toArray()),
+                toggle(id) {
+                    if (this.selected.includes(id)) {
+                        this.selected = this.selected.filter(i => i !== id);
+                    } else {
+                        this.selected.push(id);
+                    }
                 }
-            });
-        });
+            }
+        }
     </script>
 @endpush

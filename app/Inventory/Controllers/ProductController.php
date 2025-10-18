@@ -5,9 +5,11 @@ namespace App\Inventory\Controllers;
 use App\Auth\Models\Wishlist;
 use App\Inventory\Models\Category;
 use App\Inventory\Models\Product;
+use App\Payment\Models\PaymentMethod;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController
@@ -54,7 +56,7 @@ class ProductController
         $products = Product::orderBy('id', 'desc')->paginate(10);
 
         $products->getCollection()->transform(function ($product) {
-            return $product->jsonResponse(['category', 'brand']);
+            return $product->jsonResponse(['category', 'brand', 'paymentMethods']);
         });
 
         return view('pages.admin.dashboard.product.product_list', compact('products'));
@@ -63,20 +65,32 @@ class ProductController
     public function viewAdminProductAddPage()
     {
         $product_categories = Category::all();
-        return view('pages.admin.dashboard.product.edit_product', compact('product_categories'));
+
+        $payment_methods = PaymentMethod::all();
+
+        return view('pages.admin.dashboard.product.edit_product', [
+            'product_categories' => $product_categories,
+            'payment_methods' => $payment_methods,
+        ]);
     }
 
     public function viewAdminProductEditPage(Request $request, string $id)
     {
         $product_categories = Category::all();
 
+        $payment_methods = PaymentMethod::all();
+
         $edit_product = Product::find($id);
         if (!$edit_product) {
             return redirect()->back()->with('error', 'Not Found Product');
         }
-        $edit_product = $edit_product->jsonResponse(['category', 'brand']);
+        $edit_product = $edit_product->jsonResponse(['category', 'brand', 'paymentMethods']);
 
-        return view('pages.admin.dashboard.product.edit_product', ['edit_product' => $edit_product, 'product_categories' => $product_categories]);
+        return view('pages.admin.dashboard.product.edit_product', [
+            'edit_product' => $edit_product,
+            'product_categories' => $product_categories,
+            'payment_methods' => $payment_methods,
+        ]);
     }
 
 
@@ -96,8 +110,12 @@ class ProductController
             'image_gallery' => 'nullable|array',
             'image_gallery.*.label' => 'required_with:image_gallery|string|max:255',
             'image_gallery.*.image' => 'required_with:image_gallery|image|max:2048',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
+            'payment_methods' => 'nullable|array',
+            'payment_methods.*' => 'exists:payment_methods,id'
         ]);
+
+        DB::beginTransaction();
 
         try {
 
@@ -137,6 +155,12 @@ class ProductController
                 'category_id' => $validated['category_id'],
             ]);
 
+            if (!empty($validated['payment_methods'])) {
+                $new_product->paymentMethods()->sync($validated['payment_methods']);
+            }
+
+            DB::commit();
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
@@ -147,6 +171,7 @@ class ProductController
 
             return redirect()->back()->with('success', 'Product Created Successfully');
         } catch (Exception $error) {
+            DB::rollBack();
             return handleErrors($error, "Something Went Wrong");
         }
     }
@@ -169,8 +194,12 @@ class ProductController
             'image_gallery.*.label' => 'required_with:image_gallery|string|max:255',
             'image_gallery.*.image' => 'nullable|image|max:2048',
             'remove_gallery' => 'nullable|array',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
+            'payment_methods' => 'nullable|array',
+            'payment_methods.*' => 'exists:payment_methods,id'
         ]);
+
+        DB::beginTransaction();
 
         try {
             $product = Product::findOrFail($id);
@@ -231,8 +260,17 @@ class ProductController
 
             $product->save();
 
+            if (isset($validated['payment_methods'])) {
+                $product->paymentMethods()->sync($validated['payment_methods']);
+            } else {
+                $product->paymentMethods()->sync([]);
+            }
+
+            DB::commit();
+
             return redirect()->back()->with('success', 'Product updated successfully');
         } catch (\Exception $error) {
+            DB::rollBack();
             return handleErrors($error, "Something Went Wrong");
         }
     }

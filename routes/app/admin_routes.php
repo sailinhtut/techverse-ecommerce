@@ -121,6 +121,16 @@ Route::middleware('auth')->prefix('/admin')->group(function () {
 
         Route::controller(PaymentMethodController::class)->group(function () {
             Route::get('/payment/payment-method', 'viewAdminPaymentMethodListPage')->name('admin.dashboard.payment.payment-method.get');
+
+            Route::delete('/payment/payment-method/{id}', 'deleteAdminPaymentMethod')->name('admin.dashboard.payment.payment-method.id.delete');
+
+            Route::post('/payment/payment-method/create-cod-method', 'createAdminCODPaymentMethod')->name('admin.dashboard.payment.payment-method.create-cod-method.post');
+
+            Route::post('/payment/payment-method/update-cod-method/{id}', 'updateAdminCODPaymentMethod')->name('admin.dashboard.payment.payment-method.update-cod-method.id.post');
+
+            Route::post('/payment/payment-method/create-direct-bank-method', 'createAdminDirectBankTransferPaymentMethod')->name('admin.dashboard.payment.payment-method.create-direct-bank-method.post');
+
+            Route::post('/payment/payment-method/update-direct-bank-method/{id}', 'updateAdminDirectBankTransferPaymentMethod')->name('admin.dashboard.payment.payment-method.update-direct-bank-method.id.post');
         });
     });
 });

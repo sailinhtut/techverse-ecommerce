@@ -2,6 +2,8 @@
 
 namespace App\Inventory\Models;
 
+use App\Payment\Models\PaymentMethod;
+use App\Payment\Models\ProductPaymentMethod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -29,9 +31,6 @@ class Product extends Model
         'brand_id',
         'tags',
         'specifications',
-        'shipping_methods',
-        'tax_methods',
-        'payment_methods',
     ];
 
     protected function casts(): array
@@ -45,9 +44,6 @@ class Product extends Model
             'image_gallery'    => 'array',
             'tags'             => 'array',
             'specifications'   => 'array',
-            'shipping_methods' => 'array',
-            'tax_methods'      => 'array',
-            'payment_methods'  => 'array',
             'category_id'      => 'integer',
             'brand_id'         => 'integer',
         ];
@@ -64,6 +60,15 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function paymentMethods()
+    {
+        return $this->belongsToMany(
+            PaymentMethod::class,
+            'product_payment_methods',
+            'product_id',
+            'payment_method_id'
+        );
+    }
 
     public function jsonResponse(array $eager_list = []): array
     {
@@ -93,9 +98,6 @@ class Product extends Model
             'brand_id' => $this->brand_id,
             'tags' => $this->tags,
             'specifications' => $this->specifications,
-            'shipping_methods' => $this->shipping_methods,
-            'tax_methods' => $this->tax_methods,
-            'payment_methods' => $this->payment_methods,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
@@ -106,6 +108,10 @@ class Product extends Model
 
         if (in_array('brand', $eager_list) && $this->brand_id) {
             $response['brand'] = $this->brand->jsonResponse();
+        }
+
+        if (in_array('paymentMethods', $eager_list)) {
+            $response['payment_methods'] = $this->paymentMethods->map(fn($n) => $n->jsonResponse())->all();
         }
 
         return $response;

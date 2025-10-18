@@ -61,12 +61,21 @@ return new class extends Migration
         Schema::create('payment_methods', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('type', ['online', 'offline'])->default('offline');
-            $table->text('description')->nullable();
+            $table->enum('type', ['online', 'manual'])->default('manual');
+            $table->enum('code', ['cod', 'direct_bank_transfer']);
             $table->boolean('enabled')->default(true);
-            $table->json('config')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('payment_method_attributes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->cascadeOnDelete();
+            $table->string('key');
+            $table->mediumText('value');
+            $table->timestamps();
+        });
+
 
         Schema::create('products', function (Blueprint $table) {
             $table->id();
@@ -87,9 +96,13 @@ return new class extends Migration
             $table->foreignId('brand_id')->nullable()->constrained('brands')->onDelete('set null');
             $table->json('tags')->nullable();
             $table->json('specifications')->nullable();
-            $table->json('shipping_methods')->nullable(); // store selected IDs
-            $table->json('tax_methods')->nullable();
-            $table->json('payment_methods')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('product_payment_methods', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->nullable()->constrained('products')->cascadeOnDelete();
+            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -132,7 +145,9 @@ return new class extends Migration
         Schema::dropIfExists('wishlists');
         Schema::dropIfExists('product_variants');
         Schema::dropIfExists('product_variant_attributes');
+        Schema::dropIfExists('product_payment_methods');
         Schema::dropIfExists('products');
+        Schema::dropIfExists('payment_method_attributes');
         Schema::dropIfExists('payment_methods');
         Schema::dropIfExists('tax_methods');
         Schema::dropIfExists('shipping_methods');

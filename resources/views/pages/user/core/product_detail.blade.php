@@ -178,6 +178,7 @@
                                             id: {{ $product['id'] }},
                                             variant_id : variantId,
                                             name: @json($product['name']),
+                                            slug : @json($product['slug']),
                                             sku: variantSku,
                                             price: variantPrice,
                                             image: @json($product['image'])
@@ -240,6 +241,7 @@
                                         id: {{ $product['id'] }},
                                         variant_id : null,
                                         name: @json($product['name']),
+                                        slug : @json($product['slug']),
                                         sku: @json($product['sku']),
                                         price: {{ $product['regular_price'] }},
                                         image: @json($product['image'])

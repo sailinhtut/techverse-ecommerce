@@ -18,6 +18,13 @@ class ProductVariantController
 
         $product->load('productVariants');
 
+        if ($product->productVariants->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No variants available for this product.'
+            ], 404);
+        }
+
         $variant = $product->productVariants()
             ->where('combination', json_encode($selectedValues))
             ->first();
@@ -34,7 +41,7 @@ class ProductVariantController
             'data' => [
                 'id' => $variant->id,
                 'sku' => $variant->sku,
-                'price' =>$variant->regular_price,
+                'price' => $variant->regular_price,
                 'stock' => $variant->stock
             ]
         ]);

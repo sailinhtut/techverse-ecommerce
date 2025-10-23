@@ -14,6 +14,10 @@ class ProductVariantController
         $productId = $request->input('product_id');
         $selectedValues = $request->input('selected_values', []);
 
+        $selectedValues = array_filter($selectedValues, function ($value) {
+            return $value !== '' && $value !== null;
+        });
+
         $product = Product::with('productVariants')->findOrFail($productId);
 
         if ($product->productVariants->isEmpty()) {
@@ -22,10 +26,6 @@ class ProductVariantController
                 'message' => 'No variants available for this product.'
             ], 404);
         }
-
-        // $variant = $product->productVariants()
-        //     ->where('combination', json_encode($selectedValues))
-        //     ->first();
 
         $variant = $product->productVariants()
             ->whereJsonContains('combination', $selectedValues)

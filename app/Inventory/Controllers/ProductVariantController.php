@@ -16,6 +16,8 @@ class ProductVariantController
 
         $product = Product::findOrFail($productId);
 
+        $product->load('productVariants');
+
         $variant = $product->productVariants()
             ->where('combination', json_encode($selectedValues))
             ->first();

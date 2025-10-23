@@ -124,6 +124,7 @@
                                 <label class="block text-sm font-medium capitalize mb-1">{{ $key }}</label>
                                 <select name="variant_{{ $key }}" class="select select-bordered w-full"
                                     x-model="selectedValues['{{ $key }}']">
+                                    <option value="">None</option>
                                     @foreach ($values as $value)
                                         <option value="{{ $value }}">{{ ucfirst($value) }}</option>
                                     @endforeach

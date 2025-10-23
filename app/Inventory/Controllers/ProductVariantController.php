@@ -43,7 +43,7 @@ class ProductVariantController
             'data' => [
                 'id' => $variant->id,
                 'sku' => $variant->sku,
-                'price' => $variant->regular_price,
+                'price' => (float) $variant->regular_price,
                 'stock' => $variant->stock
             ]
         ]);

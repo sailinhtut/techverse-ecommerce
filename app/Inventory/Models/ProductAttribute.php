@@ -1,31 +1,34 @@
 <?php
 
-namespace App\Tax\Models;
+namespace App\Inventory\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TaxClass extends Model
+class ProductAttribute extends Model
 {
-    protected $fillable = ['name', 'description'];
+    protected $table = 'product_attributes';
+    protected $with = [];
+
+    protected $fillable = [
+        'name',
+        'values',
+    ];
 
     protected function casts(): array
     {
         return [];
     }
 
-    public function rates()
-    {
-        return $this->hasMany(TaxRate::class, 'tax_class_id');
-    }
-
     public function jsonResponse(array $eager_list = []): array
     {
-        return [
+        $response = [
             'id' => $this->id,
             'name' => $this->name,
-            'description' => $this->description,
+            'values' => $this->values,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+
+        return $response;
     }
 }

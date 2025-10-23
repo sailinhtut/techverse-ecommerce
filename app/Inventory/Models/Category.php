@@ -8,7 +8,6 @@ use Illuminate\Support\Str;
 class Category extends Model
 {
     protected $table = 'categories';
-    protected $with = ['children'];
 
     protected $fillable = [
         'name',
@@ -47,7 +46,7 @@ class Category extends Model
             'updated_at' => $this->updated_at,
         ];
 
-        if (in_array('parent', $eager_list)) {
+        if (in_array('parent', $eager_list) && !is_null($this->parent_id)) {
             $response['parent'] = $this->parent->jsonResponse();
         }
 

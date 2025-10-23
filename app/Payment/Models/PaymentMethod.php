@@ -14,6 +14,7 @@ class PaymentMethod extends Model
         'type',
         'code',
         'enabled',
+        'priority',
         'description'
     ];
 
@@ -38,6 +39,7 @@ class PaymentMethod extends Model
             'code' => $this->code,
             'enabled' => $this->enabled,
             'description' => $this->description,
+            'priority' => $this->priority,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -12,38 +12,25 @@ class CategoryController
         $product_categories = Category::orderBy('id', 'desc')->paginate(10);
 
         $product_categories->getCollection()->transform(function ($category) {
-            return $category->jsonResponse();
+            return $category->jsonResponse(['children', 'parent']);
         });
 
         return view('pages.admin.dashboard.category.category_list', compact('product_categories'));
     }
-
-    public function viewAdminAddCategoryPage()
-    {
-        return view('pages.admin.dashboard.category.edit_category');
-    }
-
-    public function viewAdminEditCategoryPage(Request $request, string $id)
-    {
-        $edit_category = Category::find($id);
-        if (!$edit_category) {
-            return redirect()->back()->with('error', 'Not Found Category');
-        }
-        return view('pages.admin.dashboard.category.edit_category', ['edit_category' => $edit_category]);
-    }
-
 
     public function addCategory(Request $request)
     {
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'description' => 'nullable|string|max:255'
+                'description' => 'nullable|string|max:255',
+                'parent_id' => 'nullable|integer|exists:categories,id'
             ]);
 
             $new_category = Category::create([
                 'name' => $validated['name'],
-                'description' => $validated['description']
+                'description' => $validated['description'] ?? null,
+                'parent_id' => $validated['parent_id'] ?? null,
             ]);
 
             if ($request->expectsJson()) {
@@ -67,12 +54,14 @@ class CategoryController
 
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'description' => 'nullable|string|max:255'
+                'description' => 'nullable|string|max:255',
+                'parent_id' => 'nullable|integer|exists:categories,id|not_in:' . $id
             ]);
 
             $category->update([
                 'name' => $validated['name'],
-                'description' => $validated['description']
+                'description' => $validated['description'] ?? null,
+                'parent_id' => $validated['parent_id'] ?? null,
             ]);
 
             if ($request->expectsJson()) {
@@ -82,6 +71,7 @@ class CategoryController
                     'data' => $category
                 ]);
             }
+
             return redirect()->back()->with('success', "{$validated['name']} is updated successfully");
         } catch (\Exception $error) {
             return handleErrors($error, "Something Went Wrong");

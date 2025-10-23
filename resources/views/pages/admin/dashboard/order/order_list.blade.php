@@ -72,7 +72,7 @@
                                     </div>
 
                                     <dialog id="detail_modal_{{ $order['id'] }}" class="modal">
-                                        <div class="modal-box max-h-[85vh] max-w-2xl">
+                                        <div class="modal-box max-w-2xl max-h-[85vh] overflow-y-auto">
                                             <form method="dialog">
                                                 <button
                                                     class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -82,84 +82,162 @@
                                                 Order #{{ $order['order_number'] }}
                                             </h3>
 
-                                            <div class="text-sm space-y-2">
-                                                <p><strong>ID:</strong> {{ $order['id'] }}</p>
-                                                <p><strong>Date:</strong> {{ $order['created_at']->format('Y-m-d H:i') }}
-                                                </p>
-                                                <p><strong>Status:</strong>
-                                                    <span class="badge {{ $color }} badge-outline">
-                                                        {{ ucfirst($order['status']) }}
-                                                    </span>
-                                                </p>
-                                                <p><strong>Subtotal:</strong> ${{ number_format($order['subtotal'], 2) }}
-                                                </p>
-                                                <p><strong>Discount:</strong>
-                                                    -${{ number_format($order['discount_total'], 2) }}</p>
-                                                <p><strong>Tax:</strong> +${{ number_format($order['tax_total'], 2) }}</p>
-                                                <p><strong>Shipping:</strong>
-                                                    +${{ number_format($order['shipping_total'], 2) }}</p>
-                                                <p><strong>Grand Total:</strong>
-                                                    <span
-                                                        class="font-semibold">${{ number_format($order['grand_total'], 2) }}</span>
-                                                </p>
-
-                                                {{-- Divider --}}
-                                                <div class="divider my-3"></div>
-
-                                                {{-- Products Table --}}
-                                                <p class="font-semibold">Ordered Products</p>
-                                                <div class="overflow-x-auto">
-                                                    <table class="table table-sm">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Name</th>
-                                                                <th>Qty</th>
-                                                                <th>Unit Price</th>
-                                                                <th>Subtotal</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($order['products'] ?? [] as $item)
-                                                                <tr>
-                                                                    <td>{{ $item['name'] }}</td>
-                                                                    <td>{{ $item['quantity'] }}</td>
-                                                                    <td>${{ number_format($item['unit_price'], 2) }}</td>
-                                                                    <td>${{ number_format($item['subtotal'], 2) }}</td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
+                                            {{-- Order Basic Info --}}
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                                                <div>
+                                                    <label class="text-sm">Order ID</label>
+                                                    <input type="text" value="{{ $order['id'] }}" readonly
+                                                        class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
-
-                                                {{-- Divider --}}
-                                                <div class="divider my-3"></div>
-
-                                                {{-- Shipping and Billing --}}
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div class="bg-base-200 rounded-box p-3">
-                                                        <p class="font-semibold mb-1">Shipping Address</p>
-                                                        @php $s = $order['shipping_address'] ?? []; @endphp
-                                                        <p>{{ $s['recipient_name'] ?? '-' }}</p>
-                                                        <p>{{ $s['street_address'] ?? '-' }}</p>
-                                                        <p>{{ $s['city'] ?? '' }} {{ $s['state'] ?? '' }}</p>
-                                                        <p>{{ $s['postal_code'] ?? '' }}</p>
-                                                        <p>{{ $s['country'] ?? '' }}</p>
-                                                        <p class="text-xs text-gray-500 mt-1">{{ $s['phone'] ?? '' }}</p>
-                                                    </div>
-
-                                                    <div class="bg-base-200 rounded-box p-3">
-                                                        <p class="font-semibold mb-1">Billing Address</p>
-                                                        @php $b = $order['billing_address'] ?? []; @endphp
-                                                        <p>{{ $b['recipient_name'] ?? '-' }}</p>
-                                                        <p>{{ $b['street_address'] ?? '-' }}</p>
-                                                        <p>{{ $b['city'] ?? '' }} {{ $b['state'] ?? '' }}</p>
-                                                        <p>{{ $b['postal_code'] ?? '' }}</p>
-                                                        <p>{{ $b['country'] ?? '' }}</p>
-                                                        <p class="text-xs text-gray-500 mt-1">{{ $b['phone'] ?? '' }}</p>
-                                                    </div>
+                                                <div>
+                                                    <label class="text-sm">Date</label>
+                                                    <input type="text"
+                                                        value="{{ $order['created_at']->format('Y-m-d H:i') }}" readonly
+                                                        class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Status</label>
+                                                    <input type="text" value="{{ ucfirst($order['status']) }}" readonly
+                                                        class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Subtotal</label>
+                                                    <input type="text"
+                                                        value="${{ number_format($order['subtotal'], 2) }}" readonly
+                                                        class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Discount</label>
+                                                    <input type="text"
+                                                        value="- ${{ number_format($order['discount_total'], 2) }}"
+                                                        readonly
+                                                        class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Tax</label>
+                                                    <input type="text"
+                                                        value="+ ${{ number_format($order['tax_total'], 2) }}" readonly
+                                                        class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Shipping</label>
+                                                    <input type="text"
+                                                        value="+ ${{ number_format($order['shipping_total'], 2) }}"
+                                                        readonly
+                                                        class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Grand Total</label>
+                                                    <input type="text"
+                                                        value="${{ number_format($order['grand_total'], 2) }}" readonly
+                                                        class="input w-full font-semibold cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                             </div>
 
+                                            <div class="divider my-3"></div>
+
+                                            {{-- Ordered Products Table --}}
+                                            <p class="font-semibold mb-2">Ordered Products</p>
+                                            <div class="overflow-x-auto mb-3">
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Qty</th>
+                                                            <th>SKU</th>
+                                                            <th>Type</th>
+                                                            <th>Unit Price</th>
+                                                            <th>Subtotal</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($order['products'] ?? [] as $item)
+                                                            <tr>
+                                                                <td>{{ $item['name'] }}</td>
+                                                                <td>{{ $item['quantity'] }}</td>
+                                                                <td>{{ $item['sku'] }}</td>
+                                                                <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}
+                                                                </td>
+                                                                <td>${{ number_format($item['unit_price'], 2) }}</td>
+                                                                <td>${{ number_format($item['subtotal'], 2) }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div class="divider my-3"></div>
+
+                                            {{-- Shipping & Billing Addresses --}}
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                                                {{-- Shipping --}}
+                                                <div class="bg-base-200 rounded-box p-3">
+                                                    <p class="font-semibold mb-1">Shipping Address</p>
+                                                    @php $s = $order['shipping_address'] ?? []; @endphp
+                                                    <input type="text" value="{{ $s['recipient_name'] ?? '-' }}"
+                                                        readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text" value="{{ $s['street_address'] ?? '-' }}"
+                                                        readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text"
+                                                        value="{{ $s['city'] ?? '' }} {{ $s['state'] ?? '' }}" readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text" value="{{ $s['postal_code'] ?? '' }}" readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text" value="{{ $s['country'] ?? '' }}" readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text" value="{{ $s['phone'] ?? '' }}" readonly
+                                                        class="input w-full text-xs cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+
+                                                {{-- Billing --}}
+                                                <div class="bg-base-200 rounded-box p-3">
+                                                    <p class="font-semibold mb-1">Billing Address</p>
+                                                    @php $b = $order['billing_address'] ?? []; @endphp
+                                                    <input type="text" value="{{ $b['recipient_name'] ?? '-' }}"
+                                                        readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text" value="{{ $b['street_address'] ?? '-' }}"
+                                                        readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text"
+                                                        value="{{ $b['city'] ?? '' }} {{ $b['state'] ?? '' }}" readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text" value="{{ $b['postal_code'] ?? '' }}" readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text" value="{{ $b['country'] ?? '' }}" readonly
+                                                        class="input w-full mb-1 cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                    <input type="text" value="{{ $b['phone'] ?? '' }}" readonly
+                                                        class="input w-full text-xs cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                            </div>
+
+                                            <div class="divider my-3"></div>
+
+                                            {{-- Payment Methods --}}
+                                            <p class="font-semibold mb-2">Payment Method</p>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="text-sm">Name</label>
+                                                    <input type="text" value="{{ $order['payment_method']['name'] }}"
+                                                        readonly
+                                                        class="input w-full cursor-default select-none mb-1 focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Description</label>
+                                                    <input type="text"
+                                                        value="{{ $order['payment_method']['description'] ?? '-' }}"
+                                                        readonly
+                                                        class="input w-full cursor-default select-none mb-1 focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                @if (empty($order['payment_method']))
+                                                    <div class="md:col-span-2 text-gray-500 italic">No payment method
+                                                        available.</div>
+                                                @endif
+                                            </div>
+
+                                            {{-- Modal Action --}}
                                             <div class="modal-action mt-6">
                                                 <form method="dialog">
                                                     <button class="btn btn-primary w-full">Close</button>
@@ -167,6 +245,7 @@
                                             </div>
                                         </div>
                                     </dialog>
+
 
 
                                     {{-- DELETE DIALOG --}}

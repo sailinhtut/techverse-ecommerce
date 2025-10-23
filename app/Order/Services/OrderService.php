@@ -31,7 +31,7 @@ class OrderService
             $orders = Order::orderBy('id', 'desc')->paginate(20);
 
             $orders->getCollection()->transform(function ($order) {
-                return $order->jsonResponse(['products', 'shippingMethod', 'billingMethod']);
+                return $order->jsonResponse(['products', 'shippingMethod', 'paymentMethod']);
             });
 
             return $orders;
@@ -47,7 +47,7 @@ class OrderService
 
             if (!$found_order) abort(404, 'No order found');
 
-            return $found_order->jsonResponse(['products', 'shippingMethod', 'billingMethod','user']);
+            return $found_order->jsonResponse(['products', 'shippingMethod', 'paymentMethod','user']);
         } catch (Exception $e) {
             throw ($e);
         }

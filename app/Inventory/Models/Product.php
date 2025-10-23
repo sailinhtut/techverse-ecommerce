@@ -4,6 +4,8 @@ namespace App\Inventory\Models;
 
 use App\Payment\Models\PaymentMethod;
 use App\Payment\Models\ProductPaymentMethod;
+use App\Shipping\Models\ShippingClass;
+use App\Tax\Models\TaxClass;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -31,6 +33,8 @@ class Product extends Model
         'brand_id',
         'tags',
         'specifications',
+        'shipping_class_id',
+        'tax_class_id',
     ];
 
     protected function casts(): array
@@ -46,6 +50,8 @@ class Product extends Model
             'specifications'   => 'array',
             'category_id'      => 'integer',
             'brand_id'         => 'integer',
+            'shipping_class_id' => 'integer',
+            'tax_class_id' => 'integer',
         ];
     }
 
@@ -54,10 +60,19 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-
     public function brand()
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function taxClass()
+    {
+        return $this->belongsTo(TaxClass::class);
+    }
+
+    public function shippingClass()
+    {
+        return $this->belongsTo(ShippingClass::class);
     }
 
     public function paymentMethods()
@@ -68,6 +83,11 @@ class Product extends Model
             'product_id',
             'payment_method_id'
         );
+    }
+
+    public function productVariants()
+    {
+        return $this->hasMany(ProductVariant::class, 'product_id');
     }
 
     public function jsonResponse(array $eager_list = []): array
@@ -96,6 +116,8 @@ class Product extends Model
             'image_gallery' => $gallery,
             'category_id' => $this->category_id,
             'brand_id' => $this->brand_id,
+            'shipping_class_id' => $this->shipping_class_id,
+            'tax_class_id' => $this->tax_class_id,
             'tags' => $this->tags,
             'specifications' => $this->specifications,
             'created_at' => $this->created_at,
@@ -106,12 +128,45 @@ class Product extends Model
             $response['category'] = $this->category->jsonResponse();
         }
 
+        if (in_array('shippingClass', $eager_list) && $this->shipping_class_id) {
+            $response['shipping_class'] = $this->shippingClass->jsonResponse();
+        }
+
+        if (in_array('taxClass', $eager_list) && $this->tax_class_id) {
+            $response['tax_class'] = $this->taxClass->jsonResponse();
+        }
+
         if (in_array('brand', $eager_list) && $this->brand_id) {
             $response['brand'] = $this->brand->jsonResponse();
         }
 
         if (in_array('paymentMethods', $eager_list)) {
             $response['payment_methods'] = $this->paymentMethods->map(fn($n) => $n->jsonResponse())->all();
+        }
+
+        if (in_array('productVariants', $eager_list)) {
+            $response['product_variants'] = $this->productVariants->map(fn($n) => $n->jsonResponse())->all();
+
+            $variants = $this->productVariants;
+            $selectors = [];
+
+            foreach ($variants as $variant) {
+                foreach (($variant->combination ?? []) as $key => $value) {
+                    if (!isset($selectors[$key])) {
+                        $selectors[$key] = [];
+                    }
+                    if (!in_array($value, $selectors[$key])) {
+                        $selectors[$key][] = $value;
+                    }
+                }
+            }
+
+            // Optional: sort values for consistency
+            foreach ($selectors as &$values) {
+                sort($values);
+            }
+
+            $response['product_variants_selectors'] = $selectors;
         }
 
         return $response;

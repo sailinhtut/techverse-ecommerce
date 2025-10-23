@@ -291,12 +291,56 @@
         </div>
 
         <div class="border border-base-300 rounded-box p-5 mt-5">
+            <p class="font-semibold mb-2">Payment Method</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm">Name</label>
+                    <input type="text" value="{{ $order['payment_method']['name'] ?? '-' }}" readonly
+                        class="input w-full cursor-default select-none mb-1 focus:outline-none focus:ring-0 focus:border-base-300">
+                </div>
+                <div>
+                    <label class="text-sm">Description</label>
+                    <input type="text" value="{{ $order['payment_method']['description'] ?? '-' }}" readonly
+                        class="input w-full cursor-default select-none mb-1 focus:outline-none focus:ring-0 focus:border-base-300">
+                </div>
+
+                @if (empty($order['payment_method']))
+                    <div class="md:col-span-2 text-gray-500 italic">No payment method available.</div>
+                @endif
+            </div>
+
+
+        </div>
+
+        <div class="border border-base-300 rounded-box p-5 mt-5">
+            <p class="font-semibold mb-2">Shipping Method</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm">Name</label>
+                    <input type="text" value="{{ $order['shipping_method']['name'] ?? '-' }}" readonly
+                        class="input w-full cursor-default select-none mb-1 focus:outline-none focus:ring-0 focus:border-base-300">
+                </div>
+                <div>
+                    <label class="text-sm">Description</label>
+                    <input type="text" value="{{ $order['shipping_method']['description'] ?? '-' }}" readonly
+                        class="input w-full cursor-default select-none mb-1 focus:outline-none focus:ring-0 focus:border-base-300">
+                </div>
+
+                @if (empty($order['shipping_method']))
+                    <div class="md:col-span-2 text-gray-500 italic">No shipping method available.</div>
+                @endif
+            </div>
+        </div>
+
+        <div class="border border-base-300 rounded-box p-5 mt-5">
             <p class="font-semibold mb-2">Ordered Products</p>
             <div class="overflow-x-auto">
                 <table class="table table-sm">
                     <thead>
                         <tr>
                             <th>Name</th>
+                            <th>SKU</th>
+                            <th>Type</th>
                             <th>Qty</th>
                             <th>Unit Price</th>
                             <th>Subtotal</th>
@@ -311,6 +355,8 @@
                                         {{ $item['name'] }}
                                     </a>
                                 </td>
+                                <td>{{ $item['sku'] }}</td>
+                                <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}</td>
                                 <td>{{ $item['quantity'] }}</td>
                                 <td>${{ number_format($item['unit_price'], 2) }}</td>
                                 <td>${{ number_format($item['subtotal'], 2) }}</td>

@@ -39,43 +39,79 @@ return new class extends Migration
             $table->timestamps();
         });
 
+
+        Schema::create('shipping_classes', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('shipping_zones', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->string('country');
+            $table->string('state');
+            $table->string('city');
+            $table->string('postal_code');
+            $table->timestamps();
+        });
+
         Schema::create('shipping_methods', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('type', ['flat', 'per_item', 'weight_based', 'distance_based'])->default('flat');
-            $table->decimal('cost', 10, 2)->default(0);
             $table->text('description')->nullable();
-            $table->json('config')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('tax_methods', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->decimal('rate', 5, 2)->default(0);
-            $table->enum('type', ['inclusive', 'exclusive'])->default('exclusive');
-            $table->string('country')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('payment_methods', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->enum('type', ['online', 'manual'])->default('manual');
-            $table->enum('code', ['cod', 'direct_bank_transfer']);
             $table->boolean('enabled')->default(true);
-            $table->text('description')->nullable();
+            $table->boolean('is_free')->default(false);
             $table->timestamps();
         });
 
-        Schema::create('payment_method_attributes', function (Blueprint $table) {
+        Schema::create('shipping_rates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->cascadeOnDelete();
-            $table->string('key');
-            $table->mediumText('value');
+            $table->string('name');
+            $table->string('description')->nullable();
+
+            $table->foreignId('shipping_zone_id')->nullable()->constrained('shipping_zones')->cascadeOnDelete();
+            $table->foreignId('shipping_method_id')->nullable()->constrained('shipping_methods')->cascadeOnDelete();
+            $table->foreignId('shipping_class_id')->nullable()->constrained('shipping_classes')->cascadeOnDelete();
+
+            $table->enum('type', ['flat', 'per_item', 'weight_based', 'distance_based'])->default('flat');
+            $table->boolean('is_percentage')->default(false);
+            $table->decimal('cost', 10, 2)->default(0);
             $table->timestamps();
         });
 
+        Schema::create('tax_classes', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('tax_zones', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->string('country');
+            $table->string('state')->nullable();
+            $table->string('city')->nullable();
+            $table->string('postal_code')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('tax_rates', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+
+            $table->foreignId('tax_zone_id')->nullable()->constrained('tax_zones')->cascadeOnDelete();
+            $table->foreignId('tax_class_id')->nullable()->constrained('tax_classes')->cascadeOnDelete();
+
+            $table->boolean('is_percentage')->default(true);
+            $table->decimal('rate', 10, 2)->default(0);
+            $table->timestamps();
+        });
 
         Schema::create('products', function (Blueprint $table) {
             $table->id();
@@ -96,21 +132,17 @@ return new class extends Migration
             $table->foreignId('brand_id')->nullable()->constrained('brands')->onDelete('set null');
             $table->json('tags')->nullable();
             $table->json('specifications')->nullable();
+
+            $table->foreignId('shipping_class_id')->nullable()->constrained('shipping_classes')->onDelete('set null');
+            $table->foreignId('tax_class_id')->nullable()->constrained('tax_classes')->onDelete('set null');
+
             $table->timestamps();
         });
 
-        Schema::create('product_payment_methods', function (Blueprint $table) {
+        Schema::create('product_attributes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->nullable()->constrained('products')->cascadeOnDelete();
-            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->cascadeOnDelete();
-            $table->timestamps();
-        });
-
-        Schema::create('product_variant_attributes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->string('name'); // e.g. Color, Size
-            $table->json('values'); // e.g. ["Red","Blue","Green"]
+            $table->mediumText('values'); // e.g. ["Red","Blue","Green"]
             $table->timestamps();
         });
 
@@ -138,19 +170,49 @@ return new class extends Migration
 
             $table->unique(['user_id', 'product_id', 'product_variant_id'], 'unique_user_product_variant');
         });
+
+
+        Schema::create('payment_methods', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->enum('type', ['online', 'manual'])->default('manual');
+            $table->enum('code', ['cod', 'direct_bank_transfer']);
+            $table->boolean('enabled')->default(true);
+            $table->enum('priority', ['low', 'high'])->default('high');
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('payment_method_attributes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->cascadeOnDelete();
+            $table->string('key');
+            $table->mediumText('value');
+            $table->timestamps();
+        });
+
+        Schema::create('product_payment_methods', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->nullable()->constrained('products')->cascadeOnDelete();
+            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->cascadeOnDelete();
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('product_payment_methods');
+        Schema::dropIfExists('payment_method_attributes');
+        Schema::dropIfExists('payment_methods');
         Schema::dropIfExists('wishlists');
         Schema::dropIfExists('product_variants');
         Schema::dropIfExists('product_variant_attributes');
-        Schema::dropIfExists('product_payment_methods');
         Schema::dropIfExists('products');
-        Schema::dropIfExists('payment_method_attributes');
-        Schema::dropIfExists('payment_methods');
         Schema::dropIfExists('tax_methods');
+        Schema::dropIfExists('shipping_rates');
         Schema::dropIfExists('shipping_methods');
+        Schema::dropIfExists('shipping_zones');
+        Schema::dropIfExists('shipping_classes');
         Schema::dropIfExists('brands');
         Schema::dropIfExists('categories');
         Schema::dropIfExists('coupons');

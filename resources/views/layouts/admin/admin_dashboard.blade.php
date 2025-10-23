@@ -11,7 +11,6 @@
         </a>
 
         <ul class="my-0 hidden lg:flex flex-row items-center px-1 gap-5">
-
             @auth
                 <div class="dropdown dropdown-end">
                     <label tabindex="0" class="btn btn-circle avatar size-6">
@@ -83,48 +82,21 @@
                             <div class="collapse-content m-0 pl-5">
                                 <ul class="w-full space-y-1">
                                     <li><a href="{{ route('admin.dashboard.product.get') }}"
-                                            class="{{ request()->is('admin/dashboard/product') ? 'bg-primary text-primary-content' : '' }}">Products</a></li>
-                                    <li><a href="{{ route('admin.dashboard.product.add.get') }}"
-                                            class="{{ request()->is('admin/dashboard/product/add') || request()->is('admin/dashboard/product/edit/*') ? 'bg-primary text-primary-content' : '' }}">Add
-                                            Product</a></li>
-                                    <li><a href="{{ route('admin.dashboard.product.product-variant-attribute.get') }}"
-                                            class="{{ request()->is('admin/dashboard/product/product-variant-attribute') ? 'bg-primary text-primary-content' : '' }}">Product Attributes</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="collapse collapse-arrow p-0 m-0">
-                            <input type="checkbox"
-                                {{ request()->is('admin/dashboard/category') || request()->is('admin/dashboard/category/*') ? 'checked' : '' }} />
-                            <div class="collapse-title px-3 py-2 my-0 mb-0 ">
-                                Category
-                            </div>
-                            <div class="collapse-content m-0 pl-5">
-                                <ul class="w-full space-y-1">
-                                    <li><a href="{{ route('admin.dashboard.category.get') }}"
-                                            class="{{ request()->is('admin/dashboard/category') ? 'bg-primary text-primary-content' : '' }}">Categories</a>
+                                            class="{{ request()->is('admin/dashboard/product') || request()->is('admin/dashboard/product/edit/*') || request()->is('admin/dashboard/product/add') ? 'bg-primary text-primary-content' : '' }}">Products</a>
                                     </li>
-                                    <li><a href="{{ route('admin.dashboard.category.add.get') }}"
-                                            class="{{ request()->is('admin/dashboard/category/add') || request()->is('admin/dashboard/category/edit/*') ? 'bg-primary text-primary-content' : '' }}">Add
-                                            Category</a></li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="collapse collapse-arrow p-0 m-0">
-                            <input type="checkbox"
-                                {{ request()->is('admin/dashboard/brand') || request()->is('admin/dashboard/brand/*') ? 'checked' : '' }} />
-                            <div class="collapse-title px-3 py-2 my-0 mb-0 ">
-                                Brand
-                            </div>
-                            <div class="collapse-content m-0 pl-5">
-                                <ul class="w-full space-y-1">
-                                    <li><a href="{{ route('admin.dashboard.brand.get') }}"
-                                            class="{{ request()->is('admin/dashboard/brand') ? 'bg-primary text-primary-content' : '' }}">Brands</a>
+                                    <li><a href="{{ route('admin.dashboard.product.category.get') }}"
+                                            class="{{ request()->is('admin/dashboard/product/category') ? 'bg-primary text-primary-content' : '' }}">Categories</a>
+                                    </li>
+                                    <li><a href="{{ route('admin.dashboard.product.brand.get') }}"
+                                            class="{{ request()->is('admin/dashboard/product/brand') ? 'bg-primary text-primary-content' : '' }}">Brands</a>
+                                    </li>
+                                    <li><a href="{{ route('admin.dashboard.product.attribute.get') }}"
+                                            class="{{ request()->is('admin/dashboard/product/attribute') ? 'bg-primary text-primary-content' : '' }}">Attributes</a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
+
 
                         <div class="collapse collapse-arrow p-0 m-0">
                             <input type="checkbox"
@@ -240,7 +212,7 @@
 
     <div class="flex flex-row flex-nowrap p-0 m-0">
         <div
-            class="hidden lg:flex w-[250px] min-h-[calc(100vh-50px)] sticky top-[50px] border-r border-base-300 flex-col justify-between">
+            class="hidden lg:flex w-[250px] h-[calc(100vh-50px)] overflow-y-auto advanced-scrollbar sticky top-[50px] border-r border-base-300 flex-col justify-between">
             <div>
                 <ul class="w-full menu mt-1 p-2 gap-0">
                     <li><a href="{{ route('admin.dashboard.get') }}"
@@ -279,48 +251,21 @@
                         <div class="collapse-content m-0 pl-5">
                             <ul class="w-full space-y-1">
                                 <li><a href="{{ route('admin.dashboard.product.get') }}"
-                                        class="{{ request()->is('admin/dashboard/product') ? 'bg-primary text-primary-content' : '' }}">Products</a></li>
-                                <li><a href="{{ route('admin.dashboard.product.add.get') }}"
-                                        class="{{ request()->is('admin/dashboard/product/add') || request()->is('admin/dashboard/product/edit/*') ? 'bg-primary text-primary-content' : '' }}">Add
-                                        Product</a></li>
-                                <li><a href="{{ route('admin.dashboard.product.product-variant-attribute.get') }}"
-                                        class="{{ request()->is('admin/dashboard/product/product-variant-attribute') ? 'bg-primary text-primary-content' : '' }}">Product
-                                        Attributes</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="collapse collapse-arrow p-0 m-0">
-                        <input type="checkbox"
-                            {{ request()->is('admin/dashboard/category') || request()->is('admin/dashboard/category/*') ? 'checked' : '' }} />
-                        <div class="collapse-title px-3 py-1.5">
-                            Category
-                        </div>
-                        <div class="collapse-content m-0 pl-5">
-                            <ul class="w-full space-y-1">
-                                <li><a href="{{ route('admin.dashboard.category.get') }}"
-                                        class="{{ request()->is('admin/dashboard/category') ? 'bg-primary text-primary-content' : '' }}">Categories</a></li>
-                                <li><a href="{{ route('admin.dashboard.category.add.get') }}"
-                                        class="{{ request()->is('admin/dashboard/category/add') || request()->is('admin/dashboard/category/edit/*') ? 'bg-primary text-primary-content' : '' }}">Add
-                                        Category</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="collapse collapse-arrow p-0 m-0">
-                        <input type="checkbox"
-                            {{ request()->is('admin/dashboard/brand') || request()->is('admin/dashboard/brand/*') ? 'checked' : '' }} />
-                        <div class="collapse-title px-3 py-1.5">
-                            Brand
-                        </div>
-                        <div class="collapse-content m-0 pl-5">
-                            <ul class="w-full space-y-1">
-                                <li><a href="{{ route('admin.dashboard.brand.get') }}"
-                                        class="{{ request()->is('admin/dashboard/brand') ? 'bg-primary text-primary-content' : '' }}">Brands</a>
+                                        class="{{ request()->is('admin/dashboard/product') || request()->is('admin/dashboard/product/add') || request()->is('admin/dashboard/product/edit/*') ? 'bg-primary text-primary-content' : '' }}">Products</a>
+                                </li>
+                                <li><a href="{{ route('admin.dashboard.product.category.get') }}"
+                                        class="{{ request()->is('admin/dashboard/product/category') ? 'bg-primary text-primary-content' : '' }}">Categories</a>
+                                </li>
+                                <li><a href="{{ route('admin.dashboard.product.brand.get') }}"
+                                        class="{{ request()->is('admin/dashboard/product/brand') ? 'bg-primary text-primary-content' : '' }}">Brands</a>
+                                </li>
+                                <li><a href="{{ route('admin.dashboard.product.attribute.get') }}"
+                                        class="{{ request()->is('admin/dashboard/product/attribute') ? 'bg-primary text-primary-content' : '' }}">Attributes</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
+
 
                     <div class="collapse collapse-arrow p-0 m-0">
                         <input type="checkbox"

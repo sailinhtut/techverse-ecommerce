@@ -6,36 +6,36 @@ use Illuminate\Database\Eloquent\Model;
 
 class ShippingMethod extends Model
 {
-    protected $table = 'shipping_methods';
-    protected $with = [];
-
-    protected $fillable = [
-        'name',
-        'type',
-        'cost',
-        'description',
-        'config',
-    ];
+    protected $fillable = ['name', 'description', 'enabled', 'is_free'];
 
     protected function casts(): array
     {
         return [
-            'cost' => 'decimal:2',
-            'config' => 'array',
+            'enabled' => 'boolean',
+            'is_free' => 'boolean',
+
         ];
     }
 
-    public function jsonResponse(): array
+    public function rates()
     {
-        return [
+        return $this->hasMany(ShippingRate::class, 'shipping_method_id');
+    }
+
+    public function jsonResponse(array $eager_list = []): array
+    {
+        $response = [
             'id' => $this->id,
             'name' => $this->name,
-            'type' => $this->type,
-            'cost' => $this->cost,
             'description' => $this->description,
-            'config' => $this->config,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'enabled' => $this->enabled,
+            'is_free' => $this->is_free
         ];
+
+        if (in_array('rates', $eager_list)) {
+            $response['rates'] = $this->rates->map(fn($r) => $r->jsonResponse())->all();
+        }
+
+        return $response;
     }
 }

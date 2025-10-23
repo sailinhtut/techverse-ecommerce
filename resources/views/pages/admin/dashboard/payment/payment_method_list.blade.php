@@ -16,6 +16,7 @@
                             <th class="w-[150px]">Code</th>
                             <th class="w-[120px]">Type</th>
                             <th class="w-[100px]">Enabled</th>
+                            <th class="w-[100px]">Priority</th>
                             <th class="w-[200px]">Description</th>
                             <th class="w-[120px]">Actions</th>
                         </tr>
@@ -40,6 +41,7 @@
                                         <span class="badge badge-error badge-outline">Disabled</span>
                                     @endif
                                 </td>
+                                  <td class="capitalize">{{ $method['priority'] }}</td>
                                 <td>{{ $method['description'] ?? '-' }}</td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
@@ -112,6 +114,12 @@
                                                 value="{{ $method['enabled'] ? 'Yes' : 'No' }}" readonly>
                                         </div>
                                         <div>
+                                            <label class="text-sm">Priority</label>
+                                            <input type="text"
+                                                class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                value="{{ ucfirst($method['priority']) }}" readonly>
+                                        </div>
+                                        <div>
                                             <label class="text-sm">Created At</label>
                                             <input type="text"
                                                 class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
@@ -172,17 +180,11 @@
                                     paymentType: @json($method['code']),
                                     enabled: @json($method['enabled'] ? '1' : '0'),
                                     description: @json($method['description']),
-                                    bank_accounts: @json($method['payment_attributes']['bank_accounts'] ?? []),
-                                    init() {
-                                        console.log("Tested");
-                                    },
-                                    addBankRow() {
-                                        this.bank_accounts.push({ account_id: "", account_name: "", bank_name: "", branch_name: ""});
-                                    },
-                                    removeBankRow(index) {
-                                        this.bank_accounts.splice(index, 1);
-                                    },
-                                }'
+                                    priority: @json($method['priority'] ?? 'high'),
+                                    bank_accounts: @json($method['payment_attributes']['bank_accounts'] ?? []), init() { console.log("Tested"); },
+                                    addBankRow() { this.bank_accounts.push({ account_id: "" , account_name: "" ,
+                                    bank_name: "" , branch_name: "" }); }, removeBankRow(index) {
+                                    this.bank_accounts.splice(index, 1); }, }'
                                     class="modal-box max-w-2xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -215,6 +217,15 @@
                                                 <option value="0">No</option>
                                             </select>
                                         </div>
+                                        <div>
+                                            <label class="text-sm">Priority</label>
+                                            <select x-model="priority" name="priority"
+                                                class="select w-full focus:outline-none focus:ring-0 focus:border-base-300">
+                                                <option value="">Select Priority</option>
+                                                <option value="high">High</option>
+                                                <option value="low">Low</option>
+                                            </select>
+                                        </div>
 
                                         <div class="md:col-span-2">
                                             <label class="text-sm">Description</label>
@@ -235,6 +246,7 @@
                                             <input type="hidden" name="name" :value="name">
                                             <input type="hidden" name="enabled" :value="enabled">
                                             <input type="hidden" name="description" :value="description">
+                                            <input type="hidden" name="priority" :value="priority">
                                             <div>
                                                 <label class="text-sm">Delivery Instruction</label>
                                                 <textarea name="cod[instruction]" class="textarea w-full focus:outline-none focus:ring-0 focus:border-base-300"
@@ -263,6 +275,7 @@
                                             <input type="hidden" name="name" :value="name">
                                             <input type="hidden" name="enabled" :value="enabled">
                                             <input type="hidden" name="description" :value="description">
+                                            <input type="hidden" name="priority" :value="priority">
 
                                             <template x-for="(bank, index) in bank_accounts" :key="index">
                                                 <div class="border border-slate-200 rounded-box p-3 space-y-2 relative">
@@ -381,6 +394,7 @@
                 paymentType: '',
                 enabled: '1',
                 description: '',
+                priority: 'high',
                 addBankRow() {
                     this.bank_accounts.push({ account_id: '', account_name: '', bank_name: '', branch_name: '' });
                 },
@@ -419,6 +433,15 @@
                             <option value="0">No</option>
                         </select>
                     </div>
+                    <div>
+                        <label class="text-sm">Priority</label>
+                        <select x-model="priority" name="priority"
+                            class="select w-full focus:outline-none focus:ring-0 focus:border-base-300">
+                            <option value="">Select Priority</option>
+                            <option value="high">High</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
 
                     <div class="md:col-span-2">
                         <label class="text-sm">Description</label>
@@ -438,6 +461,7 @@
                         <input type="hidden" name="name" :value="name">
                         <input type="hidden" name="enabled" :value="enabled">
                         <input type="hidden" name="description" :value="description">
+                        <input type="hidden" name="priority" :value="priority">
 
                         <div>
                             <label class="text-sm">Delivery Instruction</label>
@@ -465,6 +489,7 @@
                         <input type="hidden" name="name" :value="name">
                         <input type="hidden" name="enabled" :value="enabled">
                         <input type="hidden" name="description" :value="description">
+                        <input type="hidden" name="priority" :value="priority">
 
                         <template x-for="(bank, index) in bank_accounts" :key="index">
                             <div class="border border-base-200 rounded-box p-3 space-y-2 relative">

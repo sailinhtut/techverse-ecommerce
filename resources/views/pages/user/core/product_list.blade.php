@@ -39,13 +39,13 @@
                             @endif
                         </div>
 
-                        <button x-data
+                        {{-- <button x-data
                             @click='$store.cart.addItem({
                                 id: {{ $product['id'] }},
                                 name: @json($product['name']),
                                 slug: @json($product['slug']),
                                 price: {{ $product['regular_price'] }},
-                                image: @json($product['image'])
+                                image: @json($product['image']),
                             })'
                             class="btn btn-sm lg:btn-square relative">
 
@@ -62,7 +62,7 @@
                                 x-show="$store.cart.items[{{ $product['id'] }}]"></span>
 
 
-                        </button>
+                        </button> --}}
 
                     </div>
                 </div>

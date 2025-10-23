@@ -38,7 +38,7 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function jsonResponse(): array
+    public function jsonResponse(array $eager_list = []): array
     {
         $image = getDownloadableLink($this->image);
 
@@ -56,7 +56,7 @@ class ProductVariant extends Model
             'updated_at' => $this->updated_at,
         ];
 
-        if ($this->product) {
+        if (in_array('product', $eager_list) && !is_null($this->product_id)) {
             $response['product'] = $this->product->jsonResponse();
         }
 

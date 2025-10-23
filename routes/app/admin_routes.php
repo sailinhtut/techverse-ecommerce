@@ -3,8 +3,10 @@
 use App\Auth\Controllers\UserController;
 use App\Inventory\Controllers\BrandController;
 use App\Inventory\Controllers\CategoryController;
+use App\Inventory\Controllers\ProductAttributeController;
 use App\Inventory\Controllers\ProductController;
 use App\Inventory\Controllers\ProductVariantAttributeController;
+use App\Inventory\Controllers\ProductVariantController;
 use App\Inventory\Models\ProductVariantAttribute;
 use App\Order\Controllers\OrderController;
 use App\Payment\Controllers\InvoiceController;
@@ -35,6 +37,31 @@ Route::middleware('auth')->prefix('/admin')->group(function () {
             Route::delete('/user/role/{id}', 'deleteRole')->name('admin.dashboard.user.role.delete');
         });
 
+        Route::controller(ProductVariantController::class)->group(function () {
+            Route::delete('/variant/{id}', 'deleteVariant')->name('admin.dashboard.product.variant.id.delete');
+        });
+
+        Route::controller(ProductAttributeController::class)->group(function () {
+            Route::get('/product/attribute', 'viewAdminProductAttributeListPage')->name('admin.dashboard.product.attribute.get');
+            Route::post('/product/attribute', 'addAttribute')->name('admin.dashboard.product.attribute.post');
+            Route::post('/product/attribute/{id}', 'updateAttribute')->name('admin.dashboard.product.attribute.id.post');
+            Route::delete('/product/attribute/{id}', 'deleteAttribute')->name('admin.dashboard.product.attribute.id.delete');
+        });
+
+        Route::controller(CategoryController::class)->group(function () {
+            Route::get('/product/category', 'viewAdminCategoryListPage')->name('admin.dashboard.product.category.get');
+            Route::post('/product/category', 'addCategory')->name('admin.dashboard.product.category.post');
+            Route::post('/product/category/{id}', 'updateCategory')->name('admin.dashboard.product.category.id.post');
+            Route::delete('/product/category/{id}', 'deleteCategory')->name('admin.dashboard.product.category.id.delete');
+        });
+
+        Route::controller(BrandController::class)->group(function () {
+            Route::get('/product/brand', 'viewAdminBrandListPage')->name('admin.dashboard.product.brand.get');
+            Route::post('/product/brand', 'addBrand')->name('admin.dashboard.product.brand.post');
+            Route::post('/product/brand/{id}', 'updateBrand')->name('admin.dashboard.product.brand.id.post');
+            Route::delete('/product/brand/{id}', 'deleteBrand')->name('admin.dashboard.product.brand.id.delete');
+        });
+
         Route::controller(ProductController::class)->group(function () {
             Route::get('/product', 'viewAdminProductListPage')->name('admin.dashboard.product.get');
             Route::get('/product/add', 'viewAdminProductAddPage')->name('admin.dashboard.product.add.get');
@@ -44,49 +71,74 @@ Route::middleware('auth')->prefix('/admin')->group(function () {
             Route::delete('/product/{id}', 'deleteProduct')->name('admin.dashboard.product.id.delete');
         });
 
-        Route::controller(ProductVariantAttributeController::class)->group(function () {
-            Route::get('/product/product-variant-attribute', 'viewAdminProductVariantAttributeListPage')->name('admin.dashboard.product.product-variant-attribute.get');
-        });
-
-        Route::controller(CategoryController::class)->group(function () {
-            Route::get('/category', 'viewAdminCategoryListPage')->name('admin.dashboard.category.get');
-            Route::get('/category/add', 'viewAdminAddCategoryPage')->name('admin.dashboard.category.add.get');
-            Route::get('/category/edit/{id}/', 'viewAdminEditCategoryPage')->name('admin.dashboard.category.edit.id.get');
-            Route::post('/category', 'addCategory')->name('admin.dashboard.category.post');
-            Route::post('/category/{id}', 'updateCategory')->name('admin.dashboard.category.id.post');
-            Route::delete('/category/{id}', 'deleteCategory')->name('admin.dashboard.category.id.delete');
-        });
-
-        Route::controller(BrandController::class)->group(function () {
-            Route::get('/brand', 'viewAdminBrandListPage')->name('admin.dashboard.brand.get');
-        });
-
         Route::controller(ShippingClassController::class)->group(function () {
             Route::get('/shipping/shipping-class', 'viewAdminShippingClassListPage')->name('admin.dashboard.shipping.shipping-class.get');
+
+            Route::post('/shipping/shipping-class', 'createClass')->name('admin.dashboard.shipping.shipping-class.post');
+
+            Route::post('/shipping/shipping-class/{id}', 'updateClass')->name('admin.dashboard.shipping.shipping-class.id.post');
+
+            Route::delete('/shipping/shipping-class/{id}', 'deleteClass')->name('admin.dashboard.shipping.shipping-class.id.delete');
         });
 
         Route::controller(ShippingZoneController::class)->group(function () {
             Route::get('/shipping/shipping-zone', 'viewAdminShippingZoneListPage')->name('admin.dashboard.shipping.shipping-zone.get');
+
+            Route::post('/shipping/shipping-zone', 'createZone')->name('admin.dashboard.shipping.shipping-zone.post');
+
+            Route::post('/shipping/shipping-zone/{id}', 'updateZone')->name('admin.dashboard.shipping.shipping-zone.id.post');
+
+            Route::delete('/shipping/shipping-zone/{id}', 'deleteZone')->name('admin.dashboard.shipping.shipping-zone.id.delete');
         });
 
         Route::controller(ShippingMethodController::class)->group(function () {
             Route::get('/shipping/shipping-method', 'viewAdminShippingMethodListPage')->name('admin.dashboard.shipping.shipping-method.get');
+
+            Route::post('/shipping/shipping-method', 'createMethod')->name('admin.dashboard.shipping.shipping-method.post');
+
+            Route::post('/shipping/shipping-method/{id}', 'updateMethod')->name('admin.dashboard.shipping.shipping-method.id.post');
+
+            Route::delete('/shipping/shipping-method/{id}', 'deleteMethod')->name('admin.dashboard.shipping.shipping-method.id.delete');
         });
 
         Route::controller(ShippingRateController::class)->group(function () {
             Route::get('/shipping/shipping-rate', 'viewAdminShippingRateListPage')->name('admin.dashboard.shipping.shipping-rate.get');
+
+            Route::post('/shipping/shipping-rate', 'createRate')->name('admin.dashboard.shipping.shipping-rate.post');
+
+            Route::post('/shipping/shipping-rate/{id}', 'updateRate')->name('admin.dashboard.shipping.shipping-rate.id.post');
+
+            Route::delete('/shipping/shipping-rate/{id}', 'deleteRate')->name('admin.dashboard.shipping.shipping-rate.id.delete');
         });
 
         Route::controller(TaxClassController::class)->group(function () {
             Route::get('/tax/tax-class', 'viewAdminTaxClassListPage')->name('admin.dashboard.tax.tax-class.get');
+
+            Route::post('/tax/tax-class', 'createClass')->name('admin.dashboard.tax.tax-class.post');
+
+            Route::post('/tax/tax-class/{id}', 'updateClass')->name('admin.dashboard.tax.tax-class.id.post');
+
+            Route::delete('/tax/tax-class/{id}', 'deleteClass')->name('admin.dashboard.tax.tax-class.id.delete');
         });
 
         Route::controller(TaxZoneController::class)->group(function () {
             Route::get('/tax/tax-zone', 'viewAdminTaxZoneListPage')->name('admin.dashboard.tax.tax-zone.get');
+
+            Route::post('/tax/tax-zone', 'createZone')->name('admin.dashboard.tax.tax-zone.post');
+
+            Route::post('/tax/tax-zone/{id}', 'updateZone')->name('admin.dashboard.tax.tax-zone.id.post');
+
+            Route::delete('/tax/tax-zone/{id}', 'deleteZone')->name('admin.dashboard.tax.tax-zone.id.delete');
         });
 
         Route::controller(TaxRateController::class)->group(function () {
             Route::get('/tax/tax-rate', 'viewAdminTaxRateListPage')->name('admin.dashboard.tax.tax-rate.get');
+
+            Route::post('/tax/tax-rate', 'createRate')->name('admin.dashboard.tax.tax-rate.post');
+
+            Route::post('/tax/tax-rate/{id}', 'updateRate')->name('admin.dashboard.tax.tax-rate.id.post');
+
+            Route::delete('/tax/tax-rate/{id}', 'deleteRate')->name('admin.dashboard.tax.tax-rate.id.delete');
         });
 
         Route::controller(OrderController::class)->group(function () {

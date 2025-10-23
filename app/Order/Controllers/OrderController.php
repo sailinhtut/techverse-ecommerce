@@ -3,10 +3,12 @@
 namespace App\Order\Controllers;
 
 use App\Auth\Models\Address;
+use App\Inventory\Models\Product;
 use App\Order\Models\Order;
 use App\Order\Models\OrderProduct;
 use App\Order\Services\OrderService;
 use App\Payment\Models\Invoice;
+use App\Payment\Models\PaymentMethod;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,22 +17,29 @@ class OrderController
 {
     public function viewUserCheckOutPage()
     {
-        $user = auth()->user();
+        try {
+            $user = auth()->user();
 
-        $default_shipping_address = Address::where('user_id', $user->id)
-            ->where('is_default_shipping', true)
-            ->latest()
-            ->first();
+            $default_shipping_address = Address::where('user_id', $user->id)
+                ->where('is_default_shipping', true)
+                ->latest()
+                ->first();
 
-        $default_billing_address = Address::where('user_id', $user->id)
-            ->where('is_default_billing', true)
-            ->latest()
-            ->first();
+            $default_billing_address = Address::where('user_id', $user->id)
+                ->where('is_default_billing', true)
+                ->latest()
+                ->first();
 
-        return view('pages.user.core.checkout', [
-            'default_shipping_address' => $default_shipping_address,
-            'default_billing_address' => $default_billing_address,
-        ]);
+            // $payment_methods = PaymentMethod::where('enabled', true)->get();
+
+            return view('pages.user.core.checkout', [
+                'default_shipping_address' => $default_shipping_address,
+                'default_billing_address' => $default_billing_address,
+
+            ]);
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
     }
 
     public function viewUserOrderHistory()
@@ -68,7 +77,6 @@ class OrderController
         try {
             $order = OrderService::getOrder(intval($id));
 
-
             return view('pages.admin.dashboard.order.order_detail', [
                 'order' => $order
             ]);
@@ -87,15 +95,20 @@ class OrderController
                 'cart_items.*.id' => 'required|integer|exists:products,id',
                 'cart_items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
                 'cart_items.*.name' => 'required|string|max:150',
-                'cart_items.*.slug' => 'required|string|max:150',
+                'cart_items.*.sku' => 'required|string|max:150',
                 'cart_items.*.price' => 'required|numeric|min:0',
                 'cart_items.*.quantity' => 'required|integer|min:1',
                 'cart_items.*.tax' => 'nullable|numeric|min:0',
                 'cart_items.*.shipping_cost' => 'nullable|numeric|min:0',
                 'cart_items.*.discount' => 'nullable|numeric|min:0',
+                'shipping_cost_total' => 'required|numeric',
+                'tax_cost_total' => 'required|numeric',
 
                 'shipping_address' => 'required|array',
                 'billing_address' => 'required|array',
+
+                'payment_method_id' => 'required|exists:payment_methods,id',
+                'shipping_method_id' => 'required|exists:shipping_methods,id',
 
                 'shipping_address.recipient_name' => 'required|string|max:150',
                 'shipping_address.phone' => 'nullable|string|max:20',
@@ -153,8 +166,8 @@ class OrderController
 
             $order_subtotal = $cart_items->sum(fn($i) => $i['price'] * $i['quantity']);
             $order_discount_total = $cart_items->sum('discount');
-            $order_tax_total = $cart_items->sum('tax');
-            $order_shipping_total = $cart_items->sum('shipping_cost');
+            $order_tax_total =  $validated['tax_cost_total'];
+            $order_shipping_total = $validated['shipping_cost_total'];
             $order_grand_total = $order_subtotal - $order_discount_total + $order_tax_total + $order_shipping_total;
 
             $today = now();
@@ -172,8 +185,8 @@ class OrderController
                 'grand_total' => $order_grand_total,
                 'shipping_address' => $shipping_address,
                 'billing_address' => $billing_address,
-                'shipping_method_id' => null,
-                'payment_method_id' => null,
+                'shipping_method_id' => $validated['shipping_method_id'],
+                'payment_method_id' => $validated['payment_method_id'],
             ]);
 
             foreach ($cart_items as $item) {
@@ -181,7 +194,7 @@ class OrderController
                     'order_id' => $order->id,
                     'product_id' => $item['id'],
                     'variant_id' => $item['variant_id'] ?? null,
-                    'sku' => $item['slug'],
+                    'sku' => $item['sku'],
                     'name' => $item['name'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['price'],

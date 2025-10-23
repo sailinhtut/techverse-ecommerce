@@ -115,6 +115,8 @@
                                                             <tr>
                                                                 <th>Name</th>
                                                                 <th>Qty</th>
+                                                                <th>SKU</th>
+                                                                <th>Type</th>
                                                                 <th>Unit Price</th>
                                                                 <th>Subtotal</th>
                                                             </tr>
@@ -124,6 +126,8 @@
                                                                 <tr>
                                                                     <td>{{ $item['name'] }}</td>
                                                                     <td>{{ $item['quantity'] }}</td>
+                                                                    <td>{{ $item['sku'] }}</td>
+                                                                    <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}</td>
                                                                     <td>${{ number_format($item['unit_price'], 2) }}</td>
                                                                     <td>${{ number_format($item['subtotal'], 2) }}</td>
                                                                 </tr>

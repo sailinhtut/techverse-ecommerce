@@ -3,8 +3,8 @@
 namespace App\Order\Models;
 
 use App\Auth\Models\User;
-use App\Inventory\Models\PaymentMethod;
-use App\Inventory\Models\ShippingMethod;
+use App\Payment\Models\PaymentMethod;
+use App\Shipping\Models\ShippingMethod;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
@@ -94,7 +94,7 @@ class Order extends Model
             $response['shipping_method'] = $this->shippingMethod->jsonResponse();
         }
 
-        if (in_array('billingMethod', $eager_list) && $this->billing_method_id) {
+        if (in_array('paymentMethod', $eager_list) && $this->payment_method_id) {
             $response['payment_method'] = $this->paymentMethod->jsonResponse();
         }
 

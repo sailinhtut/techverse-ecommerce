@@ -1,31 +1,32 @@
 @extends('layouts.admin.admin_dashboard')
-@section('admin_dashboard_content')
-    <div class="p-5">
-        <p class="lg:text-lg font-semibold mb-3">Category List</p>
 
-        <div class="card shadow-sm border border-base-300">
+@section('admin_dashboard_content')
+    <div class="p-5 min-h-screen">
+        <p class="lg:text-lg font-semibold mb-3">Product Categories</p>
+
+        <button class="btn btn-primary" onclick="create_category_modal.showModal()">Create Category</button>
+
+        <div class="card shadow-sm border border-base-300 mt-4">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="w-[50px]">No.</th>
-                            <th class="w-[200px]">Title</th>
-                            <th class="w-[200px]">Description</th>
-                            <th style="width:180px;">Actions</th>
+                            <th>No.</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($product_categories as $category)
                             <tr>
-                                <td style="" class="">
-                                    {{ $loop->iteration + ($product_categories->currentPage() - 1) * $product_categories->perPage() }}.
+                                <td>{{ $loop->iteration + ($product_categories->currentPage() - 1) * $product_categories->perPage() }}
                                 </td>
-
-                                <td class="w-[200px] h-[30px] line-clamp-1">
-                                    <div onclick="document.getElementById('detailModal{{ $category['id'] }}').showModal()"
-                                        class="cursor-default hover:underline">{{ $category['name'] }}</div>
+                                <td>
+                                    <p onclick="document.getElementById('detail_modal_{{ $category['id'] }}').showModal()"
+                                        class="cursor-pointer hover:underline">{{ $category['name'] }}</p>
                                 </td>
-                                <td>{{ $category['description'] ?? 'No Description' }}</td>
+                                <td>{{ $category['description'] ?? '-' }}</td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">
@@ -33,124 +34,158 @@
                                         </div>
                                         <ul tabindex="0"
                                             class="menu dropdown-content bg-base-100 border border-base-300 w-30 rounded-box p-1 shadow-sm">
-                                            <li>
-                                                <button
-                                                    onclick="document.getElementById('detailModal{{ $category['id'] }}').showModal()">
-                                                    View
-                                                </button>
+                                            <li><button
+                                                    onclick="document.getElementById('detail_modal_{{ $category['id'] }}').showModal()">View</button>
                                             </li>
-                                            <li>
-                                                <a
-                                                    href="{{ route('admin.dashboard.category.edit.id.get', ['id' => $category['id']]) }}">Edit</a>
+                                            <li><button
+                                                    onclick="document.getElementById('edit_modal_{{ $category['id'] }}').showModal()">Edit</button>
                                             </li>
-                                            <li>
-                                                <button type="button" class="text-error"
-                                                    onclick="document.getElementById('deleteModal{{ $category['id'] }}').showModal()">
-                                                    Delete
-                                                </button>
+                                            <li><button class="text-error"
+                                                    onclick="document.getElementById('delete_modal_{{ $category['id'] }}').showModal()">Delete</button>
                                             </li>
                                         </ul>
                                     </div>
-
-
-                                    <dialog id="detailModal{{ $category['id'] }}" class="modal">
-                                        <div class="modal-box max-h-[80vh]">
-                                            <form method="dialog">
-                                                <button
-                                                    class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                                            </form>
-                                            <p class="text-lg font-semibold py-0">{{ $category['name'] }}</p>
-                                            <div class="mt-4 space-y-2">
-                                                <p><strong>ID:</strong> {{ $category['id'] ?? 'No ID' }}</p>
-
-                                                <p><strong>Title:</strong>
-                                                    {{ $category['name'] ?? 'No Title' }}</p>
-                                                <p><strong>Description:</strong>
-                                                    {{ $category['description'] ?? 'Description' }}</p>
-                                            </div>
-                                            <div class="modal-action mt-3">
-                                                <form method="dialog">
-                                                    <button class="btn lg:btn-md">Close</button>
-                                                </form>
-                                            </div>
-                                        </div>
-
-                                    </dialog>
-
-
-                                    <dialog id="deleteModal{{ $category['id'] }}" class="modal">
-                                        <div class="modal-box">
-                                            <form method="dialog">
-                                                <button
-                                                    class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                                            </form>
-                                            <p class="text-lg font-semibold py-0">Confirm Delete</p>
-
-                                            <p class="py-2 mb-0 text-sm">
-                                                Are you sure you want to delete
-                                                <span class="italic text-error">{{ $category['name'] }}</span> ?
-                                            </p>
-                                            <div class="modal-action mt-0">
-                                                <form method="dialog">
-                                                    <button class="btn  lg:btn-md">Close</button>
-                                                </form>
-                                                <form method="POST"
-                                                    action="{{ route('admin.dashboard.category.id.delete', ['id' => $category['id']]) }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn  lg:btn-md btn-error">Delete</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </dialog>
                                 </td>
-
                             </tr>
+
+                            {{-- Detail Modal --}}
+                            <dialog id="detail_modal_{{ $category['id'] }}" class="modal">
+                                <div class="modal-box max-w-xl">
+                                    <form method="dialog">
+                                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                                    </form>
+                                    <h3 class="text-lg font-semibold text-center mb-3">Category Details</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="text-sm">ID</label>
+                                            <input type="text"
+                                                class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                value="{{ $category['id'] }}" readonly>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label class="text-sm">Name</label>
+                                            <input type="text"
+                                                class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                value="{{ $category['name'] }}" readonly>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label class="text-sm">Parent Category</label>
+                                            <input type="text"
+                                                class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                value="{{ $category['parent']['name'] ?? '-' }}" readonly>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label class="text-sm">Description</label>
+                                            <textarea class="textarea w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                                                readonly>{{ $category['description'] }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-action">
+                                        <form method="dialog"><button class="btn">Close</button></form>
+                                    </div>
+                                </div>
+                            </dialog>
+
+                            @php
+                                $excludeIds = [];
+                                $addDescendants = function ($category) use (&$addDescendants, &$excludeIds) {
+                                    if (!empty($category['children'])) {
+                                        foreach ($category['children'] as $child) {
+                                            $excludeIds[] = $child['id'];
+                                            $addDescendants($child);
+                                        }
+                                    }
+                                };
+
+                                $excludeIds[] = $category['id'];
+                                $addDescendants($category);
+                            @endphp
+
+                            {{-- Edit Modal --}}
+                            <dialog id="edit_modal_{{ $category['id'] }}" class="modal">
+                                <div class="modal-box max-w-xl">
+                                    <form method="dialog">
+                                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                                    </form>
+                                    <h3 class="text-lg font-semibold text-center mb-3">Edit Category</h3>
+                                    <form method="POST"
+                                        action="{{ route('admin.dashboard.product.category.id.post', ['id' => $category['id']]) }}">
+                                        @csrf
+                                        @method('POST')
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div class="md:col-span-2">
+                                                <label class="text-sm">Name</label>
+                                                <input name="name" class="input w-full" value="{{ $category['name'] }}"
+                                                    required>
+                                            </div>
+
+                                            <div>
+                                                <label class="text-sm">Parent Category</label>
+                                                <select name="parent_id" class="select w-full border-base-300">
+                                                    <option value="">-- None --</option>
+                                                    @foreach ($product_categories as $cat)
+                                                        @if (!in_array($cat['id'], $excludeIds))
+                                                            <option value="{{ $cat['id'] }}"
+                                                                @if (isset($category) && $category['parent_id'] == $cat['id']) selected @endif>
+                                                                {{ $cat['name'] }}
+                                                            </option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="md:col-span-2">
+                                                <label class="text-sm">Description</label>
+                                                <textarea name="description" class="textarea w-full">{{ $category['description'] }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-action mt-3">
+                                            <button type="submit" class="btn btn-primary">Update Category</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </dialog>
+
+                            {{-- Delete Modal --}}
+                            <dialog id="delete_modal_{{ $category['id'] }}" class="modal">
+                                <div class="modal-box">
+                                    <form method="dialog"><button
+                                            class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button></form>
+                                    <p class="text-lg font-semibold">Confirm Delete</p>
+                                    <p class="text-sm mb-4">Are you sure you want to delete <span
+                                            class="text-error">{{ $category['name'] }}</span>?</p>
+                                    <div class="modal-action">
+                                        <form method="dialog"><button class="btn">Cancel</button></form>
+                                        <form method="POST"
+                                            action="{{ route('admin.dashboard.product.category.id.delete', ['id' => $category['id']]) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-error">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </dialog>
                         @endforeach
                     </tbody>
                 </table>
 
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
+                {{-- Pagination --}}
+                <div class="flex justify-between items-center py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $product_categories->firstItem() }}</span>
-                        –
-                        <span class="font-semibold">{{ $product_categories->lastItem() }}</span>
-                        of
-                        <span class="font-semibold">{{ $product_categories->total() }}</span>
-                        results
+                        <span class="font-semibold">{{ $product_categories->firstItem() }}</span> –
+                        <span class="font-semibold">{{ $product_categories->lastItem() }}</span> of
+                        <span class="font-semibold">{{ $product_categories->total() }}</span> results
                     </div>
-
                     <div class="join">
                         @if ($product_categories->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $product_categories->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-
-                        <a href="{{ $product_categories->url(1) }}"
-                            class="join-item btn btn-sm {{ $product_categories->currentPage() === 1 ? 'btn-active' : '' }}">
-                            1
-                        </a>
-
-                        @php
-                            $start = max(2, $product_categories->currentPage() - 1);
-                            $end = min($product_categories->lastPage() - 1, $product_categories->currentPage() + 1);
-                        @endphp
-
-                        @for ($i = $start; $i <= $end; $i++)
+                        @for ($i = 1; $i <= $product_categories->lastPage(); $i++)
                             <a href="{{ $product_categories->url($i) }}"
-                                class="join-item btn btn-sm {{ $product_categories->currentPage() === $i ? 'btn-active' : '' }}">
-                                {{ $i }}
-                            </a>
+                                class="join-item btn btn-sm {{ $product_categories->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
                         @endfor
-
-                        @if ($product_categories->lastPage() > 1)
-                            <a href="{{ $product_categories->url($product_categories->lastPage()) }}"
-                                class="join-item btn btn-sm {{ $product_categories->currentPage() === $product_categories->lastPage() ? 'btn-active' : '' }}">
-                                {{ $product_categories->lastPage() }}
-                            </a>
-                        @endif
-
                         @if ($product_categories->hasMorePages())
                             <a href="{{ $product_categories->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -160,5 +195,42 @@
                 </div>
             </div>
         </div>
+
+        {{-- Create Modal --}}
+        <dialog id="create_category_modal" class="modal">
+            <div class="modal-box max-w-xl">
+                <form method="dialog">
+                    <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                </form>
+                <h3 class="text-lg font-semibold text-center mb-3">Create Category</h3>
+                <form method="POST" action="{{ route('admin.dashboard.product.category.post') }}">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="md:col-span-2">
+                            <label class="text-sm">Name</label>
+                            <input name="name" class="input w-full" placeholder="Category Name" required>
+                        </div>
+                        <div>
+                            <label class="text-sm">Parent Category</label>
+                            <select name="parent_id" class="select w-full border-base-300">
+                                <option value="">-- None --</option>
+                                @foreach ($product_categories as $cat)
+                                    <option value="{{ $cat['id'] }}">
+                                        {{ $cat['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-sm">Description</label>
+                            <textarea name="description" class="textarea w-full"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-action mt-3">
+                        <button type="submit" class="btn btn-primary">Create Category</button>
+                    </div>
+                </form>
+            </div>
+        </dialog>
     </div>
 @endsection

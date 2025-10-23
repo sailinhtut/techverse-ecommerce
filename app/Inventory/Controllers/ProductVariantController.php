@@ -14,9 +14,7 @@ class ProductVariantController
         $productId = $request->input('product_id');
         $selectedValues = $request->input('selected_values', []);
 
-        $product = Product::findOrFail($productId);
-
-        $product->load('productVariants');
+        $product = Product::with('productVariants')->findOrFail($productId);
 
         if ($product->productVariants->isEmpty()) {
             return response()->json([

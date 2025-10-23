@@ -154,12 +154,7 @@
 
                 <template x-if="Object.keys(selectors).length > 0">
                     <div class="mt-3 flex flex-col gap-2 flex-wrap">
-                        <template
-                            x-if="Object.keys(selectedValues).length === 0 || Object.values(selectedValues).some(v => !v)">
-                            <p class="text-sm text-yellow-600 font-medium">
-                                ⚠️ Please choose variant options first.
-                            </p>
-                        </template>
+
 
                         <div class="flex gap-2 flex-wrap"
                             x-show="!loadingStock && variantStock !== null && variantStock > 0 && !stockError && Object.values(selectedValues).every(v => v)"

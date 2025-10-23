@@ -23,8 +23,12 @@ class ProductVariantController
             ], 404);
         }
 
+        // $variant = $product->productVariants()
+        //     ->where('combination', json_encode($selectedValues))
+        //     ->first();
+
         $variant = $product->productVariants()
-            ->where('combination', json_encode($selectedValues))
+            ->whereJsonContains('combination', $selectedValues)
             ->first();
 
         if (!$variant) {

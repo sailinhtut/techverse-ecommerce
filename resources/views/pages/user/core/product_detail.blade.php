@@ -154,10 +154,8 @@
 
                 <template x-if="Object.keys(selectors).length > 0">
                     <div class="mt-3 flex flex-col gap-2 flex-wrap">
-
-
                         <div class="flex gap-2 flex-wrap"
-                            x-show="!loadingStock && variantStock !== null && variantStock > 0 && !stockError && Object.values(selectedValues).every(v => v)"
+                            x-show="!loadingStock && variantStock !== null && variantStock > 0 && !stockError"
                             x-transition>
 
                             <div class="join join-horizontal" x-data>

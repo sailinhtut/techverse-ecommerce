@@ -152,7 +152,8 @@
 
 
 
-                <template x-if="Object.keys(selectors).length > 0">
+                <template
+                    x-if="Object.keys(selectors).length > 0 && variantStock !== null && variantStock > 0 && !stockError && !loadingStock">
                     <div class="mt-3 flex flex-col gap-2 flex-wrap">
                         <div class="flex gap-2 flex-wrap"
                             x-show="!loadingStock && variantStock !== null && variantStock > 0 && !stockError"
@@ -218,7 +219,7 @@
                     </div>
                 </template>
 
-                <template x-if="Object.keys(selectors).length === 0">
+                <template x-if="Object.keys(selectors).length === 0 ">
                     <div class="mt-3 flex gap-2 flex-wrap" x-transition>
                         @if (($product['enable_stock'] && $product['stock'] > 0) || !$product['enable_stock'])
                             <div class="join join-horizontal" x-data>

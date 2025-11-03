@@ -4,6 +4,7 @@ namespace App\Order\Controllers;
 
 use App\Auth\Models\Address;
 use App\Inventory\Models\Product;
+use App\Inventory\Services\CouponService;
 use App\Order\Models\Order;
 use App\Order\Models\OrderProduct;
 use App\Order\Services\OrderService;
@@ -59,6 +60,26 @@ class OrderController
         }
     }
 
+    public function viewUserOrderHistoryDetail(Request $request, $id)
+    {
+        try {
+            if (!auth()->check()) {
+                abort(403, 'Unauthenticated. Please Log in');
+            }
+
+            $order = Order::find($id);
+
+            if (!$order) abort(404, 'No Order Found');
+
+
+            return view('pages.user.dashboard.order_history_detail', [
+                'order' => $order->jsonResponse(['products', 'shippingMethod', 'paymentMethod'])
+            ]);
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
     public function viewAdminOrderListPage()
     {
         try {
@@ -103,6 +124,8 @@ class OrderController
                 'cart_items.*.discount' => 'nullable|numeric|min:0',
                 'shipping_cost_total' => 'required|numeric',
                 'tax_cost_total' => 'required|numeric',
+                'discount_total' => 'nullable|numeric',
+                'coupon_code' => 'nullable|string',
 
                 'shipping_address' => 'required|array',
                 'billing_address' => 'required|array',
@@ -165,7 +188,10 @@ class OrderController
             }
 
             $order_subtotal = $cart_items->sum(fn($i) => $i['price'] * $i['quantity']);
-            $order_discount_total = $cart_items->sum('discount');
+
+            $order_discount_total = $validated['discount_total'] ?? 0;
+            $order_coupon_code = $validated['coupon_code'] ?? null;
+
             $order_tax_total =  $validated['tax_cost_total'];
             $order_shipping_total = $validated['shipping_cost_total'];
             $order_grand_total = $order_subtotal - $order_discount_total + $order_tax_total + $order_shipping_total;
@@ -180,6 +206,7 @@ class OrderController
                 'currency' => 'USD',
                 'subtotal' => $order_subtotal,
                 'discount_total' => $order_discount_total,
+                'coupon_code' => $order_coupon_code,
                 'tax_total' => $order_tax_total,
                 'shipping_total' => $order_shipping_total,
                 'grand_total' => $order_grand_total,
@@ -219,9 +246,25 @@ class OrderController
                 ]
             );
 
+            if ($order_coupon_code) {
+                $applied =  CouponService::applyCoupon($order_coupon_code);
+                if (!$applied) abort(400, 'Coupon Code Is Invalid');
+            }
+
+            $consumed = OrderService::consumeOrderProductQuantity($order->id);
+            if (!$consumed) {
+                abort(400, 'Stock is not sufficient for order');
+            }
+
+
             DB::commit();
 
-            return redirect()->route('shop.get')->with('success', 'Order created successfully')->with('clear_cart', true);
+            return redirect()->route(
+                'order_detail.id.get',
+                $order->id
+            )->with('success', 'Order created successfully')->with('clear_cart', true)->with('clear_cart', true);
+
+            // return redirect()->route('shop.get')->with('success', 'Order created successfully')->with('clear_cart', true);
         } catch (Exception $e) {
             DB::rollBack();
             return handleErrors($e);
@@ -243,6 +286,7 @@ class OrderController
                 'shipping_total' => 'nullable|numeric|min:0',
                 'grand_total' => 'nullable|numeric|min:0',
                 'currency' => 'nullable|string',
+                'coupon_code' => 'nullable|string',
 
                 'shipping_address.recipient_name' => 'nullable|string|max:150',
                 'shipping_address.phone' => 'nullable|string|max:20',

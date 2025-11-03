@@ -56,7 +56,7 @@
                             </tr>
 
                             <dialog id="detail_modal_{{ $zone['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -113,7 +113,7 @@
                             </dialog>
 
                             <dialog id="edit_modal_{{ $zone['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -212,7 +212,7 @@
 
         {{-- Create Modal --}}
         <dialog id="create_shipping_zone_modal" class="modal">
-            <div class="modal-box max-w-xl">
+            <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                 <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
                 <h3 class="text-lg font-semibold text-center mb-3">Create Shipping Zone</h3>
@@ -245,7 +245,7 @@
                         </div>
                     </div>
                     <div class="modal-action mt-3">
-                        <button type="submit" class="btn btn-primary w-full">Create Shipping Zone</button>
+                        <button type="submit" class="btn btn-primary">Create Shipping Zone</button>
                     </div>
                 </form>
             </div>

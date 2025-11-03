@@ -3,6 +3,7 @@
 namespace App\Inventory\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class Category extends Model
@@ -71,5 +72,8 @@ class Category extends Model
                 $category->slug = $slug;
             }
         });
+
+        static::saved(fn($model) => Cache::flush());
+        static::deleted(fn($model) => Cache::flush());
     }
 }

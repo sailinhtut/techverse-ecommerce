@@ -13,6 +13,7 @@
                         <tr>
                             <th>No.</th>
                             <th>Name</th>
+                            <th>Parent</th>
                             <th>Description</th>
                             <th>Actions</th>
                         </tr>
@@ -20,11 +21,17 @@
                     <tbody>
                         @foreach ($product_categories as $category)
                             <tr>
-                                <td>{{ $loop->iteration + ($product_categories->currentPage() - 1) * $product_categories->perPage() }}
+                                {{-- <td>{{ $loop->iteration + ($product_categories->currentPage() - 1) * $product_categories->perPage() }}
+                                </td> --}}
+                                <td>{{ $loop->iteration }}.
                                 </td>
+                               
                                 <td>
                                     <p onclick="document.getElementById('detail_modal_{{ $category['id'] }}').showModal()"
                                         class="cursor-pointer hover:underline">{{ $category['name'] }}</p>
+                                </td>
+                                 <td>
+                                    <p>{{ $category['parent']['name'] ?? '-' }}</p>
                                 </td>
                                 <td>{{ $category['description'] ?? '-' }}</td>
                                 <td>
@@ -50,7 +57,7 @@
 
                             {{-- Detail Modal --}}
                             <dialog id="detail_modal_{{ $category['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -103,7 +110,7 @@
 
                             {{-- Edit Modal --}}
                             <dialog id="edit_modal_{{ $category['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -123,15 +130,17 @@
                                             <div>
                                                 <label class="text-sm">Parent Category</label>
                                                 <select name="parent_id" class="select w-full border-base-300">
-                                                    <option value="">-- None --</option>
-                                                    @foreach ($product_categories as $cat)
-                                                        @if (!in_array($cat['id'], $excludeIds))
-                                                            <option value="{{ $cat['id'] }}"
-                                                                @if (isset($category) && $category['parent_id'] == $cat['id']) selected @endif>
-                                                                {{ $cat['name'] }}
-                                                            </option>
-                                                        @endif
-                                                    @endforeach
+                                                    <div class="max-h-[200px] overflow-y-auto">
+                                                        <option value="">-- None --</option>
+                                                        @foreach ($product_categories as $cat)
+                                                            @if (!in_array($cat['id'], $excludeIds))
+                                                                <option value="{{ $cat['id'] }}"
+                                                                    @if (isset($category) && $category['parent_id'] == $cat['id']) selected @endif>
+                                                                    {{ $cat['name'] }}
+                                                                </option>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
                                                 </select>
                                             </div>
                                             <div class="md:col-span-2">
@@ -170,7 +179,7 @@
                 </table>
 
                 {{-- Pagination --}}
-                <div class="flex justify-between items-center py-3 px-5">
+                {{-- <div class="flex justify-between items-center py-3 px-5">
                     <div class="text-sm text-gray-500">
                         <span class="font-semibold">{{ $product_categories->firstItem() }}</span> –
                         <span class="font-semibold">{{ $product_categories->lastItem() }}</span> of
@@ -192,13 +201,13 @@
                             <button class="join-item btn btn-sm btn-disabled">»</button>
                         @endif
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
 
         {{-- Create Modal --}}
         <dialog id="create_category_modal" class="modal">
-            <div class="modal-box max-w-xl">
+            <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                 <form method="dialog">
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
@@ -212,13 +221,16 @@
                         </div>
                         <div>
                             <label class="text-sm">Parent Category</label>
-                            <select name="parent_id" class="select w-full border-base-300">
-                                <option value="">-- None --</option>
-                                @foreach ($product_categories as $cat)
-                                    <option value="{{ $cat['id'] }}">
-                                        {{ $cat['name'] }}
-                                    </option>
-                                @endforeach
+                            <select name="parent_id" class="select w-full border-base-300 ">
+                                <div class="max-h-[200px] overflow-y-auto">
+                                    <option value="">-- None --</option>
+                                    @foreach ($product_categories as $cat)
+                                        <option value="{{ $cat['id'] }}">
+                                            {{ $cat['name'] }}
+                                        </option>
+                                    @endforeach
+                                </div>
+
                             </select>
                         </div>
                         <div class="md:col-span-2">

@@ -27,7 +27,6 @@
                                     {{ $loop->iteration + ($products->currentPage() - 1) * $products->perPage() }}.
                                 </td>
                                 <td class="w-[50px]">
-
                                     @if ($product['image'])
                                         <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
                                             class="w-[20px] h-auto object-contain">
@@ -37,8 +36,10 @@
                                     @endif
                                 </td>
                                 <td class="w-[200px] h-[30px] line-clamp-1">
-                                    <div onclick="document.getElementById('detail_modal_{{ $product['id'] }}').showModal()"
-                                        class="cursor-default hover:underline">{{ $product['name'] }}</div>
+                                    <a href="{{ route('admin.dashboard.product.edit.id.get', ['id' => $product['id']]) }}"
+                                        class="cursor-default hover:underline">{{ $product['name'] }}</a>
+                                    {{-- <div onclick="document.getElementById('detail_modal_{{ $product['id'] }}').showModal()"
+                                        class="cursor-default hover:underline">{{ $product['name'] }}</div> --}}
                                 </td>
                                 <td>{{ $product['stock'] ?? 'Non Stock' }}</td>
                                 <td>{{ $product['regular_price'] ?? '-' }}</td>
@@ -69,79 +70,6 @@
                                         </ul>
                                     </div>
 
-
-                                    {{-- <dialog id="detailModal{{ $product['id'] }}" class="modal">
-                                        <div class="modal-box max-h-[80vh]">
-                                            <form method="dialog">
-                                                <button
-                                                    class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                                            </form>
-                                            <p class="text-lg font-semibold py-0">{{ $product['name'] }}</p>
-                                            <div class="mt-4 space-y-2">
-                                                <p><strong>ID:</strong> {{ $product['id'] ?? 'No ID' }}</p>
-                                                <p><strong>Status:</strong>
-                                                    {{ $product['is_active'] ? 'Live' : 'Disable' }}</p>
-                                                <p><strong>Slug:</strong> {{ $product['slug'] ?? 'No Slug' }}
-                                                </p>
-                                                <p><strong>Short Description:</strong>
-                                                    {{ $product['short_description'] ?? 'No Description' }}</p>
-                                                <p><strong>Long Description:</strong>
-                                                    {{ $product['long_description'] ?? 'No Description' }}</p>
-                                                <p><strong>SKU (Stock Keeping Unit):</strong>
-                                                    {{ $product['sku'] ?? 'Not Set' }}</p>
-                                                <p><strong>Regular Price:</strong>
-                                                    {{ $product['regular_price'] ?? 'No Price Set' }}</p>
-                                                <p><strong>Regular Price:</strong>
-                                                    {{ $product['regular_price'] ?? 'No Price Set' }}</p>
-                                                <p><strong>Sale Price:</strong>
-                                                    {{ $product['sale_price'] ?? 'No Price Set' }}</p>
-                                                <p><strong>Stock:</strong>
-                                                    {{ $product['stock'] ?? 'No Stock Set' }}</p>
-                                                <p><strong>Stock Status:</strong>
-                                                    {{ $product['enable_stock'] ? 'Enable' : 'Disable' }}</p>
-                                                <p>
-                                                    <strong>Category ID:</strong>
-                                                    {{ $product['category_id'] ?? 'No Category Set' }}
-                                                </p>
-                                                <p>
-                                                    <strong>Category:</strong>
-                                                    {{ isset($product['category']) ? $product['category']['name'] : '' }}
-                                                </p>
-
-                                                <!-- Main Image -->
-                                                <p><strong>Image:</strong></p>
-                                                @if ($product['image'])
-                                                    <img src="{{ $product['image'] }}" alt="Product Image"
-                                                        class="rounded-lg max-w-[120px]">
-                                                @else
-                                                    <span>No Image Set</span>
-                                                @endif
-
-                                                <!-- Image Gallery -->
-                                                <p><strong>Image Gallery:</strong></p>
-                                                @if (!empty($product['image_gallery']))
-                                                    <div class="flex flex-wrap gap-2">
-                                                        @foreach ($product['image_gallery'] as $img)
-                                                            <div class="tooltip" data-tip="{{ $img['label'] }}">
-                                                                <img src="{{ $img['image'] }}"
-                                                                    alt="{{ $img['label'] ?? 'Gallery Image' }}"
-                                                                    class="object-cover w-[100px] h-[100px] rounded-lg"
-                                                                    name="{{ $img['label'] ?? '' }}">
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <span>No Images in Gallery</span>
-                                                @endif
-                                            </div>
-                                            <div class="modal-action mt-3">
-                                                <form method="dialog">
-                                                    <button class="btn lg:btn-md">Close</button>
-                                                </form>
-                                            </div>
-                                        </div>
-
-                                    </dialog> --}}
 
                                     <dialog id="detail_modal_{{ $product['id'] }}" class="modal">
                                         <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">

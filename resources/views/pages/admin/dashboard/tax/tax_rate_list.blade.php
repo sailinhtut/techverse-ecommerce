@@ -31,8 +31,8 @@
                                 </td>
                                 <td>{{ $rate['zone']['name'] ?? '*' }}</td>
                                 <td>{{ $rate['class']['name'] ?? '*' }}</td>
-                                <td>{{ $rate['is_percentage'] ? 'Percentage Rate' : 'Flat Rate' }}</td>
-                                <td>{{ $rate['rate'] }}</td>
+                                <td>{{ ucwords(str_replace('_', ' ', $rate['type'])) }}</td>
+                                <td>{{ $rate['rate'] }} {{ $rate['is_percentage'] ? '%' : '' }}</td>
                                 <td>{{ $rate['description'] ?? '-' }}</td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
@@ -56,7 +56,7 @@
 
                             {{-- Detail Modal --}}
                             <dialog id="detail_modal_{{ $rate['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -108,7 +108,7 @@
 
                             {{-- Edit Modal --}}
                             <dialog id="edit_modal_{{ $rate['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -148,21 +148,61 @@
                                                 </select>
                                             </div>
                                             <div>
-                                                <label class="text-sm">Type</label>
-                                                <select name="is_percentage" class="select w-full">
-                                                    <option value="0" @selected(!$rate['is_percentage'])>Flat</option>
-                                                    <option value="1" @selected($rate['is_percentage'])>Percentage
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div class="md:col-span-2">
                                                 <label class="text-sm">Rate</label>
                                                 <input name="rate" type="number" step="0.01" class="input w-full"
-                                                    value="{{ $rate['rate'] }}">
+                                                    placeholder="Enter Rate" value="{{ $rate['rate'] }}">
                                             </div>
+
+                                            <div>
+                                                <label class="text-sm">Type</label>
+                                                <select name="type" class="select w-full border-base-300" required>
+                                                    <option disabled>Select Type</option>
+                                                    <option value="per_item" @selected($rate['type'] == 'per_item')>Per Item</option>
+                                                    <option value="per_quantity" @selected($rate['type'] == 'per_quantity')>Per Quantity
+                                                    </option>
+                                                    {{-- <option value="per_weight" @selected($rate['type'] == 'per_weight')>Per Weight</option> --}}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label class="text-sm">Calcuation</label>
+                                                <select name="is_percentage" class="select w-full">
+                                                    <option value="0" @selected(!$rate['is_percentage'])>Fixed</option>
+                                                    <option value="1" @selected($rate['is_percentage'])>Percentage</option>
+                                                </select>
+                                            </div>
+
+
                                             <div class="md:col-span-2">
                                                 <label class="text-sm">Description</label>
                                                 <textarea name="description" class="textarea w-full">{{ $rate['description'] }}</textarea>
+                                            </div>
+
+                                            <div class="md:col-span-2 border border-base-300 p-3 rounded-md bg-base-200">
+                                                <p class="font-semibold text-sm">Formula</p>
+                                                <p class="text-sm">Sample Cart Data: [Apple-500x3],
+                                                    [Orange-300x2]<br>Sample Fixed Rate:
+                                                    200<br>Sample Percentage Rate: 10%</p>
+                                                <p class="text-sm mt-3">
+                                                    <span class="font-semibold">Per Item (Fixed):</span>
+                                                    <span class="italic">Tax Cost = 200 + 200 = 400 </span>
+                                                </p>
+                                                <p class="text-sm">
+                                                    <span class="font-semibold">Per Quantity (Fixed):</span>
+                                                    <span class="italic">Tax Cost = [200x3] + [200x2] = 600 + 400 = 1000
+                                                    </span>
+                                                </p>
+
+                                                <p class="text-sm mt-3">
+                                                    <span class="font-semibold">Per Item (Percentage):</span>
+                                                    <span class="italic">Tax Cost = [500x10%] + [300x10%] = 50 + 30 =
+                                                        80</span>
+                                                </p>
+                                                <p class="text-sm">
+                                                    <span class="font-semibold">Per Quantity (Percentage):</span>
+                                                    <span class="italic">Tax Cost = [500x10%] + [300x10%] = [50x3] + [30x2]
+                                                        = 210</span>
+                                                </p>
                                             </div>
                                         </div>
                                         <div class="modal-action mt-3">
@@ -227,7 +267,7 @@
 
         {{-- Create Modal --}}
         <dialog id="create_tax_rate_modal" class="modal">
-            <div class="modal-box max-w-xl">
+            <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                 <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
                 <h3 class="text-lg font-semibold text-center mb-3">Create Tax Rate</h3>
@@ -256,21 +296,57 @@
                                 @endforeach
                             </select>
                         </div>
+
                         <div>
-                            <label class="text-sm">Type</label>
-                            <select name="is_percentage" class="select w-full">
-                                <option value="0">Flat</option>
-                                <option value="1">Percentage</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2">
                             <label class="text-sm">Rate</label>
                             <input name="rate" type="number" step="0.01" class="input w-full"
                                 placeholder="Enter Rate">
                         </div>
+
+                        <div>
+                            <label class="text-sm">Type</label>
+                            <select name="type" class="select w-full border-base-300" required>
+                                <option disabled>Select Type</option>
+                                <option value="per_item" @selected(old('type') == 'per_item')>Per Item</option>
+                                <option value="per_quantity" @selected(old('type') == 'per_quantity')>Per Quantity</option>
+                                {{-- <option value="per_weight" @selected(old('type') == 'per_weight')>Per Weight</option> --}}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-sm">Calcuation</label>
+                            <select name="is_percentage" class="select w-full">
+                                <option value="0">Fixed</option>
+                                <option value="1">Percentage</option>
+                            </select>
+                        </div>
+
                         <div class="md:col-span-2">
                             <label class="text-sm">Description</label>
                             <textarea name="description" class="textarea w-full"></textarea>
+                        </div>
+
+                        <div class="md:col-span-2 border border-base-300 p-3 rounded-md bg-base-200">
+                            <p class="font-semibold text-sm">Formula</p>
+                            <p class="text-sm">Sample Cart Data: [Apple-500x3], [Orange-300x2]<br>Sample Fixed Rate:
+                                200<br>Sample Percentage Rate: 10%</p>
+                            <p class="text-sm mt-3">
+                                <span class="font-semibold">Per Item (Fixed):</span>
+                                <span class="italic">Tax Cost = 200 + 200 = 400 </span>
+                            </p>
+                            <p class="text-sm">
+                                <span class="font-semibold">Per Quantity (Fixed):</span>
+                                <span class="italic">Tax Cost = [200x3] + [200x2] = 600 + 400 = 1000 </span>
+                            </p>
+
+                            <p class="text-sm mt-3">
+                                <span class="font-semibold">Per Item (Percentage):</span>
+                                <span class="italic">Tax Cost = [500x10%] + [300x10%] = 50 + 30 = 80</span>
+                            </p>
+                            <p class="text-sm">
+                                <span class="font-semibold">Per Quantity (Percentage):</span>
+                                <span class="italic">Tax Cost = [500x10%] + [300x10%] = [50x3] + [30x2] = 210</span>
+                            </p>
                         </div>
                     </div>
                     <div class="modal-action mt-3">

@@ -4,9 +4,6 @@ use App\Core\Controllers\StorageManager;
 use App\Inventory\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'pages.user.core.landing')->name('home.get');
-Route::get('/shop', [ProductController::class, 'showProductListUser'])->name('shop.get');
-Route::get('/shop/{slug}', [ProductController::class, 'showProductDetail'])->name('shop.slug.get');
 Route::view('/setting', 'pages.user.dashboard.general_setting')->name('setting.get');
 Route::view('/privacy', 'pages.user.core.privacy')->name('privacy.get');
 Route::view('/terms', 'pages.user.core.terms')->name('terms.get');

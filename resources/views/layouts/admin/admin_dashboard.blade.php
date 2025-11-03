@@ -29,6 +29,7 @@
             @endauth
         </ul>
 
+        {{-- Mobile Drawer --}}
         <div class="flex-none lg:hidden">
             <div class="drawer drawer-start">
                 <input id="mobile-drawer" type="checkbox" class="drawer-toggle" />
@@ -36,7 +37,6 @@
                     <label for="mobile-drawer" class="btn btn-ghost btn-circle">
                         <i data-lucide="menu"></i>
                     </label>
-
                 </div>
                 <div class="drawer-side">
                     <label for="mobile-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
@@ -75,6 +75,25 @@
 
                         <div class="collapse collapse-arrow p-0 m-0 py-0">
                             <input type="checkbox"
+                                {{ request()->is('admin/dashboard/store') || request()->is('admin/dashboard/store/*') ? 'checked' : '' }} />
+                            <div class="collapse-title px-3 py-2 my-0 mb-0 ">
+                                Store
+                            </div>
+                            <div class="collapse-content m-0 pl-5">
+                                <ul class="w-full space-y-1">
+                                    <li><a href="{{ route('admin.dashboard.store.get') }}"
+                                            class="{{ request()->is('admin/dashboard/store') ? 'bg-primary text-primary-content' : '' }}">Branches</a>
+                                    </li>
+                                    <li><a href="{{ route('admin.dashboard.store.media-image.get') }}"
+                                            class="{{ request()->is('admin/dashboard/store/media-image') ? 'bg-primary text-primary-content' : '' }}">Media
+                                            Images</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="collapse collapse-arrow p-0 m-0 py-0">
+                            <input type="checkbox"
                                 {{ request()->is('admin/dashboard/product') || request()->is('admin/dashboard/product/*') ? 'checked' : '' }} />
                             <div class="collapse-title px-3 py-2 my-0 mb-0 ">
                                 Product
@@ -90,8 +109,14 @@
                                     <li><a href="{{ route('admin.dashboard.product.brand.get') }}"
                                             class="{{ request()->is('admin/dashboard/product/brand') ? 'bg-primary text-primary-content' : '' }}">Brands</a>
                                     </li>
-                                    <li><a href="{{ route('admin.dashboard.product.attribute.get') }}"
+                                    {{-- <li><a href="{{ route('admin.dashboard.product.attribute.get') }}"
                                             class="{{ request()->is('admin/dashboard/product/attribute') ? 'bg-primary text-primary-content' : '' }}">Attributes</a>
+                                    </li> --}}
+                                    <li><a href="{{ route('admin.dashboard.product.review.get') }}"
+                                            class="{{ request()->is('admin/dashboard/product/review') || request()->is('admin/dashboard/product/review/*') ? 'bg-primary text-primary-content' : '' }}">Reviews</a>
+                                    </li>
+                                    <li><a href="{{ route('admin.dashboard.product.coupon.get') }}"
+                                            class="{{ request()->is('admin/dashboard/product/coupon') ? 'bg-primary text-primary-content' : '' }}">Coupons</a>
                                     </li>
                                 </ul>
                             </div>
@@ -210,6 +235,7 @@
         </div>
     </nav>
 
+    {{-- Sidebar --}}
     <div class="flex flex-row flex-nowrap p-0 m-0">
         <div
             class="hidden lg:flex w-[250px] h-[calc(100vh-50px)] overflow-y-auto advanced-scrollbar sticky top-[50px] border-r border-base-300 flex-col justify-between">
@@ -241,6 +267,23 @@
                         </div>
                     </div>
 
+                    <div class="collapse collapse-arrow p-0 m-0">
+                        <input type="checkbox"
+                            {{ request()->is('admin/dashboard/store') || request()->is('admin/dashboard/store/*') ? 'checked' : '' }} />
+                        <div class="collapse-title px-3 py-1.5">
+                            Store
+                        </div>
+                        <div class="collapse-content m-0 pl-5">
+                            <ul class="w-full space-y-1">
+                                <li><a href="{{ route('admin.dashboard.store.get') }}"
+                                        class="{{ request()->is('admin/dashboard/store') ? 'bg-primary text-primary-content' : '' }}">Branches</a>
+                                </li>
+                                <li><a href="{{ route('admin.dashboard.store.media-image.get') }}"
+                                        class="{{ request()->is('admin/dashboard/store/media-image') ? 'bg-primary text-primary-content' : '' }}">Media Images</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
                     <div class="collapse collapse-arrow p-0 m-0">
                         <input type="checkbox"
@@ -259,8 +302,14 @@
                                 <li><a href="{{ route('admin.dashboard.product.brand.get') }}"
                                         class="{{ request()->is('admin/dashboard/product/brand') ? 'bg-primary text-primary-content' : '' }}">Brands</a>
                                 </li>
-                                <li><a href="{{ route('admin.dashboard.product.attribute.get') }}"
+                                {{-- <li><a href="{{ route('admin.dashboard.product.attribute.get') }}"
                                         class="{{ request()->is('admin/dashboard/product/attribute') ? 'bg-primary text-primary-content' : '' }}">Attributes</a>
+                                </li> --}}
+                                <li><a href="{{ route('admin.dashboard.product.review.get') }}"
+                                        class="{{ request()->is('admin/dashboard/product/review') || request()->is('admin/dashboard/product/review/*') ? 'bg-primary text-primary-content' : '' }}">Reviews</a>
+                                </li>
+                                <li><a href="{{ route('admin.dashboard.product.coupon.get') }}"
+                                        class="{{ request()->is('admin/dashboard/product/coupon') ? 'bg-primary text-primary-content' : '' }}">Coupons</a>
                                 </li>
                             </ul>
                         </div>

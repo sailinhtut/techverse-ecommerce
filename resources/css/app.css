@@ -74,6 +74,16 @@
 [x-cloak] {
     display: none !important;
 }
+
+.hidden-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.hidden-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
 .advanced-scrollbar {
     overflow-y: auto;
     overflow-x: hidden;
@@ -103,3 +113,15 @@
 .advanced-scrollbar::-webkit-scrollbar-corner {
     background: transparent;
 }
+
+/* .tabs-lift > .tab {
+    border-bottom: 1px solid lightgray !important;
+}
+
+.tabs-lift > .tab[checked] {
+    border-bottom: none !important;
+} */
+
+/* .tabs-lift > .tab[checked] {
+    border-bottom: 1px solid hsl(var(--b3));
+} */

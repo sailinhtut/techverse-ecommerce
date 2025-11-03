@@ -55,7 +55,7 @@
 
                             {{-- Detail Modal --}}
                             <dialog id="detail_modal_{{ $brand['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -87,7 +87,7 @@
 
                             {{-- Edit Modal --}}
                             <dialog id="edit_modal_{{ $brand['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -163,12 +163,12 @@
                         @endif
                     </div>
                 </div>
-        </div>
+            </div>
         </div>
 
         {{-- Create Modal --}}
         <dialog id="create_brand_modal" class="modal">
-            <div class="modal-box max-w-xl">
+            <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                 <form method="dialog">
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>

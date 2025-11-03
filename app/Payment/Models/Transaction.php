@@ -46,7 +46,7 @@ class Transaction extends Model
             'user_id' => $this->user_id,
             'reference' => $this->reference,
             'type' => $this->type,
-            'amount' => $this->amount,
+            'amount' => (float) $this->amount ?? 0,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -63,6 +63,4 @@ class Transaction extends Model
 
         return $response;
     }
-
-    
 }

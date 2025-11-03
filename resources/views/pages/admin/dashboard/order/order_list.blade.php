@@ -30,7 +30,7 @@
                                     </a>
                                 </td>
 
-                                <td>{{ $order['created_at']->format('Y-m-d H:i') }}</td>
+                                <td>{{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d H:i') : '-' }}</td>
 
                                 <td>
                                     @php
@@ -92,7 +92,7 @@
                                                 <div>
                                                     <label class="text-sm">Date</label>
                                                     <input type="text"
-                                                        value="{{ $order['created_at']->format('Y-m-d H:i') }}" readonly
+                                                        value="{{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d H:i') : ''}}" readonly
                                                         class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                                 <div>
@@ -110,6 +110,13 @@
                                                     <label class="text-sm">Discount</label>
                                                     <input type="text"
                                                         value="- ${{ number_format($order['discount_total'], 2) }}"
+                                                        readonly
+                                                        class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Coupon Code</label>
+                                                    <input type="text"
+                                                        value="{{ $order['coupon_code'] ?? 'None'}}"
                                                         readonly
                                                         class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>

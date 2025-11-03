@@ -4,6 +4,15 @@
 @section('web_content')
     @include('components.shop_navbar')
     <div class="max-w-screen p-6 overflow-x-hidden" x-data>
+        <div class="mb-3">
+            <button onclick="history.back()" class="btn btn-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+            </button>
+        </div>
         <p class="lg:text-lg font-semibold mb-3">Your Cart</p>
         <div class="card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">
@@ -13,6 +22,7 @@
                             <th class="w-[50px]">No.</th>
                             <th class="w-[50px]">Image</th>
                             <th class="w-[200px]">Title</th>
+                            <th class="w-[200px]">Type</th>
                             <th class="">Price</th>
                             <th class="">Quantity</th>
                             <th class="">Total</th>
@@ -30,10 +40,13 @@
                                         :alt="item.title" class="w-[20px] h-auto object-contain">
                                 </td>
 
-
                                 <td class="w-[200px] h-[30px] line-clamp-1">
                                     <a :href="`/shop/${item.slug}`" class="cursor-default hover:underline"
                                         x-text="item.name"></a>
+                                </td>
+
+                                <td x-text="item.variant_combination ? Object.entries(item.variant_combination).map(([key, value]) => value.toUpperCase()).join('-') : item.name "
+                                    class="w-[250px] text-xs">
                                 </td>
                                 <td x-text="item.price.toFixed(2)"></td>
 

@@ -49,10 +49,6 @@
 
     @stack('script')
 
-
-
-
-
     @if (session('success') || session('error') || true)
         <div class="toast fixed bottom-4 right-4 z-50 space-y-2">
             @if (session('success'))

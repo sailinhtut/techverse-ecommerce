@@ -48,6 +48,7 @@ class TaxSeeder extends Seeder
                 'tax_class_id' => $standardClass->id,
                 'is_percentage' => false,
                 'rate' => 5.00,
+                'type' => 'per_item',
             ],
             [
                 'name' => 'Global Special Tax Rate',
@@ -55,6 +56,7 @@ class TaxSeeder extends Seeder
                 'tax_class_id' => $specialClass->id,
                 'is_percentage' => false,
                 'rate' => 10.00,
+                'type' => 'per_item',
             ],
         ];
 

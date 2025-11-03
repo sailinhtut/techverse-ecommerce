@@ -2,14 +2,18 @@
 
 return [
     'name' => env('APP_NAME', 'Master Seller'),
-    
+
+    'description' => 'Powerful eCommerce system built to help businesses sell products online with ease. It offers seamless product management, secure payments, and efficient order tracking—all in one place. With its user-friendly design and smart features, Master Seller makes online selling faster, smarter, and more successful.',
+
     'app_logo_bare_path' => 'assets/images/master_seller_bare_primary.png',
 
     'app_logo_backgroud_path' => 'assets/images/master_seller_background_primary.png',
-    
-    'logo_link' => '/debug',
 
-    'admin_logo_link' => '/debug',
+    'logo_link' => '/shop',
+
+    'admin_logo_link' => '/shop',
+
+    'cache_time' => 3600,
 
     'env' => env('APP_ENV', 'production'),
 
@@ -17,7 +21,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Bangkok',
 
     'locale' => env('APP_LOCALE', 'en'),
 

@@ -53,7 +53,7 @@
                             </tr>
 
                             <dialog id="detail_modal_{{ $method['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -99,7 +99,7 @@
 
                             {{-- Edit Modal --}}
                             <dialog id="edit_modal_{{ $method['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -198,7 +198,7 @@
 
         {{-- Create Modal --}}
         <dialog id="create_shipping_method_modal" class="modal">
-            <div class="modal-box max-w-xl">
+            <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                 <form method="dialog"><button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
                 <h3 class="text-lg font-semibold text-center mb-3">Create Shipping Method</h3>

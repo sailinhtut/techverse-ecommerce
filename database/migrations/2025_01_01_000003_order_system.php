@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('currency', 10)->default('USD');
             $table->decimal('subtotal', 10, 2)->default(0);
             $table->decimal('discount_total', 10, 2)->default(0);
+            $table->string('coupon_code')->nullable();
             $table->decimal('tax_total', 10, 2)->default(0);
             $table->decimal('shipping_total', 10, 2)->default(0);
             $table->decimal('grand_total', 10, 2)->default(0);

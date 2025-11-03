@@ -57,7 +57,7 @@
 
                             {{-- Detail Modal --}}
                             <dialog id="detail_modal_{{ $zone['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -108,7 +108,7 @@
 
                             {{-- Edit Modal --}}
                             <dialog id="edit_modal_{{ $zone['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -120,7 +120,8 @@
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div class="md:col-span-2">
                                                 <label class="text-sm">Name</label>
-                                                <input name="name" class="input w-full" value="{{ $zone['name'] }}" required>
+                                                <input name="name" class="input w-full" value="{{ $zone['name'] }}"
+                                                    required>
                                             </div>
                                             <div>
                                                 <label class="text-sm">Country</label>
@@ -136,7 +137,8 @@
                                             </div>
                                             <div>
                                                 <label class="text-sm">Postal Code</label>
-                                                <input name="postal_code" class="input w-full" value="{{ $zone['postal_code'] }}">
+                                                <input name="postal_code" class="input w-full"
+                                                    value="{{ $zone['postal_code'] }}">
                                             </div>
                                             <div class="md:col-span-2">
                                                 <label class="text-sm">Description</label>
@@ -158,7 +160,8 @@
                                     </form>
                                     <p class="text-lg font-semibold">Confirm Delete</p>
                                     <p class="text-sm mb-4">Are you sure you want to delete
-                                        <span class="text-error">{{ $zone['name'] }}</span>?</p>
+                                        <span class="text-error">{{ $zone['name'] }}</span>?
+                                    </p>
                                     <div class="modal-action">
                                         <form method="dialog">
                                             <button class="btn">Cancel</button>
@@ -204,7 +207,7 @@
 
         {{-- Create Modal --}}
         <dialog id="create_tax_zone_modal" class="modal">
-            <div class="modal-box max-w-xl">
+            <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                 <form method="dialog">
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>

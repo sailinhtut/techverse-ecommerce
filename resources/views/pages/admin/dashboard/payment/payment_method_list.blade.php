@@ -123,7 +123,7 @@
                                             <label class="text-sm">Created At</label>
                                             <input type="text"
                                                 class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
-                                                value="{{ \Carbon\Carbon::parse($method['created_at'])->format('Y-m-d H:i') }}"
+                                                value="{{ $method['created_at'] ? \Carbon\Carbon::parse($method['created_at'])->format('Y-m-d H:i') : '' }}"
                                                 readonly>
                                         </div>
                                         <div class="md:col-span-2">

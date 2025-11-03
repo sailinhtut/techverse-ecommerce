@@ -111,12 +111,21 @@ class ShippingMethodController
                 if ($class_rates->isEmpty()) continue;
 
                 if (is_null($product['shipping_class_id'])) {
-                    $result['aborted_product'][$method->name][] = $product['name'];
+                    // $result['aborted_product'][$method->name][] = $product['name'];
                     continue;
                 }
 
-                $matched_rate = $class_rates->first();
+                $matched_rate = null;
+                
+                if($class_rates->count() > 1){
+                    $matched_rate = $class_rates->whereNotNull('shipping_class_id')->first();
+                } else {
+                    $matched_rate = $class_rates->first();
+                }
+
                 $method_total_cost += $matched_rate->calculateCost(array_merge($item, ['price' => $item['price']]));
+
+                $result['debug_shipping_cost'][$method->name][$product['name']] = $matched_rate->calculateCost(array_merge($item, ['price' => $item['price']]));
             }
 
             if ($method_total_cost > 0 || $method->is_free) {

@@ -26,6 +26,7 @@ class Order extends Model
         'billing_address',
         'shipping_method_id',
         'payment_method_id',
+        'coupon_code',
     ];
 
     protected function casts(): array
@@ -72,11 +73,12 @@ class Order extends Model
             'order_number' => $this->order_number,
             'status' => $this->status,
             'currency' => $this->currency,
-            'subtotal' => $this->subtotal,
-            'discount_total' => $this->discount_total,
-            'tax_total' => $this->tax_total,
-            'shipping_total' => $this->shipping_total,
-            'grand_total' => $this->grand_total,
+            'subtotal' => (float) $this->subtotal ?? 0,
+            'discount_total' => (float) $this->discount_total ?? 0,
+            'coupon_code' => $this->coupon_code,
+            'tax_total' => (float) $this->tax_total ?? 0,
+            'shipping_total' => (float) $this->shipping_total ?? 0,
+            'grand_total' => (float) $this->grand_total ?? 0,
             'shipping_address' => $this->shipping_address,
             'billing_address' => $this->billing_address,
             'shipping_method_id' => $this->shipping_method_id,
@@ -99,7 +101,7 @@ class Order extends Model
         }
 
         if (in_array('products', $eager_list)) {
-            $response['products'] = $this->products->map(fn($p) => $p->jsonResponse())->all();
+            $response['products'] = $this->products->map(fn($p) => $p->jsonResponse(['product']))->all();
         }
 
         return $response;

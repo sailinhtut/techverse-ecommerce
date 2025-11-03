@@ -9,22 +9,48 @@ use App\Inventory\Models\Product;
 use App\Inventory\Models\ProductVariant;
 use App\Payment\Models\PaymentMethod;
 use App\Shipping\Models\ShippingClass;
+use App\Store\Models\MediaImage;
+use App\Store\Models\StoreBranch;
 use App\Tax\Models\TaxClass;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController
 {
     public function showProductListUser(Request $request)
     {
-        $products = Product::with('category')->orderBy('id', 'desc')->paginate(20);
+        $expiredProducts = Product::where('is_promotion', true)
+            ->where('promotion_end_time', '<', now())
+            ->get();
 
-        $products->getCollection()->transform(function ($product) {
-            return $product->jsonResponse(['category', 'brand']);
-        });
+        foreach ($expiredProducts as $product) {
+            $product->update([
+                'is_promotion' => false,
+                'sale_price' => null,
+            ]);
+            ProductVariant::where('product_id', $product->id)
+                ->update(['sale_price' => 0]);
+        }
+
+        $products = Cache::remember(
+            'products_page_' . (request('page', 1)),
+            config('app.cache_time', 3600),
+            fn() => Product::where('is_active', true)
+                ->orderByRaw('ISNULL(priority), priority ASC')
+                ->orderByDesc('id')
+                ->paginate(20)
+                ->through(fn($product) => $product->jsonResponse(['category', 'brand']))
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json($products);
+        }
 
         $wishlists = [];
         if (auth()->check()) {
@@ -32,22 +58,600 @@ class ProductController
             $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
         }
 
-        return view('pages.user.core.product_list', compact('products', 'wishlists'));
+        $cacheTime = config('app.cache_time', 3600);
+
+        $pinned_products = Cache::remember(
+            'pinned_products',
+            $cacheTime,
+            fn() =>
+            Product::where('is_active', true)
+                ->where('is_pinned', true)
+                ->orderByRaw('ISNULL(priority), priority ASC')
+                ->orderByDesc('id')
+                ->take(4)
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $categories = Cache::remember(
+            'categories',
+            $cacheTime,
+            fn() =>
+            Category::whereNull('parent_id')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $brands = Cache::remember(
+            'brands',
+            $cacheTime,
+            fn() =>
+            Brand::orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $tags = Cache::remember(
+            'tags',
+            $cacheTime,
+            fn() =>
+            Product::select('tags')
+                ->pluck('tags')
+                ->flatten()
+                ->unique()
+                ->values()
+                ->all()
+        );
+
+        $carousel_images = Cache::remember(
+            'carousel_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('carousel_slider')->get()->map->lightJsonResponse()
+        );
+        $popup_images = Cache::remember(
+            'popup_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('landing_pop_up')->get()->map->lightJsonResponse()
+        );
+        $banner_images = Cache::remember(
+            'banner_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('side_banner')->get()->map->lightJsonResponse()
+        );
+
+        $all_branch_count = Cache::remember('all_branch_count', $cacheTime, fn() => StoreBranch::count());
+        $all_product_count = Cache::remember('all_product_count', $cacheTime, fn() => Product::where('is_active', true)->count());
+        $all_categories_count = Cache::remember('all_categories_count', $cacheTime, fn() => Category::count());
+        $all_brand_count = Cache::remember('all_brand_count', $cacheTime, fn() => Brand::count());
+
+
+        return view(
+            'pages.user.core.product_list',
+            [
+                'product_list_title' => "Products For You",
+                'products' => $products->items(),
+                'pinned_products' => $pinned_products,
+                'pagination' => $products->toArray(),
+                'wishlists' => $wishlists,
+                'categories' => $categories,
+                'brands' => $brands,
+                'tags' => $tags,
+                'carousel_images' => $carousel_images,
+                'popup_images' => $popup_images,
+                'banner_images' => $banner_images,
+                'promotion_display' => true,
+                'today_best_display' => true,
+                'popular_display' => true,
+                'all_branch_count' => $all_branch_count,
+                'all_product_count' => $all_product_count,
+                'all_categories_count' => $all_categories_count,
+                'all_brand_count' => $all_brand_count,
+            ]
+        );
+    }
+
+    public function showSearchProductListUser(Request $request)
+    {
+        $searchQuery = $request->get('q');
+
+        $searchProducts = $this->searchProductService($request);
+
+        if ($request->expectsJson()) {
+            return response()->json($searchProducts);
+        }
+
+        $wishlists = Wishlist::where('user_id', auth()->id())->get();
+        $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
+
+        $cacheTime = config('app.cache_time', 3600);
+
+        $pinned_products = Cache::remember(
+            'pinned_products',
+            $cacheTime,
+            fn() =>
+            Product::where('is_active', true)
+                ->where('is_pinned', true)
+                ->orderByRaw('ISNULL(priority), priority ASC')
+                ->orderByDesc('id')
+                ->take(4)
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $categories = Cache::remember(
+            'categories',
+            $cacheTime,
+            fn() =>
+            Category::whereNull('parent_id')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $brands = Cache::remember(
+            'brands',
+            $cacheTime,
+            fn() =>
+            Brand::orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $tags = Cache::remember(
+            'tags',
+            $cacheTime,
+            fn() =>
+            Product::select('tags')
+                ->pluck('tags')
+                ->flatten()
+                ->unique()
+                ->values()
+                ->all()
+        );
+
+        $carousel_images = Cache::remember(
+            'carousel_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('carousel_slider')->get()->map->lightJsonResponse()
+        );
+        $popup_images = Cache::remember(
+            'popup_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('landing_pop_up')->get()->map->lightJsonResponse()
+        );
+        $banner_images = Cache::remember(
+            'banner_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('side_banner')->get()->map->lightJsonResponse()
+        );
+
+        $all_branch_count = Cache::remember('all_branch_count', $cacheTime, fn() => StoreBranch::count());
+        $all_product_count = Cache::remember('all_product_count', $cacheTime, fn() => Product::where('is_active', true)->count());
+        $all_categories_count = Cache::remember('all_categories_count', $cacheTime, fn() => Category::count());
+        $all_brand_count = Cache::remember('all_brand_count', $cacheTime, fn() => Brand::count());
+
+        return view(
+            'pages.user.core.product_list',
+            [
+                'product_list_title' => "Result Product For \"" . ($searchQuery) . "\"",
+                'products' => $searchProducts->items(),
+                'pinned_products' => $pinned_products,
+                'pagination' => $searchProducts->toArray(),
+                'wishlists' => $wishlists,
+                'categories' => $categories,
+                'brands' => $brands,
+                'tags' => $tags,
+                'query' => $searchQuery,
+                'promotion_display' => false,
+                'today_best_display' => false,
+                'popular_display' => false,
+                'go_home_display' => true,
+                'carousel_images' => $carousel_images,
+                'popup_images' => $popup_images,
+                'banner_images' => $banner_images,
+                'all_branch_count' => $all_branch_count,
+                'all_product_count' => $all_product_count,
+                'all_categories_count' => $all_categories_count,
+                'all_brand_count' => $all_brand_count,
+            ]
+        );
+    }
+
+    public function showSearchProductListByCategoryUser(Request $request, $category_slug)
+    {
+        $query = Product::where('is_active', true)->orderByRaw('ISNULL(priority), priority ASC')
+            ->orderByDesc('id');
+
+        $foundCategory = Category::where('slug', $category_slug)->first();
+        $products = [];
+
+        if ($foundCategory) {
+            $query->where('category_id', $foundCategory->id);
+            $products = $query->paginate(10);
+            $products->getCollection()->transform(fn($p) => $p->jsonResponse(['category', 'brand']));
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json($products);
+        }
+
+        $wishlists = Wishlist::where('user_id', auth()->id())->get();
+        $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
+
+        $cacheTime = config('app.cache_time', 3600);
+
+        $pinned_products = Cache::remember(
+            'pinned_products',
+            $cacheTime,
+            fn() =>
+            Product::where('is_active', true)
+                ->where('is_pinned', true)
+                ->orderByRaw('ISNULL(priority), priority ASC')
+                ->orderByDesc('id')
+                ->take(4)
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $categories = Cache::remember(
+            'categories',
+            $cacheTime,
+            fn() =>
+            Category::whereNull('parent_id')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $brands = Cache::remember(
+            'brands',
+            $cacheTime,
+            fn() =>
+            Brand::orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $tags = Cache::remember(
+            'tags',
+            $cacheTime,
+            fn() =>
+            Product::select('tags')
+                ->pluck('tags')
+                ->flatten()
+                ->unique()
+                ->values()
+                ->all()
+        );
+
+        $carousel_images = Cache::remember(
+            'carousel_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('carousel_slider')->get()->map->lightJsonResponse()
+        );
+        $popup_images = Cache::remember(
+            'popup_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('landing_pop_up')->get()->map->lightJsonResponse()
+        );
+        $banner_images = Cache::remember(
+            'banner_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('side_banner')->get()->map->lightJsonResponse()
+        );
+
+        $all_branch_count = Cache::remember('all_branch_count', $cacheTime, fn() => StoreBranch::count());
+        $all_product_count = Cache::remember('all_product_count', $cacheTime, fn() => Product::where('is_active', true)->count());
+        $all_categories_count = Cache::remember('all_categories_count', $cacheTime, fn() => Category::count());
+        $all_brand_count = Cache::remember('all_brand_count', $cacheTime, fn() => Brand::count());
+
+        return view(
+            'pages.user.core.product_list',
+            [
+                'product_list_title' =>  "Search Result For Category \"" . ($foundCategory->name ?? $category_slug) . "\"",
+                'products' => !empty($products) ? $products->items() : [],
+                'pinned_products' => $pinned_products,
+                'pagination' => $products ? $products->toArray() : null,
+                'wishlists' => $wishlists,
+                'categories' => $categories,
+                'brands' => $brands,
+                'tags' => $tags,
+                'promotion_display' => false,
+                'today_best_display' => false,
+                'popular_display' => false,
+                'go_home_display' => true,
+                'carousel_images' => $carousel_images,
+                'popup_images' => $popup_images,
+                'banner_images' => $banner_images,
+                'all_branch_count' => $all_branch_count,
+                'all_product_count' => $all_product_count,
+                'all_categories_count' => $all_categories_count,
+                'all_brand_count' => $all_brand_count,
+            ]
+        );
+    }
+
+    public function showSearchProductListByBrandUser(Request $request, $brand_slug)
+    {
+        $query = Product::where('is_active', true)->orderByRaw('ISNULL(priority), priority ASC')
+            ->orderByDesc('id');
+
+        $foundBrand = Brand::where('slug', $brand_slug)->first();
+
+        $products = [];
+
+        if ($foundBrand) {
+            $query->where('brand_id', $foundBrand->id);
+            $products = $query->paginate(10);
+            $products->getCollection()->transform(fn($p) => $p->jsonResponse(['category', 'brand']));
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json($products);
+        }
+
+        $wishlists = Wishlist::where('user_id', auth()->id())->get();
+        $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
+
+        $cacheTime = config('app.cache_time', 3600);
+
+        $pinned_products = Cache::remember(
+            'pinned_products',
+            $cacheTime,
+            fn() =>
+            Product::where('is_active', true)
+                ->where('is_pinned', true)
+                ->orderByRaw('ISNULL(priority), priority ASC')
+                ->orderByDesc('id')
+                ->take(4)
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $categories = Cache::remember(
+            'categories',
+            $cacheTime,
+            fn() =>
+            Category::whereNull('parent_id')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $brands = Cache::remember(
+            'brands',
+            $cacheTime,
+            fn() =>
+            Brand::orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $tags = Cache::remember(
+            'tags',
+            $cacheTime,
+            fn() =>
+            Product::select('tags')
+                ->pluck('tags')
+                ->flatten()
+                ->unique()
+                ->values()
+                ->all()
+        );
+
+        $carousel_images = Cache::remember(
+            'carousel_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('carousel_slider')->get()->map->lightJsonResponse()
+        );
+        $popup_images = Cache::remember(
+            'popup_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('landing_pop_up')->get()->map->lightJsonResponse()
+        );
+        $banner_images = Cache::remember(
+            'banner_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('side_banner')->get()->map->lightJsonResponse()
+        );
+
+        $all_branch_count = Cache::remember('all_branch_count', $cacheTime, fn() => StoreBranch::count());
+        $all_product_count = Cache::remember('all_product_count', $cacheTime, fn() => Product::where('is_active', true)->count());
+        $all_categories_count = Cache::remember('all_categories_count', $cacheTime, fn() => Category::count());
+        $all_brand_count = Cache::remember('all_brand_count', $cacheTime, fn() => Brand::count());
+
+        return view(
+            'pages.user.core.product_list',
+            [
+                'product_list_title' => "Search Result For Brand \"" . ($foundBrand->name ?? $brand_slug) . "\"",
+                'products' => !empty($products) ? $products->items() : [],
+                'pinned_products' => $pinned_products,
+                'pagination' => $products ? $products->toArray() : null,
+                'wishlists' => $wishlists,
+                'categories' => $categories,
+                'brands' => $brands,
+                'tags' => $tags,
+                'promotion_display' => false,
+                'today_best_display' => false,
+                'popular_display' => false,
+                'go_home_display' => true,
+                'carousel_images' => $carousel_images,
+                'popup_images' => $popup_images,
+                'banner_images' => $banner_images,
+                'all_branch_count' => $all_branch_count,
+                'all_product_count' => $all_product_count,
+                'all_categories_count' => $all_categories_count,
+                'all_brand_count' => $all_brand_count,
+            ]
+        );
+    }
+
+    public function showSearchProductListByTagUser(Request $request, $tag)
+    {
+
+        $query = Product::where('is_active', true)
+            ->orderByRaw('ISNULL(priority), priority ASC')
+            ->orderByDesc('id');
+
+        $normalizedTag = str_replace('-', ' ', $tag);
+
+        if ($normalizedTag) {
+            $query->where(function ($q) use ($normalizedTag) {
+                $q->whereJsonContains('tags', $normalizedTag)
+                    ->orWhereJsonContains('tags', ucfirst($normalizedTag))
+                    ->orWhereJsonContains('tags', ucwords($normalizedTag))
+                    ->orWhereJsonContains('tags', strtolower($normalizedTag))
+                    ->orWhereJsonContains('tags', strtoupper($normalizedTag));
+            });
+        }
+
+        $products = $query->paginate(10);
+        $products->getCollection()->transform(fn($p) => $p->jsonResponse(['category', 'brand']));
+
+        if ($request->expectsJson()) {
+            return response()->json($products);
+        }
+
+        $wishlists = Wishlist::where('user_id', auth()->id())->get();
+        $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
+
+        $cacheTime = config('app.cache_time', 3600);
+
+        $pinned_products = Cache::remember(
+            'pinned_products',
+            $cacheTime,
+            fn() =>
+            Product::where('is_active', true)
+                ->where('is_pinned', true)
+                ->orderByRaw('ISNULL(priority), priority ASC')
+                ->orderByDesc('id')
+                ->take(4)
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $categories = Cache::remember(
+            'categories',
+            $cacheTime,
+            fn() =>
+            Category::whereNull('parent_id')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $brands = Cache::remember(
+            'brands',
+            $cacheTime,
+            fn() =>
+            Brand::orderByDesc('id')
+                ->get()
+                ->map(fn($e) => $e->jsonResponse())
+        );
+
+        $tags = Cache::remember(
+            'tags',
+            $cacheTime,
+            fn() =>
+            Product::select('tags')
+                ->pluck('tags')
+                ->flatten()
+                ->unique()
+                ->values()
+                ->all()
+        );
+
+        $carousel_images = Cache::remember(
+            'carousel_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('carousel_slider')->get()->map->lightJsonResponse()
+        );
+        $popup_images = Cache::remember(
+            'popup_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('landing_pop_up')->get()->map->lightJsonResponse()
+        );
+        $banner_images = Cache::remember(
+            'banner_images',
+            $cacheTime,
+            fn() =>
+            MediaImage::activeType('side_banner')->get()->map->lightJsonResponse()
+        );
+
+        $all_branch_count = Cache::remember('all_branch_count', $cacheTime, fn() => StoreBranch::count());
+        $all_product_count = Cache::remember('all_product_count', $cacheTime, fn() => Product::where('is_active', true)->count());
+        $all_categories_count = Cache::remember('all_categories_count', $cacheTime, fn() => Category::count());
+        $all_brand_count = Cache::remember('all_brand_count', $cacheTime, fn() => Brand::count());
+
+        return view(
+            'pages.user.core.product_list',
+            [
+                'product_list_title' => "Search Result For Tag \"" . (ucfirst($normalizedTag)) . "\"",
+                'products' => !empty($products) ? $products->items() : [],
+                'pinned_products' => $pinned_products,
+                'pagination' => $products ? $products->toArray() : null,
+                'wishlists' => $wishlists,
+                'categories' => $categories,
+                'brands' => $brands,
+                'tags' => $tags,
+                'promotion_display' => false,
+                'today_best_display' => false,
+                'popular_display' => false,
+                'go_home_display' => true,
+                'carousel_images' => $carousel_images,
+                'popup_images' => $popup_images,
+                'banner_images' => $banner_images,
+                'all_branch_count' => $all_branch_count,
+                'all_product_count' => $all_product_count,
+                'all_categories_count' => $all_categories_count,
+                'all_brand_count' => $all_brand_count,
+            ]
+        );
     }
 
     public function showProductDetail(Request $request, string $slug)
     {
         try {
-            $product = Product::with('category')->where('slug', $slug)->firstOrFail();
-            $product = $product->jsonResponse(['category', 'brand', 'productVariants']);
 
-            // dd($product);
+            $product = Product::with('category')->where('slug', $slug)->firstOrFail();
+
+            if ($product->is_promotion && $product->promotion_end_time && $product->promotion_end_time < now()) {
+                $product->update([
+                    'is_promotion' => false,
+                    'sale_price' => null,
+                ]);
+
+                ProductVariant::where('product_id', $product->id)
+                    ->update(['sale_price' => 0]);
+            }
+
+            $product->increment('interest');
+            $product = $product->jsonResponse(['category', 'brand', 'productVariants', 'crossSells', 'upSells', 'overall_review']);
+
 
             $wishlists = [];
             if (auth()->check()) {
                 $wishlists = Wishlist::where('user_id', auth()->id())->get();
                 $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
             }
+
+
+
 
             return view('pages.user.core.product_detail', compact('product', 'wishlists'));
         } catch (ModelNotFoundException $error) {
@@ -59,7 +663,10 @@ class ProductController
 
     public function viewAdminProductListPage()
     {
-        $products = Product::orderBy('id', 'desc')->paginate(10);
+        $products = Product::where('is_active', true)
+            ->orderByRaw('ISNULL(priority), priority ASC')
+            ->orderByDesc('id')
+            ->paginate(50);
 
         $products->getCollection()->transform(function ($product) {
             return $product->jsonResponse(['category', 'brand', 'paymentMethods', 'shippingClass', 'taxClass']);
@@ -105,7 +712,7 @@ class ProductController
         if (!$edit_product) {
             return redirect()->back()->with('error', 'Not Found Product');
         }
-        $edit_product = $edit_product->jsonResponse(['category', 'brand', 'paymentMethods', 'productVariants']);
+        $edit_product = $edit_product->jsonResponse(['category', 'brand', 'paymentMethods', 'productVariants', 'crossSells', 'upSells']);
 
         return view('pages.admin.dashboard.product.edit_product', [
             'edit_product' => $edit_product,
@@ -118,12 +725,178 @@ class ProductController
     }
 
 
+    public function searchProductService(Request $request)
+    {
+        $searchQuery = $request->get('q');
+        $searchCategorySlug = $request->get('category');
+        $searchBrandSlug = $request->get('brand');
+        $searchTag = $request->get('tag');
+
+        $query = Product::where('is_active', true)->orderByRaw('ISNULL(priority), priority ASC')
+            ->orderByDesc('id');
+
+        if ($searchQuery) {
+            $query->where('name', 'like', '%' . $searchQuery . '%');
+        }
+
+        if ($searchCategorySlug) {
+            $categoryId = Category::where('slug', $searchCategorySlug)->value('id');
+            if ($categoryId) {
+                $query->where('category_id', $categoryId);
+            }
+        }
+
+        if ($searchBrandSlug) {
+            $brandId = Brand::where('slug', $searchBrandSlug)->value('id');
+            if ($brandId) {
+                $query->where('brand_id', $brandId);
+            }
+        }
+
+        $normalizedTag = str_replace('-', ' ', $searchTag);
+        if ($normalizedTag) {
+            $query->where(function ($q) use ($normalizedTag) {
+                $q->whereJsonContains('tags', $normalizedTag)
+                    ->orWhereJsonContains('tags', ucfirst($normalizedTag))
+                    ->orWhereJsonContains('tags', ucwords($normalizedTag))
+                    ->orWhereJsonContains('tags', strtolower($normalizedTag))
+                    ->orWhereJsonContains('tags', strtoupper($normalizedTag));
+            });
+        }
+
+        $products = $query->paginate(10);
+
+        $products->getCollection()->transform(fn($p) => $p->jsonResponse(['category', 'brand']));
+
+        return $products;
+    }
+
+    public function fetchPopularProductsByAPI()
+    {
+        try {
+            // $popular_products = Product::where('is_active', true)
+            //     ->orderByDesc('interest') 
+            //     ->orderByRaw('ISNULL(priority), priority ASC')
+            //     ->orderByDesc('id')
+            //     ->paginate(10);
+
+            $page = request()->get('page', 1);
+            $perPage = 10;
+
+            $popular_products = Cache::remember("popular_products_page_{$page}_per_{$perPage}", config('app.cache_time', 3600), function () use ($perPage) {
+                $paginator = Product::where('is_active', true)
+                    ->where('interest', '>', 0)
+                    ->orderByDesc('interest')
+                    ->paginate($perPage);
+
+                $paginator->getCollection()->transform(fn($product) => $product->jsonResponse(['category', 'brand', 'overall_review']));
+                return $paginator;
+            });
+
+            return response()->json($popular_products);
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
+    public function fetchPromotionProductsByAPI()
+    {
+        try {
+            $page = request()->get('page', 1);
+            $perPage = 10;
+
+            $promotion_products = Cache::remember("promotion_products_page_{$page}_per_{$perPage}", config('app.cache_time', 3600), function () use ($perPage) {
+                $paginator = Product::where('is_active', true)
+                    ->where('is_promotion', true)
+                    ->orderByRaw('ISNULL(priority), priority ASC')
+                    ->orderByDesc('id')
+                    ->paginate($perPage);
+
+                $paginator->getCollection()->transform(fn($product) => $product->jsonResponse(['category', 'brand', 'overall_review']));
+                return $paginator;
+            });
+
+            return response()->json($promotion_products);
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
+    public function fetchPinnedProductsByAPI()
+    {
+        try {
+            $page = request()->get('page', 1);
+            $perPage = 10;
+
+            $pinned_products = Cache::remember("pinned_products_page_{$page}_per_{$perPage}", config('app.cache_time', 3600), function () use ($perPage) {
+                $paginator = Product::where('is_active', true)
+                    ->where('is_pinned', true)
+                    ->orderByRaw('ISNULL(priority), priority ASC')
+                    ->orderByDesc('id')
+                    ->paginate($perPage);
+
+                $paginator->getCollection()->transform(fn($product) => $product->jsonResponse(['category', 'brand', 'overall_review']));
+                return $paginator;
+            });
+
+            return response()->json($pinned_products);
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
+    public function searchProductsByAPI(Request $request)
+    {
+        $keyword = $request->input('q');
+
+        if (!$keyword || strlen($keyword) < 2) {
+            return response()->json([
+                'data' => [],
+                'message' => 'Enter at least 2 characters'
+            ]);
+        }
+
+        $products = Product::select('id', 'name', 'slug', 'regular_price')
+            ->where('name', 'like', "%{$keyword}%")
+            ->orWhere('slug', 'like', "%{$keyword}%")
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'data' => $products,
+        ]);
+    }
+
+    public function searchByIds(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (!is_array($ids) || empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No valid product IDs provided.',
+                'data' => []
+            ], 400);
+        }
+
+        $products = Product::whereIn('id', $ids)
+            ->select('id', 'name', 'regular_price', 'image')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $products
+        ]);
+    }
+
+
     public function addProduct(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'short_description' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string:65535',
             'long_description' => 'nullable|string',
+            'tags' => 'nullable|string',
             'regular_price' => 'required|numeric',
             'sku' => 'required|string|max:255',
             'is_active' => 'nullable|boolean',
@@ -140,16 +913,32 @@ class ProductController
             'payment_methods.*' => 'exists:payment_methods,id',
             'shipping_class_id' => 'nullable|exists:shipping_classes,id',
             'tax_class_id' => 'nullable|exists:tax_classes,id',
+            'product_type' => 'required|in:simple,variable',
 
             'product_variants' => 'nullable|array',
             'product_variants.*.sku' => 'required|string|max:255',
             'product_variants.*.regular_price' => 'required|numeric|min:0',
             'product_variants.*.sale_price' => 'nullable|numeric|min:0',
-            'product_variants.*.stock' => 'required|integer|min:0',
+            'product_variants.*.enable_stock' => 'nullable|boolean',
+            'product_variants.*.stock' => 'nullable|integer|min:0',
             'product_variants.*.weight' => 'nullable|numeric|min:0',
             'product_variants.*.combination' => 'nullable|array',
             'product_variants.*.image' => 'nullable|image|max:2048',
             'product_variants.*.remove_image' => 'nullable|boolean',
+
+            'cross_sell_product_ids' => 'nullable|array',
+            'up_sell_product_ids' => 'nullable|array',
+            'priority' => 'nullable|integer',
+            'is_pinned' => 'nullable|boolean',
+            'is_promotion' => 'nullable|boolean',
+            'promotion_end_time' => 'nullable|date',
+            'interest' => 'nullable|integer',
+            'specifications' => 'nullable|array',
+
+            'length' => 'nullable|numeric',
+            'width' => 'nullable|numeric',
+            'height' => 'nullable|numeric',
+            'weight' => 'nullable|numeric',
         ], [
             'product_variants.array' => 'The product variants must be a valid array.',
             'product_variants.*.sku.required' => 'Each product variant must have a SKU.',
@@ -200,8 +989,16 @@ class ProductController
                 'name' => $validated['name'],
                 'short_description' => $validated['short_description'] ?? null,
                 'long_description' => $validated['long_description'] ?? null,
+                'tags' => $validated['tags'] ? explode(',', $validated['tags']) : null,
                 'sku' => $validated['sku'] ?? null,
                 'is_active' => $validated['is_active'] ?? true,
+                'priority' => $validated['priority'] ?? null,
+                'is_pinned' => $validated['is_pinned'] ?? false,
+                'is_promotion' => $validated['is_promotion'] ?? false,
+                'promotion_end_time' => $validated['promotion_end_time']
+                    ? Carbon::parse($validated['promotion_end_time'])
+                    : null,
+                'interest' => $validated['interest'] ?? 0,
                 'regular_price' => $validated['regular_price'],
                 'sale_price' => $validated['sale_price'] ?? null,
                 'enable_stock' => $validated['enable_stock'] ?? true,
@@ -212,12 +1009,25 @@ class ProductController
                 'brand_id' => $validated['brand_id'] ?? null,
                 'shipping_class_id' => $validated['shipping_class_id'] ?? null,
                 'tax_class_id' => $validated['tax_class_id'] ?? null,
+                'product_type' => $validated['product_type'] ?? 'simple',
+                'specifications' => $validated['specifications'] ?? null,
+                'length' => $validated['length'] ?? null,
+                'width' => $validated['width'] ?? null,
+                'height' => $validated['height'] ?? null,
+                'weight' => $validated['weight'] ?? null,
             ]);
 
             if (!empty($validated['payment_methods'])) {
                 $new_product->paymentMethods()->sync($validated['payment_methods']);
             }
 
+            if (!empty($validated['cross_sell_product_ids'])) {
+                $new_product->crossSells()->sync($validated['cross_sell_product_ids']);
+            }
+
+            if (!empty($validated['up_sell_product_ids'])) {
+                $new_product->upSells()->sync($validated['up_sell_product_ids']);
+            }
 
             DB::commit();
 
@@ -230,7 +1040,8 @@ class ProductController
 
                 if ($variant) {
                     $variant->regular_price = $variantData['regular_price'] ?? 0;
-                    $variant->sale_price = $variantData['sale_price'] ?? 0;
+                    $variant->sale_price = $variantData['sale_price'] ?? null;
+                    $variant->enable_stock = $variantData['enable_stock'] ?? false;
                     $variant->stock = $variantData['stock'] ?? 0;
                     $variant->weight = $variantData['weight'] ?? 0;
                     $variant->combination = $variantData['combination'] ?? [];
@@ -240,7 +1051,8 @@ class ProductController
                     $variant->product_id = $new_product->id;
                     $variant->sku = $variantData['sku'] ?? null;
                     $variant->regular_price = $variantData['regular_price'] ?? 0;
-                    $variant->sale_price = $variantData['sale_price'] ?? 0;
+                    $variant->sale_price = $variantData['sale_price'] ?? null;
+                    $variant->enable_stock = $variantData['enable_stock'] ?? false;
                     $variant->stock = $variantData['stock'] ?? 0;
                     $variant->weight = $variantData['weight'] ?? 0;
                     $variant->combination = $variantData['combination'] ?? [];
@@ -282,10 +1094,11 @@ class ProductController
 
     public function updateProduct(Request $request, string $id)
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'short_description' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string:65535',
             'long_description' => 'nullable|string',
+            'tags' => 'nullable|string',
             'sku' => 'nullable|string|max:255',
             'is_active' => 'nullable|boolean',
             'regular_price' => 'required|numeric',
@@ -304,16 +1117,32 @@ class ProductController
             'payment_methods.*' => 'exists:payment_methods,id',
             'shipping_class_id' => 'nullable|exists:shipping_classes,id',
             'tax_class_id' => 'nullable|exists:tax_classes,id',
+            'product_type' => 'required|in:simple,variable',
 
             'product_variants' => 'nullable|array',
             'product_variants.*.sku' => 'required|string|max:255',
             'product_variants.*.regular_price' => 'required|numeric|min:0',
             'product_variants.*.sale_price' => 'nullable|numeric|min:0',
-            'product_variants.*.stock' => 'required|integer|min:0',
+            'product_variants.*.enable_stock' => 'nullable|boolean',
+            'product_variants.*.stock' => 'nullable|integer|min:0',
             'product_variants.*.weight' => 'nullable|numeric|min:0',
             'product_variants.*.combination' => 'nullable|array',
             'product_variants.*.image' => 'nullable|image|max:2048',
             'product_variants.*.remove_image' => 'nullable|boolean',
+
+            'cross_sell_product_ids' => 'nullable|array',
+            'up_sell_product_ids' => 'nullable|array',
+            'priority' => 'nullable|integer',
+            'is_pinned' => 'nullable|boolean',
+            'is_promotion' => 'nullable|boolean',
+            'promotion_end_time' => 'nullable|date',
+            'interest' => 'nullable|integer',
+            'specifications' => 'nullable|array',
+
+            'length' => 'nullable|numeric',
+            'width' => 'nullable|numeric',
+            'height' => 'nullable|numeric',
+            'weight' => 'nullable|numeric',
         ], [
             'product_variants.array' => 'The product variants must be a valid array.',
             'product_variants.*.sku.required' => 'Each product variant must have a SKU.',
@@ -335,7 +1164,17 @@ class ProductController
             'product_variants.*.remove_image.boolean' => 'The remove_image field must be true or false.',
         ]);
 
+
+
+
+        if ($validator->fails()) {
+            return handleErrors(new Exception($validator->errors()->first()), 'Validation failed', 422);
+        }
+
+        $validated = $validator->validated();
+
         DB::beginTransaction();
+
 
         try {
             $product = Product::findOrFail($id);
@@ -383,17 +1222,31 @@ class ProductController
                 'name' => $validated['name'],
                 'short_description' => $validated['short_description'] ?? null,
                 'long_description' => $validated['long_description'] ?? null,
+                'tags' => $validated['tags'] ? explode(',', $validated['tags']) : null,
                 'sku' => $validated['sku'] ?? null,
                 'is_active' => $validated['is_active'] ?? true,
+                'priority' => $validated['priority'] ?? null,
+                'is_pinned' => $validated['is_pinned'] ?? false,
+                'is_promotion' => $validated['is_promotion'] ?? false,
+                'promotion_end_time' => $validated['promotion_end_time']
+                    ? Carbon::parse($validated['promotion_end_time'])
+                    : null,
+                'interest' => $validated['interest'] ?? 0,
                 'regular_price' => $validated['regular_price'],
                 'sale_price' => $validated['sale_price'] ?? null,
-                'enable_stock' => $validated['enable_stock'] ?? true,
+                'enable_stock' => $validated['enable_stock'] ?? false,
                 'stock' => $validated['stock'] ?? null,
                 'category_id' => $validated['category_id'] ?? null,
                 'brand_id' => $validated['brand_id'] ?? null,
                 'image_gallery' => $gallery,
                 'shipping_class_id' => $validated['shipping_class_id'] ?? null,
                 'tax_class_id' => $validated['tax_class_id'] ?? null,
+                'product_type' => $validated['product_type'] ?? 'simple',
+                'specifications' => $validated['specifications'] ?? null,
+                'length' => $validated['length'] ?? null,
+                'width' => $validated['width'] ?? null,
+                'height' => $validated['height'] ?? null,
+                'weight' => $validated['weight'] ?? null,
             ]);
 
 
@@ -404,6 +1257,15 @@ class ProductController
             } else {
                 $product->paymentMethods()->sync([]);
             }
+
+            if (!empty($validated['cross_sell_product_ids'])) {
+                $product->crossSells()->sync($validated['cross_sell_product_ids']);
+            }
+
+            if (!empty($validated['up_sell_product_ids'])) {
+                $product->upSells()->sync($validated['up_sell_product_ids']);
+            }
+
 
             DB::commit();
 
@@ -416,7 +1278,8 @@ class ProductController
 
                 if ($variant) {
                     $variant->regular_price = $variantData['regular_price'] ?? 0;
-                    $variant->sale_price = $variantData['sale_price'] ?? 0;
+                    $variant->sale_price = $variantData['sale_price'] ?? null;
+                    $variant->enable_stock = $variantData['enable_stock'] ?? false;
                     $variant->stock = $variantData['stock'] ?? 0;
                     $variant->weight = $variantData['weight'] ?? 0;
                     $variant->combination = $variantData['combination'] ?? [];
@@ -426,7 +1289,8 @@ class ProductController
                     $variant->product_id = $product->id;
                     $variant->sku = $variantData['sku'] ?? null;
                     $variant->regular_price = $variantData['regular_price'] ?? 0;
-                    $variant->sale_price = $variantData['sale_price'] ?? 0;
+                    $variant->sale_price = $variantData['sale_price'] ?? null;
+                    $variant->enable_stock = $variantData['enable_stock'] ?? false;
                     $variant->stock = $variantData['stock'] ?? 0;
                     $variant->weight = $variantData['weight'] ?? 0;
                     $variant->combination = $variantData['combination'] ?? [];
@@ -498,33 +1362,4 @@ class ProductController
             return handleErrors($error, "Something Went Wrong");
         }
     }
-
-    //     public function deleteProduct(Request $request, string $id)
-    //     {
-    //         try {
-    //             $product = Product::findOrFail($id);
-    // 
-    //             if ($product->image) {
-    //                 Storage::disk('public')->delete($product->image);
-    //             }
-    // 
-    //             $image_gallery = $product->image_gallery ?? [];
-    //             foreach ($image_gallery as $gallery) {
-    //                 Storage::disk('public')->delete($gallery['image']);
-    //             }
-    // 
-    //             $product->delete();
-    // 
-    //             if ($request->expectsJson()) {
-    //                 return response()->json([
-    //                     'success' => true,
-    //                     'message' => 'Product Deleted Successfully'
-    //                 ]);
-    //             }
-    // 
-    //             return redirect()->back()->with('success', 'Product Deleted Successfully');
-    //         } catch (\Exception $error) {
-    //             return handleErrors($error, "Something Went Wrong");
-    //         }
-    //     }
 }

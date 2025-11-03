@@ -45,25 +45,21 @@ class ShippingRate extends Model
 
     public function calculateCost($item)
     {
-        $quantity = $item['quantity'] ?? 1;
-        $weight = $item['weight_value'] ?? 1;
+        $item_quantity = $item['quantity'] ?? 1;
+        $item_weight = $item['weight'] ?? 1;
+        $item_price = $item['price'] ?? 0;
 
-        $itemPrice = $item['price'] ?? 0;
-        $cost = $this->cost;
+        $percent_factor = $this->cost / 100;
 
-        if ($this->is_percentage) {
-            $cost =  $itemPrice * $this->cost / 100;
-        }
-
-        $baseCost = match ($this->type) {
-            'flat' => $cost,
-            'per_item' => $cost * $quantity,
-            'weight_based' => $cost * $weight,
-            default => $cost,
+        $shipping_cost = match ($this->type) {
+            'per_item' => $this->is_percentage ? $item_price * $percent_factor : $this->cost,
+            'per_quantity' => $this->is_percentage ?  ($item_price * $percent_factor) * $item_quantity : $this->cost * $item_quantity,
+            'per_weight' => $this->is_percentage ?  ($item_price * $percent_factor) * $item_weight : $this->cost * $item_weight,
+            default => $this->is_percentage ? ($item_price * $item_quantity) * $percent_factor : $this->cost
         };
 
 
-        return $baseCost;
+        return $shipping_cost;
     }
 
     public function jsonResponse(array $eager_list = []): array
@@ -79,7 +75,7 @@ class ShippingRate extends Model
 
             'type' => $this->type,
             'is_percentage' => $this->is_percentage,
-            'cost' => $this->cost,
+            'cost' => (float)$this->cost ?? 0,
         ];
 
         if (in_array('zone', $eager_list) && $this->zone) {

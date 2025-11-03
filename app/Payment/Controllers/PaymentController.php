@@ -2,8 +2,9 @@
 
 namespace App\Payment\Controllers;
 
-
+use App\Inventory\Services\CouponService;
 use App\Order\Models\Order;
+use App\Order\Services\OrderService;
 use App\Payment\Models\Invoice;
 use App\Payment\Models\Payment;
 use App\Payment\Models\Transaction;
@@ -105,6 +106,8 @@ class PaymentController
                 $transaction->update(['status' => 'completed']);
             }
 
+            
+            
             DB::commit();
 
             return redirect()->back()->with('success', 'Payment completed successfully!');

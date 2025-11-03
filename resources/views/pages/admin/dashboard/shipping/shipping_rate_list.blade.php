@@ -16,8 +16,8 @@
                             <th>Zone</th>
                             <th>Method</th>
                             <th>Class</th>
-                            <th>Rate</th>
                             <th>Type</th>
+                            <th>Rate</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -35,8 +35,9 @@
                                 <td>{{ $rate['zone']['name'] ?? '*' }}</td>
                                 <td>{{ $rate['method']['name'] ?? '*' }}</td>
                                 <td>{{ $rate['class']['name'] ?? '*' }}</td>
-                                <td>{{ number_format($rate['cost'], 2) }}</td>
                                 <td>{{ ucwords(str_replace('_', ' ', $rate['type'])) }}</td>
+                                <td> {{ number_format($rate['cost'], 2) }} {{ $rate['is_percentage'] ? '%' : '' }}</td>
+
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">
@@ -59,7 +60,7 @@
                             </tr>
 
                             <dialog id="detail_modal_{{ $rate['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -139,7 +140,7 @@
 
 
                             <dialog id="edit_modal_{{ $rate['id'] }}" class="modal">
-                                <div class="modal-box max-w-xl">
+                                <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
@@ -155,7 +156,7 @@
                                             <div class="md:col-span-2">
                                                 <label class="text-sm">Name</label>
                                                 <input name="name" class="input w-full border-base-300"
-                                                    placeholder="Rate name" value="{{ $rate['name'] }}" >
+                                                    placeholder="Rate name" value="{{ $rate['name'] }}">
                                             </div>
 
                                             <div>
@@ -204,7 +205,7 @@
                                             </div>
 
                                             <div>
-                                                <label class="text-sm">Flat Cost</label>
+                                                <label class="text-sm">Rate</label>
                                                 <input name="cost" type="number" step="0.01"
                                                     class="input w-full border-base-300" value="{{ $rate['cost'] }}"
                                                     required>
@@ -214,26 +215,51 @@
                                                 <label class="text-sm">Type</label>
                                                 <select name="type" class="select w-full border-base-300">
                                                     <option disabled>Select Type</option>
-                                                    <option value="flat" @selected($rate['type'] == 'flat')>Flat Rate</option>
                                                     <option value="per_item" @selected($rate['type'] == 'per_item')>Per Item</option>
-                                                    {{-- <option value="weight_based" @selected($rate['type'] == 'weight_based')>Weight Based
+                                                    <option value="per_quantity" @selected($rate['type'] == 'per_quantity')>Per Quantity
                                                     </option>
-                                                    <option value="distance_based" @selected($rate['type'] == 'distance_based')>Distance
-                                                        Based</option> --}}
+                                                    {{-- <option value="per_weight" @selected($rate['type'] == 'per_weight')>Per Weight</option> --}}
                                                 </select>
                                             </div>
+
                                             <div>
-                                                <label class="w-full label mt-1.5 select-none">
-                                                    <input type="hidden" name="is_percentage" value="0">
-                                                    <input type="checkbox" name="is_percentage" value="1"
-                                                        class="checkbox checkbox-sm" @checked($rate['is_percentage']) />
-                                                    Percentage Rate (%)
-                                                </label>
+                                                <label class="text-sm">Calcuation</label>
+                                                <select name="is_percentage" class="select w-full">
+                                                    <option value="0" @selected(!$rate['is_percentage'])>Fixed</option>
+                                                    <option value="1" @selected($rate['is_percentage'])>Percentage</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="md:col-span-2 border border-base-300 p-3 rounded-md bg-base-200">
+                                                <p class="font-semibold text-sm">Formula</p>
+                                                <p class="text-sm">Sample Cart Data: [Apple-500x3],
+                                                    [Orange-300x2]<br>Sample Fixed Rate:
+                                                    200<br>Sample Percentage Rate: 10%</p>
+                                                <p class="text-sm mt-3">
+                                                    <span class="font-semibold">Per Item (Fixed):</span>
+                                                    <span class="italic">Shipping Cost = 200 + 200 = 400 </span>
+                                                </p>
+                                                <p class="text-sm">
+                                                    <span class="font-semibold">Per Quantity (Fixed):</span>
+                                                    <span class="italic">Shipping Cost = [200x3] + [200x2] = 600 + 400 =
+                                                        1000 </span>
+                                                </p>
+
+                                                <p class="text-sm mt-3">
+                                                    <span class="font-semibold">Per Item (Percentage):</span>
+                                                    <span class="italic">Shipping Cost = [500x10%] + [300x10%] = 50 + 30 =
+                                                        80</span>
+                                                </p>
+                                                <p class="text-sm">
+                                                    <span class="font-semibold">Per Quantity (Percentage):</span>
+                                                    <span class="italic">Shipping Cost = [500x10%] + [300x10%] = [50x3] +
+                                                        [30x2] = 210</span>
+                                                </p>
                                             </div>
                                         </div>
 
                                         <div class="modal-action mt-3">
-                                            <button type="submit" class="btn btn-primary w-full">Update Shipping
+                                            <button type="submit" class="btn btn-primary">Update Shipping
                                                 Rate</button>
                                         </div>
                                     </form>
@@ -291,7 +317,7 @@
         </div>
 
         <dialog id="create_shipping_rate_modal" class="modal">
-            <div class="modal-box max-w-xl">
+            <div class="modal-box max-w-3xl max-h-[85vh] overflow-y-auto">
                 <form method="dialog">
                     <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                 </form>
@@ -304,72 +330,107 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="md:col-span-2">
                             <label class="text-sm">Name</label>
-                            <input name="name" class="input w-full border-base-300" placeholder="Rate name">
+                            <input name="name" class="input w-full border-base-300" placeholder="Rate name"
+                                value="{{ old('name') }}">
                         </div>
+
                         <div>
                             <label class="text-sm">Shipping Zone</label>
                             <select name="shipping_zone_id" class="select w-full border-base-300" required>
                                 <option disabled>Select Zone</option>
                                 <option value="">*</option>
                                 @foreach ($shipping_zones as $zone)
-                                    <option value="{{ $zone['id'] }}">{{ $zone['name'] }}</option>
+                                    <option value="{{ $zone['id'] }}" @selected(old('shipping_zone_id') == $zone['id'])>
+                                        {{ $zone['name'] }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
+
                         <div>
                             <label class="text-sm">Shipping Method</label>
                             <select name="shipping_method_id" class="select w-full border-base-300" required>
                                 <option disabled>Select Method</option>
                                 <option value="">*</option>
                                 @foreach ($shipping_methods as $method)
-                                    <option value="{{ $method['id'] }}">{{ $method['name'] }}</option>
+                                    <option value="{{ $method['id'] }}" @selected(old('shipping_method_id') == $method['id'])>
+                                        {{ $method['name'] }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="md:col-span-2">
                             <label class="text-sm">Shipping Class</label>
-                            <select name="shipping_class_id" class="select w-full border-base-300" required>
+                            <select name="shipping_class_id" class="select w-full border-base-300">
                                 <option disabled>Select Class</option>
                                 <option value="">*</option>
                                 @foreach ($shipping_classes as $class)
-                                    <option value="{{ $class['id'] }}">{{ $class['name'] }}</option>
+                                    <option value="{{ $class['id'] }}" @selected(old('shipping_class_id') == $class['id'])>
+                                        {{ $class['name'] }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="md:col-span-2">
                             <label class="text-sm">Description</label>
-                            <textarea name="description" class="textarea w-full border-base-300" rows="2"></textarea>
+                            <textarea name="description" class="textarea w-full border-base-300" rows="2">{{ old('description') }}</textarea>
                         </div>
+
                         <div>
-                            <label class="text-sm">Flat Cost</label>
+                            <label class="text-sm">Rate</label>
                             <input name="cost" type="number" step="0.01" class="input w-full border-base-300"
-                                placeholder="Enter Cost" required>
+                                placeholder="Enter Rate" value="{{ old('cost') }}" required>
                         </div>
+
                         <div>
                             <label class="text-sm">Type</label>
                             <select name="type" class="select w-full border-base-300" required>
                                 <option disabled>Select Type</option>
-                                {{-- flat,per_item,weight_based,distance_based --}}
-                                <option value="flat">Flat Rate</option>
-                                <option value="per_item">Per Item</option>
-                                {{-- <option value="weight_based">Weight Based</option>
-                                <option value="distance_based">Distance Based</option> --}}
+                                <option value="per_item" @selected(old('type') == 'per_item')>Per Item</option>
+                                <option value="per_quantity" @selected(old('type') == 'per_quantity')>Per Quantity</option>
+                                {{-- <option value="per_weight" @selected(old('type') == 'per_weight')>Per Weight</option> --}}
                             </select>
                         </div>
+
                         <div>
-                            <label class="w-full label mt-1.5 select-none">
-                                <input type="hidden" name="is_percentage" value="0">
-                                <input type="checkbox" name="is_percentage" value="1"
-                                    class="checkbox checkbox-sm" />
-                                Percentage Rate (%)
-                            </label>
+                            <label class="text-sm">Calcuation</label>
+                            <select name="is_percentage" class="select w-full">
+                                <option value="0">Fixed</option>
+                                <option value="1">Percentage</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2 border border-base-300 p-3 rounded-md bg-base-200">
+                            <p class="font-semibold text-sm">Formula</p>
+                            <p class="text-sm">Sample Cart Data: [Apple-500x3], [Orange-300x2]<br>Sample Fixed Rate:
+                                200<br>Sample Percentage Rate: 10%</p>
+                            <p class="text-sm mt-3">
+                                <span class="font-semibold">Per Item (Fixed):</span>
+                                <span class="italic">Shipping Cost = 200 + 200 = 400 </span>
+                            </p>
+                            <p class="text-sm">
+                                <span class="font-semibold">Per Quantity (Fixed):</span>
+                                <span class="italic">Shipping Cost = [200x3] + [200x2] = 600 + 400 = 1000 </span>
+                            </p>
+
+                            <p class="text-sm mt-3">
+                                <span class="font-semibold">Per Item (Percentage):</span>
+                                <span class="italic">Shipping Cost = [500x10%] + [300x10%] = 50 + 30 = 80</span>
+                            </p>
+                            <p class="text-sm">
+                                <span class="font-semibold">Per Quantity (Percentage):</span>
+                                <span class="italic">Shipping Cost = [500x10%] + [300x10%] = [50x3] + [30x2] = 210</span>
+                            </p>
                         </div>
                     </div>
 
                     <div class="modal-action mt-3">
-                        <button type="submit" class="btn btn-primary w-full">Create Shipping Rate</button>
+                        <button type="submit" class="btn btn-primary">Create Shipping Rate</button>
                     </div>
                 </form>
+
             </div>
         </dialog>
     </div>

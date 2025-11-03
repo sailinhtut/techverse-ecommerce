@@ -21,6 +21,11 @@ use App\Tax\Controllers\TaxClassController;
 use App\Tax\Controllers\TaxRateController;
 use App\Tax\Controllers\TaxZoneController;
 use Illuminate\Support\Facades\Route;
+use App\Inventory\Controllers\CouponController;
+use App\Review\Controllers\ProductReviewController;
+use App\Review\Controllers\ProductReviewReplyController;
+use App\Store\Controllers\MediaImageController;
+use App\Store\Controllers\StoreBranchController;
 
 Route::middleware('auth')->prefix('/admin')->group(function () {
     Route::prefix('/dashboard')->group(function () {
@@ -37,8 +42,70 @@ Route::middleware('auth')->prefix('/admin')->group(function () {
             Route::delete('/user/role/{id}', 'deleteRole')->name('admin.dashboard.user.role.delete');
         });
 
-        Route::controller(ProductVariantController::class)->group(function () {
-            Route::delete('/variant/{id}', 'deleteVariant')->name('admin.dashboard.product.variant.id.delete');
+        Route::controller(MediaImageController::class)->group(function () {
+            Route::get('/store/media-image', 'viewAdminMediaImageListPage')
+                ->name('admin.dashboard.store.media-image.get');
+
+            Route::post('/store/media-image', 'createMediaImage')
+                ->name('admin.dashboard.store.media-image.post');
+
+            Route::post('/store/media-image/{id}', 'updateMediaImage')
+                ->name('admin.dashboard.media-image.id.post');
+
+            Route::delete('/store/media-image/{id}', 'deleteMediaImage')
+                ->name('admin.dashboard.media-image.id.delete');
+        });
+
+        Route::controller(StoreBranchController::class)->group(function () {
+            Route::get('/store', 'viewAdminStoreBranchListPage')
+                ->name('admin.dashboard.store.get');
+
+            Route::post('/store', 'createStoreBranch')
+                ->name('admin.dashboard.store.post');
+
+            Route::post('/store/{id}', 'updateStoreBranch')
+                ->name('admin.dashboard.store.id.post');
+
+            Route::delete('/store/{id}', 'deleteStoreBranch')
+                ->name('admin.dashboard.store.id.delete');
+        });
+
+        Route::controller(ProductReviewReplyController::class)->group(function () {
+            Route::post('/product/review/{review_id}/reply', 'createReviewReply')
+                ->name('admin.dashboard.product.review.review_id.reply.post');
+
+            Route::post('/product/review/{review_id}/reply/{reply_sid}', 'updateReviewReply')
+                ->name('admin.dashboard.product.review.review_id.reply.reply_id.post');
+
+            Route::delete('/product/review/{review_id}/reply/{reply_id}', 'deleteReviewReply')
+                ->name('admin.dashboard.product.review.review_id.reply.reply_id.delete');
+        });
+
+        Route::controller(ProductReviewController::class)->group(function () {
+            Route::get('/product/review', 'viewAdminReviewListPage')
+                ->name('admin.dashboard.product.review.get');
+
+            Route::post('/product/review', 'createReview')
+                ->name('admin.dashboard.product.review.post');
+
+            Route::get('/product/review/{id}', 'viewAdminReviewDetailPage')
+                ->name('admin.dashboard.product.review.id.get');
+
+            Route::post('/product/review/{id}', 'updateReview')
+                ->name('admin.dashboard.product.review.id.post');
+
+            Route::delete('/product/review/{id}', 'deleteReview')
+                ->name('admin.dashboard.product.review.id.delete');
+        });
+
+        Route::controller(CouponController::class)->group(function () {
+            Route::get('/product/coupon', 'viewAdminCouponListPage')->name('admin.dashboard.product.coupon.get');
+
+            Route::post('/product/coupon', 'createCoupon')->name('admin.dashboard.product.coupon.post');
+
+            Route::post('/product/coupon/{id}', 'updateCoupon')->name('admin.dashboard.product.coupon.id.post');
+
+            Route::delete('/product/coupon/{id}', 'deleteCoupon')->name('admin.dashboard.product.coupon.id.delete');
         });
 
         Route::controller(ProductAttributeController::class)->group(function () {
@@ -49,6 +116,9 @@ Route::middleware('auth')->prefix('/admin')->group(function () {
         });
 
         Route::controller(CategoryController::class)->group(function () {
+            Route::get('/category/search', 'couponSearchCategory')->name('admin.dashboard.category.search.get');
+            Route::post('/category/search-ids', 'couponSearchCategoryByIds')->name('admin.dashboard.category.search-ids.post');
+
             Route::get('/product/category', 'viewAdminCategoryListPage')->name('admin.dashboard.product.category.get');
             Route::post('/product/category', 'addCategory')->name('admin.dashboard.product.category.post');
             Route::post('/product/category/{id}', 'updateCategory')->name('admin.dashboard.product.category.id.post');
@@ -62,7 +132,14 @@ Route::middleware('auth')->prefix('/admin')->group(function () {
             Route::delete('/product/brand/{id}', 'deleteBrand')->name('admin.dashboard.product.brand.id.delete');
         });
 
+        Route::controller(ProductVariantController::class)->group(function () {
+            Route::delete('/variant/{id}', 'deleteVariant')->name('admin.dashboard.product.variant.id.delete');
+        });
+
         Route::controller(ProductController::class)->group(function () {
+            Route::get('/product/search', 'searchProductsByAPI')->name('admin.dashboard.product.search.get');
+            Route::post('/product/search-ids', 'searchByIds')->name('admin.dashboard.product.search-ids.post');
+
             Route::get('/product', 'viewAdminProductListPage')->name('admin.dashboard.product.get');
             Route::get('/product/add', 'viewAdminProductAddPage')->name('admin.dashboard.product.add.get');
             Route::get('/product/edit/{id}/', 'viewAdminProductEditPage')->name('admin.dashboard.product.edit.id.get');

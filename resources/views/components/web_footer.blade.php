@@ -19,6 +19,9 @@
                 <li><a href="{{ route('shop.get') }}"
                         class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Shop</a>
                 </li>
+                <li><a href="/store-locator"
+                        class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Store Locator</a>
+                </li>
                 <li><a href="/about"
                         class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">About
                         Us</a></li>

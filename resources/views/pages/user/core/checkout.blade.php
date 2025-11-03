@@ -160,7 +160,8 @@
                                 'cart_items.*.tax' => 'nullable|numeric|min:0',
                                 'cart_items.*.discount' => 'nullable|numeric|min:0', --}}
                                 <input type="hidden" :name="`cart_items[${index}][id]`" :value="item.id">
-                                <input type="hidden" :name="`cart_items[${index}][variant_id]`" :value="item.variant_id">
+                                <input type="hidden" :name="`cart_items[${index}][variant_id]`"
+                                    :value="item.variant_id">
                                 <input type="hidden" :name="`cart_items[${index}][name]`" :value="item.name">
                                 <input type="hidden" :name="`cart_items[${index}][sku]`" :value="item.sku">
                                 <input type="hidden" :name="`cart_items[${index}][price]`" :value="item.price">
@@ -188,6 +189,8 @@
                         </div>
                         <div x-show="discount > 0" class="flex justify-between">
                             <span>Discount</span>
+                            <input type="hidden" name="discount_total" :value="discount">
+                            <input type="hidden" name="coupon_code" :value="applied_coupon.code">
                             <span>− $<span x-text="discount.toFixed(2)"></span></span>
                         </div>
                         <div class="flex justify-between">
@@ -212,6 +215,27 @@
                         </div>
                     </section>
 
+                    <section class="border rounded-lg p-4 space-y-3">
+                        <h2 class="text-lg font-semibold mb-3">Apply Coupon</h2>
+
+                        <div class="flex gap-2">
+                            <input type="text" x-model="coupon_code" placeholder="Enter coupon code"
+                                class="input input-bordered flex-1" />
+
+                            <button type="button" @click="applyCoupon" class="btn btn-outline"
+                                :disabled="loadingCoupon">
+                                <span x-show="!loadingCoupon">Apply</span>
+                                <span x-show="loadingCoupon" class="loading loading-spinner loading-sm"></span>
+                            </button>
+                        </div>
+
+                        <p x-show="coupon_error" class="text-sm text-red-500" x-text="coupon_error"></p>
+                        <p x-show="applied_coupon" class="text-sm text-green-600">
+                            Applied: <span x-text="applied_coupon.code"></span> —
+                            <span x-text="applied_coupon_summary"></span>
+                        </p>
+                    </section>
+
                     <div class="mt-6">
                         <button type="submit" class="btn btn-primary w-full" :disabled="!can_place_order">Place
                             Order</button>
@@ -229,6 +253,12 @@
         function checkoutData() {
             return {
                 cartItems: Alpine.store('cart').items,
+
+                loadingCoupon: false,
+                coupon_code: '',
+                coupon_error: '',
+                applied_coupon: null,
+                applied_coupon_summary: '',
 
                 loadingTaxTotalCost: false,
                 tax_total_cost: 0,
@@ -251,24 +281,24 @@
                 grand_total: 0,
 
                 shipping: {
-                    label: 'Shitment',
-                    recipient_name: '{{ $default_shipping_address->recipient_name ?? '' }}',
-                    phone: '{{ $default_shipping_address->phone ?? '' }}',
-                    street_address: '{{ $default_shipping_address->street_address ?? '' }}',
-                    city: '{{ $default_shipping_address->city ?? '' }}',
-                    state: '{{ $default_shipping_address->state ?? '' }}',
-                    postal_code: '{{ $default_shipping_address->postal_code ?? '' }}',
-                    country: '{{ $default_shipping_address->country ?? '' }}'
+                    label: 'Shipment',
+                    recipient_name: '{{ old('shipping_address.recipient_name', $default_shipping_address->recipient_name ?? '') }}',
+                    phone: '{{ old('shipping_address.phone', $default_shipping_address->phone ?? '') }}',
+                    street_address: '{{ old('shipping_address.street_address', $default_shipping_address->street_address ?? '') }}',
+                    city: '{{ old('shipping_address.city', $default_shipping_address->city ?? '') }}',
+                    state: '{{ old('shipping_address.state', $default_shipping_address->state ?? '') }}',
+                    postal_code: '{{ old('shipping_address.postal_code', $default_shipping_address->postal_code ?? '') }}',
+                    country: '{{ old('shipping_address.country', $default_shipping_address->country ?? '') }}'
                 },
                 billing: {
-                    label: '{{ $default_billing_address->label ?? '' }}',
-                    recipient_name: '{{ $default_billing_address->recipient_name ?? '' }}',
-                    phone: '{{ $default_billing_address->phone ?? '' }}',
-                    street_address: '{{ $default_billing_address->street_address ?? '' }}',
-                    city: '{{ $default_billing_address->city ?? '' }}',
-                    state: '{{ $default_billing_address->state ?? '' }}',
-                    postal_code: '{{ $default_billing_address->postal_code ?? '' }}',
-                    country: '{{ $default_billing_address->country ?? '' }}'
+                    label: '{{ old('billing_address.label', $default_billing_address->label ?? '') }}',
+                    recipient_name: '{{ old('billing_address.recipient_name', $default_billing_address->recipient_name ?? '') }}',
+                    phone: '{{ old('billing_address.phone', $default_billing_address->phone ?? '') }}',
+                    street_address: '{{ old('billing_address.street_address', $default_billing_address->street_address ?? '') }}',
+                    city: '{{ old('billing_address.city', $default_billing_address->city ?? '') }}',
+                    state: '{{ old('billing_address.state', $default_billing_address->state ?? '') }}',
+                    postal_code: '{{ old('billing_address.postal_code', $default_billing_address->postal_code ?? '') }}',
+                    country: '{{ old('billing_address.country', $default_billing_address->country ?? '') }}'
                 },
                 init() {
                     this.loadPaymentMethods();
@@ -293,15 +323,65 @@
                         this.selectedPaymentId && !this
                         .payment_method_error && this.payment_methods.length > 0 && !this.tax_calculation_error;
                 },
+                async applyCoupon() {
+                    if (!this.coupon_code.trim()) {
+                        this.coupon_error = 'Please enter a coupon code.';
+                        return;
+                    }
+
+                    this.loadingCoupon = true;
+                    this.coupon_error = '';
+
+                    try {
+                        const cart = {
+                            items: Object.values(this.cartItems).map(i => ({
+                                product_id: i.id,
+                                category_id: i.category_id ?? null,
+                                price: i.price,
+                                quantity: i.quantity
+                            })),
+                            subtotal: this.subtotal
+                        };
+
+                        const res = await axios.post('/order/apply-coupon', {
+                            code: this.coupon_code,
+                            cart
+                        }, {
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        const data = res.data;
+                        this.applied_coupon = data.coupon;
+                        this.discount = data.discount ?? 0;
+
+                        // Build a readable summary
+                        this.applied_coupon_summary = data.coupon_message;
+                        this.calculateTotals();
+                        console.log(data);
+
+                    } catch (err) {
+                        console.log(err);
+                        this.discount = 0;
+                        this.applied_coupon = null;
+                        this.applied_coupon_summary = '';
+                        this.coupon_error = err.response?.data?.error || 'Invalid or expired coupon.';
+                    } finally {
+                        this.loadingCoupon = false;
+                    }
+                },
                 calculateTotals() {
                     const selectedShippingMethod = this.shipping_methods.find(
                         (e) => e.method.id == this.selectedShippingId
                     );
                     this.shipping_cost = selectedShippingMethod ? selectedShippingMethod.total_cost : 0;
 
-                    this.subtotal = Object.values(this.cartItems).reduce((sum, i) => sum + i.price * i.quantity, 0);
-                    this.discount = 0;
-                    this.grand_total = (this.subtotal + this.tax_total_cost + this.shipping_cost) - this.discount;
+                    this.subtotal = Object.values(this.cartItems)
+                        .reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+                    const totalBeforeDiscount = this.subtotal + this.tax_total_cost + this.shipping_cost;
+                    this.grand_total = Math.max(totalBeforeDiscount - this.discount, 0);
                 },
                 async calculateTaxTotalCost() {
                     try {
@@ -312,6 +392,7 @@
                             return {
                                 'id': e.id,
                                 'quantity': e.quantity,
+                                'price': e.price,
                             }
                         });
 
@@ -327,7 +408,7 @@
                         );
                         this.tax_total_cost = response.data.data.total_cost ?? [];
                         this.tax_calculation_error = '';
-
+                        console.log(response.data);
                     } catch (error) {
                         this.tax_total_cost = 0;
                         this.tax_calculation_error = error.response.data.message ?? 'Unexpected Error Occured';
@@ -345,7 +426,7 @@
                             return {
                                 'id': e.id,
                                 'variant_id': e.variant_id,
-                                'price' : e.price,
+                                'price': e.price,
                                 'quantity': e.quantity,
                             }
                         });

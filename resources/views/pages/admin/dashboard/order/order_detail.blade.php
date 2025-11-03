@@ -1,6 +1,17 @@
 @extends('layouts.admin.admin_dashboard')
 @section('admin_dashboard_content')
     <div class="p-5 min-h-screen">
+
+        <div class="mb-4">
+            <button onclick="history.back()" class="btn btn-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+            </button>
+        </div>
+        
         <div class="w-fit max-w-full text-sm bg-base-300 rounded px-2 overflow-x-auto ">
             <div class="breadcrumbs text-sm my-0 py-1">
                 <ul>
@@ -21,13 +32,7 @@
             </div>
         </div>
 
-        <a href="{{ route('admin.dashboard.order.get') }}" class="btn btn-sm mt-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="size-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-            </svg>
-            Back
-        </a>
+
         <p class="text-lg font-semibold mt-5">Order Detail</p>
 
         <div class="flex flex-wrap gap-3 mt-2">
@@ -104,6 +109,13 @@
                         class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
                         value="{{ $order['discount_total'] }}" readonly>
                 </div>
+
+                <div>
+                    <label class="text-sm">Coupon Code</label>
+                    <input type="text" name="coupon_code"
+                        class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
+                        value="{{ $order['coupon_code'] ?? 'None' }}" readonly>
+                </div>
                 <div>
                     <label class="text-sm">Tax</label>
                     <input type="number" step="0.01" name="tax_total"
@@ -177,7 +189,7 @@
                     <label class="text-sm">Email Verified At</label>
                     <input type="text"
                         class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
-                        value="{{ $order['user']['email_verified_at'] ? $order['user']['email_verified_at']->format('Y-m-d H:i') : 'Not Verified' }}"
+                        value="{{ $order['user']['email_verified_at'] ? \Carbon\Carbon::parse($order['user']['email_verified_at'])->format('Y-m-d H:i') : 'Not Verified' }}"
                         readonly>
                 </div>
 
@@ -185,7 +197,7 @@
                     <label class="text-sm">Account Created</label>
                     <input type="text"
                         class="input w-full focus:outline-none focus:ring-0 focus-border-base-300 cursor-default select-none"
-                        value="{{ $order['user']['created_at']->format('Y-m-d H:i') }}" readonly>
+                        value="{{ $order['user']['created_at'] ? \Carbon\Carbon::parse($order['user']['created_at'])->format('Y-m-d H:i') : '' }}" readonly>
                 </div>
 
                 <div>

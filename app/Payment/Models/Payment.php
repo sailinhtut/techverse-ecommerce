@@ -53,7 +53,7 @@ class Payment extends Model
             'payment_method_id' => $this->payment_method_id,
             'transaction_id' => $this->transaction_id, // External Paymenet Gateway ID
             'status' => $this->status,
-            'amount' => $this->amount,
+            'amount' => (float) $this->amount ?? 0,
             'details' => $this->details,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

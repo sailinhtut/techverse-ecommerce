@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             PaymentSeeder::class,
             ShippingSeeder::class,
             TaxSeeder::class,
+            ProductFastSeeder::class,
         ]);
     }
 }

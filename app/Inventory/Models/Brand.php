@@ -3,6 +3,9 @@
 namespace App\Inventory\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
+
 
 class Brand extends Model
 {
@@ -11,6 +14,7 @@ class Brand extends Model
     protected $fillable = [
         'name',
         'description',
+        'slug',
     ];
 
     protected function casts(): array
@@ -28,6 +32,7 @@ class Brand extends Model
         $response = [
             'id' => $this->id,
             'name' => $this->name,
+            'slug' => $this->slug,
             'description' => $this->description,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -39,4 +44,29 @@ class Brand extends Model
 
         return $response;
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($brand) {
+            if ($brand->isDirty('name')) {
+                $base = Str::slug($brand->name);
+                $slug = $base;
+                $i = 1;
+                while (self::where('slug', $slug)
+                    ->where('id', '!=', $brand->id)
+                    ->exists()
+                ) {
+                    $slug = "{$base}-" . $i++;
+                }
+                $brand->slug = $slug;
+            }
+        });
+
+        static::saved(fn($model) => Cache::flush());
+        static::deleted(fn($model) => Cache::flush());
+    }
+
+   
 }

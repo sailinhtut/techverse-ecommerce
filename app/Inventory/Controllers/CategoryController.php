@@ -9,14 +9,62 @@ class CategoryController
 {
     public function viewAdminCategoryListPage()
     {
-        $product_categories = Category::orderBy('id', 'desc')->paginate(10);
+        // $product_categories = Category::orderBy('id', 'desc')->paginate(10);
+        $product_categories = Category::orderBy('id', 'desc')->get();
 
-        $product_categories->getCollection()->transform(function ($category) {
-            return $category->jsonResponse(['children', 'parent']);
-        });
+        // $product_categories->getCollection()->transform(function ($category) {
+        //     return $category->jsonResponse(['children', 'parent']);
+        // });
+
+        $product_categories = $product_categories->map(fn($e) => $e->jsonResponse(['children', 'parent']));
 
         return view('pages.admin.dashboard.category.category_list', compact('product_categories'));
     }
+
+    public function couponSearchCategory(Request $request)
+    {
+        $keyword = $request->input('q');
+
+        if (!$keyword || strlen($keyword) < 2) {
+            return response()->json([
+                'data' => [],
+                'message' => 'Enter at least 2 characters'
+            ]);
+        }
+
+        $categories = Category::select('id', 'name', 'slug')
+            ->where('name', 'like', "%{$keyword}%")
+            ->orWhere('slug', 'like', "%{$keyword}%")
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'data' => $categories,
+        ]);
+    }
+
+    public function couponSearchCategoryByIds(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (!is_array($ids) || empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No valid category IDs provided.',
+                'data' => []
+            ], 400);
+        }
+
+        $categories = Category::whereIn('id', $ids)
+            ->select('id', 'name', 'slug')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $categories
+        ]);
+    }
+
 
     public function addCategory(Request $request)
     {

@@ -8,8 +8,7 @@
 
     <ul class="my-0 hidden lg:flex flex-row items-center px-1 gap-5">
 
-        <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'active' : '' }} text-primary">Go
-                Shopping</a></li>
+        <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'active' : '' }} text-primary">Shop</a></li>
         <li><a href="{{ route('contact.get') }}" class="{{ request()->is('shop') ? 'active' : '' }}">Contact</a></li>
         <li><a href="{{ route('about_us.get') }}" class="{{ request()->is('shop') ? 'active' : '' }}">About</a></li>
 

@@ -40,12 +40,7 @@ class ProductVariantController
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $variant->id,
-                'sku' => $variant->sku,
-                'price' => (float) $variant->regular_price,
-                'stock' => $variant->stock
-            ]
+            'data' => $variant->jsonResponse(),
         ]);
     }
 

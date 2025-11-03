@@ -38,7 +38,7 @@
                                     <a href="{{ route('shop.slug.get', ['slug' => $wishlist['product']['slug']]) }}"
                                         class="cursor-default hover:underline">{{ $wishlist['product']['name'] }}</a>
                                 </td>
-                                <td>{{ $wishlist['product']['short_description'] ?? '-' }}</td>
+                                <td class="max-w-[200px] truncate">{{ $wishlist['product']['short_description'] ?? '-' }}</td>
                                 <td>{{ $wishlist['note'] ?? '-' }}</td>
                                 <td>{{ $wishlist['created_at'] ?? '-' }}</td>
                                 <td>

@@ -84,7 +84,7 @@
                                                 </div>
 
                                                 <div class="modal-action mt-4">
-                                                    <button type="submit" class="btn btn-primary w-full">Update
+                                                    <button type="submit" class="btn btn-primary">Update
                                                         Permissions</button>
                                                 </div>
                                             </form>

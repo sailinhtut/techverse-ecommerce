@@ -47,7 +47,7 @@ class ShippingRateController
                 'shipping_zone_id' => 'nullable|exists:shipping_zones,id',
                 'shipping_method_id' => 'nullable|exists:shipping_methods,id',
                 'shipping_class_id' => 'nullable|exists:shipping_classes,id',
-                'type' => 'required|in:flat,per_item,weight_based,distance_based',
+                'type' => 'required|in:per_item,per_quantity,per_weight',
                 'is_percentage' => 'required|boolean',
                 'cost' => 'required|numeric|min:0',
             ]);
@@ -82,7 +82,7 @@ class ShippingRateController
                 'shipping_method_id' => 'nullable|exists:shipping_methods,id',
                 'shipping_class_id' => 'nullable|exists:shipping_classes,id',
 
-                'type' => 'nullable|in:flat,per_item,weight_based,distance_based',
+                'type' => 'nullable|in:per_item,per_quantity,per_weight',
                 'is_percentage' => 'nullable|boolean',
                 'cost' => 'nullable|numeric|min:0',
             ]);
@@ -95,9 +95,9 @@ class ShippingRateController
             $rate->update([
                 'name' => $validated['name'] ?? $rate->name,
                 'description' => $validated['description'] ?? $rate->description,
-                'shipping_zone_id' => $validated['shipping_zone_id'] ?? $rate->shipping_zone_id,
-                'shipping_method_id' => $validated['shipping_method_id'] ?? $rate->shipping_method_id,
-                'shipping_class_id' => $validated['shipping_class_id'] ?? $rate->shipping_class_id,
+                'shipping_zone_id' => $validated['shipping_zone_id'] ?? null,
+                'shipping_method_id' => $validated['shipping_method_id'] ?? null,
+                'shipping_class_id' => $validated['shipping_class_id'] ?? null,
                 'type' => $validated['type'] ?? $rate->type,
                 'is_percentage' => $is_percentage,
                 'cost' => $validated['cost'] ?? $rate->cost

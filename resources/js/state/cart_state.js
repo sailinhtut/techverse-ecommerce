@@ -22,8 +22,12 @@ export const cartState = {
             0
         );
     },
-    
-    addItem(product) {
+
+    addItem(product, reset = false) {
+        if (reset) {
+            this.deleteItem(product.id);
+        }
+
         if (this.items[product.id]) {
             let selectedItem = this.items[product.id];
             selectedItem.quantity++;

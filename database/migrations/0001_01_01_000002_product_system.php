@@ -20,6 +20,7 @@ return new class extends Migration
             $table->dateTime('valid_from')->nullable();
             $table->dateTime('valid_to')->nullable();
             $table->integer('usage_limit')->nullable();
+            $table->integer('used')->default(0);
             $table->timestamps();
         });
 
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
+            $table->integer('interest')->default(0);
             $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('cascade');
             $table->timestamps();
         });
@@ -36,6 +38,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->integer('interest')->default(0);
+            $table->string('slug')->unique();
             $table->timestamps();
         });
 
@@ -76,7 +80,7 @@ return new class extends Migration
             $table->foreignId('shipping_method_id')->nullable()->constrained('shipping_methods')->cascadeOnDelete();
             $table->foreignId('shipping_class_id')->nullable()->constrained('shipping_classes')->cascadeOnDelete();
 
-            $table->enum('type', ['flat', 'per_item', 'weight_based', 'distance_based'])->default('flat');
+            $table->enum('type', ['per_item', 'per_quantity', 'per_weight'])->default('per_item');
             $table->boolean('is_percentage')->default(false);
             $table->decimal('cost', 10, 2)->default(0);
             $table->timestamps();
@@ -108,6 +112,7 @@ return new class extends Migration
             $table->foreignId('tax_zone_id')->nullable()->constrained('tax_zones')->cascadeOnDelete();
             $table->foreignId('tax_class_id')->nullable()->constrained('tax_classes')->cascadeOnDelete();
 
+            $table->enum('type', ['per_item', 'per_quantity', 'per_weight'])->default('per_item');
             $table->boolean('is_percentage')->default(true);
             $table->decimal('rate', 10, 2)->default(0);
             $table->timestamps();
@@ -126,15 +131,25 @@ return new class extends Migration
             $table->longText('long_description')->nullable();
             $table->decimal('regular_price', 10, 2)->default(0);
             $table->decimal('sale_price', 10, 2)->nullable();
-            $table->boolean('enable_stock')->default(true);
+            $table->boolean('enable_stock')->default(false);
             $table->integer('stock')->default(0);
             $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->foreignId('brand_id')->nullable()->constrained('brands')->onDelete('set null');
             $table->json('tags')->nullable();
             $table->json('specifications')->nullable();
+            $table->integer('priority')->nullable();
+            $table->boolean('is_pinned')->default(false);
+            $table->boolean('is_promotion')->default(false);
+             $table->dateTime('promotion_end_time')->nullable();
+            $table->integer('interest')->default(0);
 
             $table->foreignId('shipping_class_id')->nullable()->constrained('shipping_classes')->onDelete('set null');
             $table->foreignId('tax_class_id')->nullable()->constrained('tax_classes')->onDelete('set null');
+
+            $table->decimal('length', 10, 2)->nullable();
+            $table->decimal('width', 10, 2)->nullable();
+            $table->decimal('height', 10, 2)->nullable();
+            $table->decimal('weight', 10, 2)->nullable();
 
             $table->timestamps();
         });
@@ -153,6 +168,7 @@ return new class extends Migration
             $table->json('combination'); // {"Color":"Red","Size":"M"}
             $table->decimal('regular_price', 10, 2)->default(0);
             $table->decimal('sale_price', 10, 2)->nullable();
+            $table->boolean('enable_stock')->default(false);
             $table->integer('stock')->default(0);
             $table->string('image')->nullable();
             $table->decimal('weight', 10, 2)->nullable();
@@ -169,6 +185,24 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['user_id', 'product_id', 'product_variant_id'], 'unique_user_product_variant');
+        });
+
+        Schema::create('product_cross_sell', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('cross_sell_id')->constrained('products')->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['product_id', 'cross_sell_id']);
+        });
+
+        Schema::create('product_up_sell', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('up_sell_id')->constrained('products')->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['product_id', 'up_sell_id']);
         });
 
 
@@ -195,24 +229,55 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->nullable()->constrained('products')->cascadeOnDelete();
             $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->cascadeOnDelete();
+
+            $table->timestamps();
+        });
+
+        Schema::create('product_reviews', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('order_id')->nullable()->constrained('orders')->nullOnDelete();
+            $table->decimal('rating', 3, 1)->unsigned();
+            $table->text('comment')->nullable();
+            $table->string('image')->nullable();
+            $table->boolean('is_approved')->default(false);
+            $table->timestamps();
+        });
+
+        Schema::create('product_review_replies', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('review_id')->constrained('product_reviews')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->text('reply');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('product_review_replies');
+        Schema::dropIfExists('product_reviews');
         Schema::dropIfExists('product_payment_methods');
         Schema::dropIfExists('payment_method_attributes');
-        Schema::dropIfExists('payment_methods');
+        Schema::dropIfExists('product_up_sell');
+        Schema::dropIfExists('product_cross_sell');
         Schema::dropIfExists('wishlists');
         Schema::dropIfExists('product_variants');
-        Schema::dropIfExists('product_variant_attributes');
+        Schema::dropIfExists('product_attributes');
+
         Schema::dropIfExists('products');
-        Schema::dropIfExists('tax_methods');
+
         Schema::dropIfExists('shipping_rates');
         Schema::dropIfExists('shipping_methods');
         Schema::dropIfExists('shipping_zones');
         Schema::dropIfExists('shipping_classes');
+
+        Schema::dropIfExists('tax_rates');
+        Schema::dropIfExists('tax_zones');
+        Schema::dropIfExists('tax_classes');
+
+        Schema::dropIfExists('payment_methods');
         Schema::dropIfExists('brands');
         Schema::dropIfExists('categories');
         Schema::dropIfExists('coupons');

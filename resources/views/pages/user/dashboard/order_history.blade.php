@@ -25,13 +25,14 @@
                                 </td>
 
                                 <td>
-                                    <div onclick="document.getElementById('detail_modal_{{ $order['id'] }}').showModal()"
+                                    <a href="{{ route('order_detail.id.get', $order['id']) }}"
                                         class="cursor-pointer hover:underline">
                                         {{ $order['order_number'] }}
-                                    </div>
+                                    </a>
                                 </td>
 
-                                <td>{{ $order['created_at']->format('Y-m-d H:i') }}</td>
+                                <td>{{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d H:i') : '-' }}
+                                </td>
 
                                 <td>
                                     @php
@@ -85,7 +86,7 @@
 
                                             <div class="text-sm space-y-2">
                                                 <p><strong>ID:</strong> {{ $order['id'] }}</p>
-                                                <p><strong>Date:</strong> {{ $order['created_at']->format('Y-m-d H:i') }}
+                                                <p><strong>Date:</strong> {{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d H:i') }}
                                                 </p>
                                                 <p><strong>Status:</strong>
                                                     <span class="badge {{ $color }} badge-outline">
@@ -127,7 +128,8 @@
                                                                     <td>{{ $item['name'] }}</td>
                                                                     <td>{{ $item['quantity'] }}</td>
                                                                     <td>{{ $item['sku'] }}</td>
-                                                                    <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}</td>
+                                                                    <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}
+                                                                    </td>
                                                                     <td>${{ number_format($item['unit_price'], 2) }}</td>
                                                                     <td>${{ number_format($item['subtotal'], 2) }}</td>
                                                                 </tr>

@@ -82,16 +82,22 @@ class TaxRateController
 
             if ($class_rates->isEmpty()) continue;
 
-            if(is_null($product['tax_class_id'])){
+            if (is_null($product['tax_class_id'])) {
                 continue;
             }
 
-            $item_quantity = intval($item['quantity']);
-            $item_price = $product['regular_price'] ?? 0;
-            $item_cost =  $item_quantity * $item_price;
+            $matched_rate = null;
+                
+            if($class_rates->count() > 1){
+                $matched_rate = $class_rates->whereNotNull('tax_class_id')->first();
+            } else {
+                $matched_rate = $class_rates->first();
+            }
 
             $matched_rate = $class_rates->first();
-            $tax_total_cost += $matched_rate->calculateTax($item_cost);
+            $tax_total_cost += $matched_rate->calculateTax($item);
+
+            $result['debug_tax_cost'][$product['name']] = $matched_rate->calculateTax($item);
         }
 
         $result['data'] = [
@@ -138,6 +144,7 @@ class TaxRateController
                 'tax_class_id' => 'nullable|exists:tax_classes,id',
                 'is_percentage' => 'required|boolean',
                 'rate' => 'required|numeric|min:0',
+                'type' => 'required|string|in:per_item,per_quantity,per_weight',
             ]);
 
             $is_percentage = $request->boolean('is_percentage', true);
@@ -149,6 +156,7 @@ class TaxRateController
                 'tax_class_id' => $validated['tax_class_id'] ?? null,
                 'is_percentage' => $is_percentage,
                 'rate' => $validated['rate'],
+                'type' => $validated['type'],
             ]);
 
             return redirect()->back()->with('success', 'Tax Rate created successfully.');
@@ -167,6 +175,7 @@ class TaxRateController
                 'tax_class_id' => 'nullable|exists:tax_classes,id',
                 'is_percentage' => 'nullable|boolean',
                 'rate' => 'nullable|numeric|min:0',
+                'type' => 'nullable|string|in:per_item,per_quantity,per_weight',
             ]);
 
             $rate = TaxRate::find($id);
@@ -182,6 +191,7 @@ class TaxRateController
                 'tax_class_id' => $validated['tax_class_id'] ?? null,
                 'is_percentage' => $is_percentage,
                 'rate' => $validated['rate'] ?? $rate->rate,
+                'type' => $validated['type'] ?? $rate->type,
             ]);
 
             return redirect()->back()->with('success', 'Tax Rate updated successfully.');

@@ -348,7 +348,7 @@
                 <form method="POST" id="create_address_form" action="{{ route('address.post') }}"
                     class="flex flex-col gap-3">
                     @csrf
-                    <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+                    <input type="hidden" name="user_id" value="{{ auth()->id() ?? -1 }}">
 
                     <div class="form-control">
                         <label class="label"><span class="label-text">Label (optional)</span></label>

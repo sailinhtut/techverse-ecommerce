@@ -63,10 +63,10 @@ class OrderProduct extends Model
             'sku' => $this->sku,
             'name' => $this->name,
             'quantity' => $this->quantity,
-            'unit_price' => $this->unit_price,
-            'discount' => $this->discount,
-            'tax' => $this->tax,
-            'subtotal' => $this->subtotal,
+            'unit_price' => (float) $this->unit_price ?? 0,
+            'discount' => (float) $this->discount ?? 0,
+            'tax' => (float) $this->tax ?? 0,
+            'subtotal' => (float) $this->subtotal ?? 0,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
@@ -75,7 +75,7 @@ class OrderProduct extends Model
             $response['order'] = $this->order->jsonResponse();
         }
         if (in_array('product', $eager_list) && $this->product_id) {
-            $response['product'] = $this->product->jsonResponse();
+            $response['product'] = $this->product->jsonResponse(['productVariants']);
         }
         if (in_array('variant', $eager_list) && $this->variant_id) {
             $response['variant'] = $this->variant->jsonResponse();

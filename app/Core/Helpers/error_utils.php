@@ -13,6 +13,6 @@ if (!function_exists('handleErrors')) {
             }
             return response()->json($response, $status);
         }
-        return redirect()->back()->with('error', $error->getMessage());
+        return redirect()->back()->withInput()->with('error', $error->getMessage());
     }
 }

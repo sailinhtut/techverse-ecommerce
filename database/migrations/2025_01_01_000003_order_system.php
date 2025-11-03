@@ -85,11 +85,33 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->timestamps();
         });
+
+        Schema::create('product_reviews', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('order_id')->nullable()->constrained('orders')->nullOnDelete();
+            $table->decimal('rating', 3, 1)->unsigned();
+            $table->text('comment')->nullable();
+            $table->string('image')->nullable();
+            $table->boolean('is_approved')->default(false);
+            $table->timestamps();
+        });
+
+        Schema::create('product_review_replies', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('review_id')->constrained('product_reviews')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->text('reply');
+            $table->timestamps();
+        });
     }
 
 
     public function down(): void
     {
+        Schema::dropIfExists('product_review_replies');
+        Schema::dropIfExists('product_reviews');
         Schema::dropIfExists('transactions');
         Schema::dropIfExists('payments');
         Schema::dropIfExists('invoices');

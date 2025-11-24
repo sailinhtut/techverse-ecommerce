@@ -14,12 +14,14 @@ class UserRole extends Model
         'display_name',
         'description',
         'permissions',
+        'is_company_member',
     ];
 
     protected function casts(): array
     {
         return [
             'permissions' => 'array',
+            'is_company_member' => 'boolean'
         ];
     }
 
@@ -36,6 +38,7 @@ class UserRole extends Model
             'display_name' => $this->display_name,
             'description' => $this->description,
             'permissions' => $this->permissions,
+            'is_company_member' => $this->is_company_member,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

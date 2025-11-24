@@ -129,6 +129,7 @@ return new class extends Migration
             $table->enum('product_type', ['simple', 'variable'])->default('simple');
             $table->text('short_description')->nullable();
             $table->longText('long_description')->nullable();
+            $table->decimal('buying_price', 10, 2)->default(0);
             $table->decimal('regular_price', 10, 2)->default(0);
             $table->decimal('sale_price', 10, 2)->nullable();
             $table->boolean('enable_stock')->default(false);
@@ -140,7 +141,7 @@ return new class extends Migration
             $table->integer('priority')->nullable();
             $table->boolean('is_pinned')->default(false);
             $table->boolean('is_promotion')->default(false);
-             $table->dateTime('promotion_end_time')->nullable();
+            $table->dateTime('promotion_end_time')->nullable();
             $table->integer('interest')->default(0);
 
             $table->foreignId('shipping_class_id')->nullable()->constrained('shipping_classes')->onDelete('set null');
@@ -150,6 +151,8 @@ return new class extends Migration
             $table->decimal('width', 10, 2)->nullable();
             $table->decimal('height', 10, 2)->nullable();
             $table->decimal('weight', 10, 2)->nullable();
+
+            $table->boolean('enable_review')->default(true);
 
             $table->timestamps();
         });
@@ -232,13 +235,11 @@ return new class extends Migration
 
             $table->timestamps();
         });
-
-        
     }
 
     public function down(): void
     {
- 
+
         Schema::dropIfExists('product_payment_methods');
         Schema::dropIfExists('payment_method_attributes');
         Schema::dropIfExists('product_up_sell');

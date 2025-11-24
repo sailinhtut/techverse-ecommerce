@@ -1,16 +1,26 @@
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_logo = getSiteLogoURL();
+@endphp
+
+
 <nav x-data="{ scrolled: false }" x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 10 })"
     :class="scrolled ? 'bg-white shadow-sm border-b border-base-300' : 'bg-transparent'"
     class="fixed top-0 left-0 right-0 flex flex-row justify-between items-center px-2 lg:px-5 py-0 !h-[60px] z-50">
     <a href="{{ config('app.logo_link') }}" class="my-0 flex flex-row items-center text-sm lg:text-base font-semibold">
-        <img src="{{ asset(config('app.app_logo_bare_path')) }}" alt="{{ config('app.name') }}" class="h-8 mr-2">
-        {{ config('app.name') }}
+        <img src="{{ $site_logo }}" alt="{!! $site_name !!}" class="h-8 mr-2">
+        {!! $site_name !!}
     </a>
 
     <ul class="my-0 hidden lg:flex flex-row items-center px-1 gap-5">
 
-        <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'active' : '' }} text-primary">Shop</a></li>
-        <li><a href="{{ route('contact.get') }}" class="{{ request()->is('shop') ? 'active' : '' }}">Contact</a></li>
-        <li><a href="{{ route('about_us.get') }}" class="{{ request()->is('shop') ? 'active' : '' }}">About</a></li>
+        <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'text-primary active' : '' }}">Shop</a>
+        </li>
+        <li><a href="{{ route('contact.get') }}"
+                class="{{ request()->is('contact') ? 'text-primary active' : '' }}">Contact</a>
+        </li>
+        <li><a href="{{ route('about_us.get') }}"
+                class="{{ request()->is('about') ? 'text-primary active' : '' }}">About</a></li>
 
         @auth
             <div class="dropdown dropdown-end">
@@ -19,7 +29,7 @@
                 </label>
                 <ul tabindex="0" class="menu dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-40">
                     <li><a href="/profile">Profile</a></li>
-                    @if (auth()->user()->hasRole('admin'))
+                    @if (auth()->user()->role?->is_company_member ?? false)
                         <li><a href="/admin/dashboard">Admin Panel</a></li>
                     @endif
 
@@ -84,7 +94,7 @@
                     </li>
                     @auth
                         <li><a href="{{ route('profile.get') }}">Profile</a></li>
-                        @if (auth()->user()->hasRole('admin'))
+                        @if (auth()->user()->role?->is_company_member ?? false)
                             <li><a href="{{ route('admin.dashboard.get') }}">Admin Panel</a></li>
                         @endif
 

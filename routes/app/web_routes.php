@@ -1,5 +1,7 @@
 <?php
 
+use App\Auth\Controllers\WishlistController;
+use App\Cart\Controllers\CartController;
 use App\Inventory\Controllers\CouponController;
 use App\Inventory\Controllers\ProductController;
 use App\Inventory\Controllers\ProductVariantController;
@@ -8,14 +10,39 @@ use App\Payment\Controllers\PaymentController;
 use App\Payment\Controllers\PaymentMethodController;
 use App\Review\Controllers\ProductReviewController;
 use App\Review\Controllers\ProductReviewReplyController;
+use App\Setting\Models\AppSetting;
 use App\Shipping\Controllers\ShippingMethodController;
 use App\Store\Controllers\StoreBranchController;
 use App\Tax\Controllers\TaxRateController;
 use Illuminate\Support\Facades\Route;
 
-
-
 Route::view('/', 'pages.user.core.landing')->name('home.get');
+
+Route::view('/setting', 'pages.user.dashboard.general_setting')->name('setting.get');
+Route::view('/privacy', 'pages.user.core.privacy')->name('privacy.get');
+Route::view('/terms', 'pages.user.core.terms')->name('terms.get');
+Route::view('/about', 'pages.user.core.about_us')->name('about_us.get');
+Route::view('/contact', 'pages.user.core.contact')->name('contact.get');
+
+Route::controller(CartController::class)->group(function () {
+    Route::get('/cart/items', 'getCartItems')->name('cart.items.get')->middleware('auth');
+    Route::post('/cart/add', 'addToCart')->name('cart.add.post')->middleware('auth');
+    Route::post('/cart/remove', 'removeFromCart')->name('cart.remove.post')->middleware('auth');
+    Route::post('/cart/clear', 'clearCart')->name('cart.clear.post')->middleware('auth');
+    Route::get('/cart', 'viewUserCartPage')->name('cart.get')->middleware('auth');
+});
+
+Route::controller(WishlistController::class)->group(function () {
+    Route::get('/wishlist', 'getWishlists')->name('wishlist.get')->middleware('auth');
+
+    Route::get('/wishlist/api', 'getAPIWishlists')->name('wishlist.api.get')->middleware('auth');
+
+    Route::post('/wishlist', 'toggleWishlist')->name('wishlist.post')->middleware('auth');
+
+    Route::delete('/wishlist/{id}', 'deleteWishlist')->name('wishlist.id.delete')->middleware('auth');
+});
+
+
 
 Route::controller(StoreBranchController::class)->group(function () {
     Route::get('/store-locator', 'viewUserStoreLocatorPage');
@@ -55,7 +82,7 @@ Route::controller(ProductController::class)->group(function () {
 });
 
 Route::controller(CouponController::class)->group(function () {
-    Route::post('/order/apply-coupon', 'applyCoupon')->name('order.apply-coupon.post');
+    Route::post('/order/check-coupon', 'checkCoupon')->name('order.apply-coupon.post');
 });
 
 Route::controller(ProductVariantController::class)->group(function () {

@@ -22,7 +22,8 @@
 
                     <li>
                         @isset($edit_product)
-                            <a href="{{ route('admin.dashboard.product.edit.id.get',$edit_product['id']) }}" class="btn btn-xs btn-ghost">
+                            <a href="{{ route('admin.dashboard.product.edit.id.get', $edit_product['id']) }}"
+                                class="btn btn-xs btn-ghost">
                                 {{ $edit_product['name'] ?? 'Edit Product' }}
                             </a>
                         @else
@@ -193,6 +194,16 @@
 
                         <div x-data="{ enable_stock: @json($edit_product['enable_stock'] ?? false) }"
                             class="w-full p-3 border border-base-300 rounded-box grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+
+                            <div class="w-full flex flex-col gap-2">
+                                <label for="buying_price" class="text-sm">Buying
+                                    Price (Optional)</label>
+                                <input type="number" name="buying_price" id="buying_price"
+                                    class="input input-sm w-full"
+                                    value="{{ old('buying_price', $edit_product['buying_price'] ?? '') }}" step="any"
+                                    required>
+                            </div>
+
                             <div class="w-full flex flex-col gap-2">
                                 <label for="regular_price" class="text-sm">Regular
                                     Price*</label>
@@ -227,9 +238,21 @@
                         </div>
 
                         <div class="p-3 rounded-box border border-base-300 w-full flex flex-col gap-2">
-                            <label for="long_description" class="text-sm">Long Description
-                                (Optional)</label>
-                            <textarea name="long_description" id="long_description" class="textarea w-full" rows="10">{{ old('long_description', $edit_product['long_description'] ?? '') }}</textarea>
+                            <label class="text-sm flex items-center gap-2">Long Description (Optional)<span
+                                    class="tooltip font-normal" data-tip="{{ config('app.template_usage_tooltip') }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                    </svg>
+                                </span></label>
+                            <div x-data="quillSetUpData()">
+                                <div x-ref="editor" class=""></div>
+                                <textarea class="hidden" name="long_description" x-ref="input">
+                                    {{ old('long_description', $edit_product['long_description'] ?? '') }}
+                                </textarea>
+                            </div>
+                            {{-- <textarea name="long_description" id="long_description" class="textarea w-full" rows="10"></textarea> --}}
                         </div>
                     </div>
                 </div>
@@ -339,7 +362,6 @@
                                             Generate
                                         </button>
                                     </div>
-
 
                                     <!-- Regular Price -->
                                     <label class="text-sm">Regular Price</label>
@@ -716,6 +738,32 @@
                     </div>
                 </div>
 
+                <input type="radio" name="active_tab" class="tab" aria-label="Review" />
+                <div class="tab-content">
+                    <div
+                        class="mt-3 w-full p-3 border border-base-300 rounded-box grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <div class="w-full flex flex-col gap-2">
+                            <label for="priority" class="text-sm flex items-center gap-3">Enable Product Review
+                                <span class="tooltip font-normal"
+                                    data-tip="If enabled, product review section will appear in product detail page.">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                                    </svg>
+                                </span>
+                            </label>
+                            <select name="enable_review" class="select w-full" required>
+                                <option value="1" @selected(old('enable_review', $edit_product['enable_review']))>
+                                    Enabled
+                                </option>
+                                <option value="0" @selected(!old('enable_review', $edit_product['enable_review']))>
+                                    Disabled
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button type="submit" class="mt-10 btn btn-primary w-fit">
@@ -726,6 +774,7 @@
 @endsection
 
 @push('script')
+    <script src="https://cdn.jsdelivr.net/gh/scrapooo/quill-resize-module@1.0.2/dist/quill-resize-module.js"></script>
     <script>
         function specificationForm(existingSpecification) {
 
@@ -861,6 +910,159 @@
                     }
                 }
             };
+        }
+
+        const sitePrimaryColor = "{{ $settings['site_primary_color'] ?? config('app.primary_color') }}";
+
+        const sitePrimaryContentColor =
+            "{{ $settings['site_primary_content_color'] ?? config('app.site_primary_content_color') }}";
+
+        const colorPalette = [
+            // Site branding colors first
+            sitePrimaryColor,
+            sitePrimaryContentColor,
+
+            // GREEN
+            'HoneyDew', 'PaleGreen', 'LightGreen', 'Lime', 'LimeGreen', 'MediumSeaGreen', 'SeaGreen', 'ForestGreen',
+            'Green', 'DarkGreen', 'Olive', 'OliveDrab', 'YellowGreen',
+
+            // RED / PINK
+            'MistyRose', 'LightCoral', 'Salmon', 'DarkSalmon', 'Red', 'FireBrick', 'Crimson', 'Pink', 'HotPink',
+            'DeepPink', 'Fuchsia', 'Magenta',
+
+            // BLUE / CYAN
+            'LightCyan', 'PaleTurquoise', 'Cyan', 'Aqua', 'Aquamarine', 'Turquoise', 'MediumTurquoise', 'DarkTurquoise',
+            'LightBlue', 'SkyBlue', 'DeepSkyBlue', 'DodgerBlue', 'CornflowerBlue', 'RoyalBlue', 'Blue', 'MediumBlue',
+            'DarkBlue', 'Navy', 'MidnightBlue',
+
+            // PURPLE / VIOLET
+            'Lavender', 'Thistle', 'Plum', 'Orchid', 'Violet', 'MediumOrchid', 'DarkOrchid', 'Purple', 'RebeccaPurple',
+            'DarkViolet', 'MediumPurple', 'SlateBlue', 'MediumSlateBlue',
+
+            // YELLOW / ORANGE / BROWN
+            'LightYellow', 'LemonChiffon', 'LightGoldenRodYellow', 'PapayaWhip', 'Moccasin', 'PeachPuff',
+            'PaleGoldenRod', 'Khaki', 'DarkKhaki', 'Yellow', 'Gold', 'GoldenRod', 'Orange', 'DarkOrange', 'OrangeRed',
+            'Peru', 'Chocolate', 'SandyBrown', 'BurlyWood', 'Tan', 'RosyBrown', 'Salmon', 'Sienna',
+
+            // NEUTRALS / BLACK / WHITE / GRAY
+            'Snow', 'White', 'WhiteSmoke', 'Gainsboro', 'LightGray', 'Silver', 'DarkGray', 'Gray', 'DimGray', 'Black'
+        ];
+
+        document.addEventListener("alpine:init", () => {
+            // Register with Quill v2
+            Quill.register("modules/resize", window.QuillResizeModule);
+        });
+
+        function quillSetUpData() {
+            return {
+                init() {
+                    const toolbar = [
+                        [{
+                            'font': []
+                        }],
+                        [{
+                            'size': ['small', false, 'large', 'huge']
+                        }],
+                        ['bold', 'italic', 'underline', 'strike', 'code'],
+                        [{
+                            'color': colorPalette
+                        }, {
+                            'background': colorPalette
+                        }],
+                        [{
+                            'script': 'sub'
+                        }, {
+                            'script': 'super'
+                        }],
+                        [{
+                            'header': 1
+                        }, {
+                            'header': 2
+                        }, 'blockquote', 'code-block'],
+                        [{
+                            'list': 'ordered'
+                        }, {
+                            'list': 'bullet'
+                        }, {
+                            'indent': '-1'
+                        }, {
+                            'indent': '+1'
+                        }],
+                        ['direction', {
+                            'align': []
+                        }],
+                        ['link', 'image', 'video'],
+                        ['clean']
+                    ];
+
+                    let initial = (this.$refs.input.value || '').trim();
+
+                    let editor = new Quill(this.$refs.editor, {
+                        theme: 'snow',
+                        placeholder: 'Write something...',
+                        modules: {
+                            toolbar: {
+                                container: toolbar,
+                                handlers: {
+                                    image: function() {
+                                        const input = document.createElement('input');
+                                        input.setAttribute('type', 'file');
+                                        input.setAttribute('accept', 'image/*');
+                                        input.click();
+
+                                        input.onchange = () => {
+                                            const file = input.files[0];
+                                            if (file) {
+                                                if (file.size > 200 * 1024) {
+                                                    alert(
+                                                        "Image is too large. Maximum allowed size is 200 KB."
+                                                    );
+                                                    return;
+                                                }
+
+                                                const reader = new FileReader();
+                                                reader.onload = (e) => {
+                                                    const range = editor.getSelection(true);
+                                                    editor.insertEmbed(range.index, 'image', e.target
+                                                        .result, 'user');
+                                                    editor.setSelection(range.index + 1, 0);
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        };
+                                    }
+
+                                }
+                            },
+                            resize: {
+                                parchment: Quill.import('parchment'),
+                                displayStyles: {
+                                    backgroundColor: 'black',
+                                    border: 'none',
+                                    color: 'white'
+                                }
+                            }
+                        },
+                        formats: [
+                            'size', 'bold', 'italic', 'underline', 'color', 'list', 'link', 'image',
+                            'video', 'background', 'script', 'header', 'blockquote', 'code-block', 'code',
+                            'direction',
+                            'align', 'font', 'strike', 'indent'
+                        ]
+                    });
+
+                    // Set initial content
+                    editor.root.innerHTML = initial;
+
+                    if (initial.length === 0) {
+                        editor.setSelection(0, 0);
+                    }
+
+                    editor.on('text-change', () => {
+                        this.$refs.input.value = editor.root.innerHTML.trim();
+                    });
+                }
+            }
         }
     </script>
 @endpush

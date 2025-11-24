@@ -2,8 +2,8 @@
 
 @section('user_dashboard_content')
     <div class="p-3 lg:p-5">
-        <p class="lg:text-lg font-semibold ">Payment Transaction</p>
-        <div class="card shadow-sm border border-base-300">
+        <p class="lg:text-lg font-semibold">Payment Transaction</p>
+        <div class="mt-3 card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
                     <thead>

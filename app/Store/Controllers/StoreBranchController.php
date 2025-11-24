@@ -37,11 +37,41 @@ class StoreBranchController
         }
     }
 
-    public function viewAdminStoreBranchListPage()
+    public function viewAdminStoreBranchListPage(Request $request)
     {
         try {
-            $branches = StoreBranch::orderBy('name', 'asc')
-                ->paginate(10);
+
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = StoreBranch::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $branches = $query->paginate($perPage);
+            $branches->appends(request()->query());
 
             $branches->getCollection()->transform(function ($branch) {
                 return $branch->jsonResponse();
@@ -135,6 +165,43 @@ class StoreBranchController
             return redirect()->back()->with('success', 'Store branch deleted successfully.');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+    public function deleteSelectedStoreBranches(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No store branches selected for deletion.');
+            }
+
+            $store_branches = StoreBranch::whereIn('id', $ids)->get();
+
+            foreach ($store_branches as $branch) {
+                $branch->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected store branches deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected store branches.");
+        }
+    }
+
+
+    public function deleteAllStoreBranches()
+    {
+        try {
+            $store_branches = StoreBranch::all();
+
+            foreach ($store_branches as $branch) {
+                $branch->delete();
+            }
+
+            return redirect()->back()->with('success', 'All store branches deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all store branches.");
         }
     }
 }

@@ -11,7 +11,7 @@
                 Back
             </button>
         </div>
-        
+
         <div class="w-fit max-w-full text-sm bg-base-300 rounded px-2 overflow-x-auto ">
             <div class="breadcrumbs text-sm my-0 py-1">
                 <ul>
@@ -189,7 +189,7 @@
                     <label class="text-sm">Email Verified At</label>
                     <input type="text"
                         class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
-                        value="{{ $order['user']['email_verified_at'] ? \Carbon\Carbon::parse($order['user']['email_verified_at'])->format('Y-m-d H:i') : 'Not Verified' }}"
+                        value="{{ $order['user']['email_verified_at'] ? \Carbon\Carbon::parse($order['user']['email_verified_at'])->format('Y-m-d h:i A') : 'Not Verified' }}"
                         readonly>
                 </div>
 
@@ -197,7 +197,8 @@
                     <label class="text-sm">Account Created</label>
                     <input type="text"
                         class="input w-full focus:outline-none focus:ring-0 focus-border-base-300 cursor-default select-none"
-                        value="{{ $order['user']['created_at'] ? \Carbon\Carbon::parse($order['user']['created_at'])->format('Y-m-d H:i') : '' }}" readonly>
+                        value="{{ $order['user']['created_at'] ? \Carbon\Carbon::parse($order['user']['created_at'])->format('Y-m-d h:i A') : '' }}"
+                        readonly>
                 </div>
 
                 <div>
@@ -362,10 +363,18 @@
                         @foreach ($order['products'] ?? [] as $item)
                             <tr>
                                 <td>
-                                    <a href="{{ route('shop.slug.get', ['slug' => $item['sku']]) }}"
-                                        class="cursor-pointer hover:underline">
-                                        {{ $item['name'] }}
-                                    </a>
+                                    @if (isset($item['product']['slug']))
+                                        <a href="{{ route('shop.slug.get', ['slug' => $item['product']['slug'], 'variant' => $item['variant_id']]) }}"
+                                            class="cursor-pointer hover:underline">
+                                            {{ $item['name'] }}
+                                        </a>
+                                    @else
+                                        <div class="tooltip tooltip-right" data-tip="{{ $item['name'] }} is not existed">
+                                            <p class="cursor-pointer hover:underline">
+                                                {{ $item['name'] }}
+                                            </p>
+                                        </div>
+                                    @endif
                                 </td>
                                 <td>{{ $item['sku'] }}</td>
                                 <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}</td>

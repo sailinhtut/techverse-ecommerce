@@ -7,6 +7,8 @@ use App\Auth\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 
+use function PHPUnit\Framework\isNull;
+
 class UserService
 {
     public static function getProfile($id): User
@@ -46,7 +48,7 @@ class UserService
 
             if (!$user) throw new Exception('No User Found');
 
-            if (array_key_exists('remove_profile', $values) && $values['remove_profile']) {
+            if (array_key_exists('remove_profile', $values) && $values['remove_profile'] && !isNull($user->profile) && Storage::disk('public')->exists($user->profile)) {
                 Storage::disk('public')->delete($user->profile);
                 $user->profile = null;
             }

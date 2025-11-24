@@ -27,6 +27,7 @@ class Product extends Model
         'product_type',
         'short_description',
         'long_description',
+        'buying_price',
         'regular_price',
         'sale_price',
         'enable_stock',
@@ -45,7 +46,8 @@ class Product extends Model
         'length',
         'width',
         'height',
-        'weight'
+        'weight',
+        'enable_review',
     ];
 
     protected function casts(): array
@@ -53,6 +55,7 @@ class Product extends Model
         return [
             'is_active'        => 'boolean',
             'enable_stock'     => 'boolean',
+            'buying_price'     => 'decimal:2',
             'regular_price'    => 'decimal:2',
             'sale_price'       => 'decimal:2',
             'stock'            => 'integer',
@@ -71,7 +74,8 @@ class Product extends Model
             'width' => 'decimal:2',
             'height' => 'decimal:2',
             'weight' => 'decimal:2',
-            'promotion_end_time' => 'datetime'
+            'promotion_end_time' => 'datetime',
+            'enable_review' => 'boolean',
         ];
     }
 
@@ -165,6 +169,7 @@ class Product extends Model
             'product_type' => $this->product_type,
             'short_description' => $this->short_description,
             'long_description' => $this->long_description,
+            'buying_price' => (float) $this->buying_price ?? 0,
             'regular_price' =>  (float) $this->regular_price ?? 0,
             'sale_price' => $sale_price <= 0 ? null : $sale_price,
             'enable_stock' => $this->enable_stock,
@@ -187,6 +192,7 @@ class Product extends Model
             'width' =>  $this->width ? (float)$this->width : null,
             'height' =>  $this->height ? (float)$this->height : null,
             'weight' =>  $this->weight ? (float)$this->weight : null,
+            'enable_review' => $this->enable_review, 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -2,22 +2,53 @@
 
 namespace App\Payment\Controllers;
 
+use App\Cart\Models\Cart;
 use App\Inventory\Models\Product;
 use App\Payment\Models\PaymentMethod;
+use App\Payment\Services\PaymentMethodService;
 use Exception;
 use Illuminate\Http\Request;
 
 class PaymentMethodController
 {
-    public function viewAdminPaymentMethodListPage()
+    public function viewAdminPaymentMethodListPage(Request $request)
     {
         try {
-            $paymentmethods = PaymentMethod::orderBy('id', 'desc')->paginate(20);
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = PaymentMethod::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $paymentmethods = $query->paginate($perPage);
+            $paymentmethods->appends(request()->query());
 
             $paymentmethods->getCollection()->transform(function ($payment) {
                 return $payment->jsonResponse(['paymentAttributes']);
             });
-
 
             return view('pages.admin.dashboard.payment.payment_method_list', [
                 'paymentmethods' => $paymentmethods
@@ -30,57 +61,20 @@ class PaymentMethodController
     public function filterPaymentMethod(Request $request)
     {
         try {
-            $validated = $request->validate([
-                'product_ids' => 'required|array',
-                'product_ids.*' => 'integer|exists:products,id',
-            ]);
+            $cart = Cart::with('items.product')
+                ->where('user_id', auth()->id())
+                ->orWhere('is_checked_out', false)
+                ->first();
 
-            $products = Product::with(['paymentMethods'])
-                ->whereIn('id', $validated['product_ids'])
-                ->get();
-
-            if ($products->isEmpty()) abort(404, 'No Product Found');
-
-            $paymentMethodIdsPerProduct = $products->map(
-                fn($product) =>
-                $product->paymentMethods->pluck('id')->toArray()
-            )->filter(fn($ids) => !empty($ids));
-
-            $commonPaymentMethodIds = $paymentMethodIdsPerProduct->reduce(function ($carry, $item) {
-                return $carry === null ? $item : array_intersect($carry, $item);
-            });
-
-            if (!empty($commonPaymentMethodIds)) {
-                $commonPaymentMethods = PaymentMethod::whereIn('id', $commonPaymentMethodIds)
-                    ->where('enabled', true)
-                    ->get()
-                    ->map(fn($method) => $method->jsonResponse());
-
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Filtered payment methods retrieved successfully.',
-                    'data' => $commonPaymentMethods,
-                ]);
+            if (!$cart || !$cart->items()->exists()) {
+                return response()->json(['message' => "Your cart is empty"], 400);
             }
 
-            // $allMethods = $products->flatMap(fn($p) => $p->paymentMethods)->unique('id')->values();
-            $allMethods = PaymentMethod::where('enabled', true)->get();
-
-            $highPriorityFallback = $allMethods->filter(fn($m) => $m->priority === 'high' && $m->enabled);
-
-            if ($highPriorityFallback->isNotEmpty()) {
-                $fallbackMethods = $highPriorityFallback->map(fn($m) => $m->jsonResponse());
-                $message = 'No common methods. Showing high-priority fallback.';
-            } else {
-                $fallbackMethods = $allMethods->filter(fn($m) => $m->enabled)->map(fn($m) => $m->jsonResponse());
-                $message = 'No common methods. Showing available low priority fallback.';
-            }
+            $calculated_methods = PaymentMethodService::calculatePaymentMethods($cart->items);
 
             return response()->json([
                 'success' => true,
-                'message' => $message,
-                'data' => $fallbackMethods,
+                'data' => $calculated_methods,
             ]);
         } catch (Exception $e) {
             return handleErrors($e);
@@ -256,6 +250,43 @@ class PaymentMethodController
             return back()->with('success', 'Payment Method Deleted Successfully');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+    public function deleteSelectedPaymentMethods(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No payment methods selected for deletion.');
+            }
+
+            $payment_methods = PaymentMethod::whereIn('id', $ids)->get();
+
+            foreach ($payment_methods as $method) {
+                $method->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected payment_methods deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected payment_methods.");
+        }
+    }
+
+
+    public function deleteAllPaymentMethods()
+    {
+        try {
+            $payment_methods = PaymentMethod::all();
+
+            foreach ($payment_methods as $method) {
+                $method->delete();
+            }
+
+            return redirect()->back()->with('success', 'All payment methods deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all payment_methods.");
         }
     }
 }

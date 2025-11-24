@@ -3,6 +3,11 @@
 @section('web_content')
     @include('components.shop_navbar')
 
+    @php
+        $site_name = getParsedTemplate('site_name');
+        $site_logo = getSiteLogoURL();
+    @endphp
+
     {{-- Categories Bar --}}
     <div x-cloak
         class="flex flex-row md:justify-between bg-white sticky top-[60px] z-10 w-full text-sm border-b border-b-base-300"
@@ -41,13 +46,12 @@
             <div class="flex flex-col lg:flex-row justify-start gap-3">
                 <div class="px-3 w-full lg:w-[250px] hidden lg:block">
                     <p class="text-lg font-semibold flex flex-row items-center gap-2">
-                        <img src="{{ asset(config('app.app_logo_bare_path')) }}" alt="{{ config('app.name') }}"
-                            class="w-9 h-8">
-                        {{ config('app.name') }}
+                        <img src="{{ $site_logo }}" alt="{!! $site_name !!}" class="h-8">
+                        {!! $site_name !!}
                     </p>
-                    <p class="text-xs italic text-justify">
+                    {{-- <p class="text-xs italic text-justify">
                         Explore Your New Best Favourites
-                    </p>
+                    </p> --}}
                     <div class="mt-3 flex flex-col gap-1">
                         <a
                             class="flex flex-row items-center justify-between gap-1 text-sm cursor-pointer text-primary hover:bg-primary/20 hover:px-2 px-0 py-1 rounded-md group transition-all">
@@ -187,7 +191,7 @@
 
 
     {{-- Mobile Carousel Slider --}}
-    <div x-data="carousel()" x-init="startAutoSlide()"
+    <div x-data="carousel()" x-show="visible" x-init="startAutoSlide()"
         class="group w-full h-[30vh] sm:h-[40vh] lg:hidden relative overflow-hidden z-0">
 
         <!-- Slides -->
@@ -260,7 +264,8 @@
     <div class="p-3 sm:p-5 lg:p-10">
 
         {{-- Header Focus Section --}}
-        <div class="w-full hidden lg:flex h-[400px] flex-row items-start justify-center gap-3">
+        <div x-data='carousel()' x-show="visible" x-init="startAutoSlide()"
+            class="w-full hidden lg:flex h-[400px] flex-row items-start justify-center gap-3">
 
 
             {{-- Category List --}}
@@ -312,15 +317,16 @@
 
 
             {{-- Carousel Slider --}}
-            <div x-data='carousel()' x-init="startAutoSlide()"
-                class="group w-[600px] shrink-0 h-full relative overflow-hidden z-0">
+            <div class="group w-[600px] shrink-0 h-full relative overflow-hidden z-0">
 
                 <!-- Slides -->
                 <template x-for="(image, index) in images" :key="image.id">
                     <div class="absolute inset-0 transition-opacity duration-700"
                         :class="current === index ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'">
                         <a :href="image.link" target="_self" rel="noopener">
-                            <img :src="image.image" alt="" class="w-full h-full object-fill border border-base-300 opacity-0 transition-opacity" onload="this.style.opacity=1;"/>
+                            <img :src="image.image" alt=""
+                                class="w-full h-full object-fill border border-base-300 opacity-0 transition-opacity"
+                                onload="this.style.opacity=1;" />
                         </a>
                     </div>
                 </template>
@@ -467,8 +473,8 @@
             </div>
         </div>
 
-        {{-- Banner Ads --}}
         <div class="flex flex-row justify-around">
+            {{-- Banner Ads --}}
             @if (isset($banner_images) && !empty($banner_images) && count($banner_images) > 0)
                 <div class="hidden sticky top-[100px] mt-[50px] w-[200px] h-full p-5 lg:flex flex-col">
                     <p class="text-sm font-semibold">Trending Updates</p>
@@ -502,8 +508,8 @@
                 </div>
 
                 @if (isset($today_best_display) && $today_best_display == true)
-                    <div class="mt-5 w-full scroll-mt-[120px]" x-data="pinnedProductState()" x-show="products.length > 0"
-                        x-cloak id="todays-best">
+                    <div class="mt-5 w-full scroll-mt-[120px]" x-data="pinnedProductState()"
+                        x-show="loading || products.length > 0" x-cloak id="todays-best">
                         <div class="flex flex-row justify-between items-center">
                             <p class="font-semibold lg:text-lg">Today's Best</p>
                             <button class="btn btn-sm btn-ghost btn-primary" @click="showViewAll=!showViewAll"
@@ -521,54 +527,108 @@
                             </div>
                         </template>
 
+                        <div x-show="loading"
+                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                            <template x-for="i in 6" :key="i">
+                                <div class="skeleton w-full h-48 rounded-lg"></div>
+                            </template>
+                        </div>
+
                         {{-- Horizontal Scroll --}}
                         <div class="relative" x-show="!showViewAll" x-cloak>
                             <div x-ref="scrollContainer"
-                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar pb-3">
+                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar p-2">
                                 <template x-for="(product,index) in products" :key="product.slug">
-                                    <a :href="`/shop/${product.slug}`"
-                                        class="w-[140px] md:w-[160px] grow-0 shrink-0 bg-base-100 border border-base-300 shadow-sm rounded-lg overflow-hidden hover:shadow-md transition flex flex-col relative">
-
-                                        <img :src="product.image || '{{ asset('assets/images/computer_accessories.png') }}'"
-                                            :alt="product.name" class="w-full h-24 lg:h-32 p-2 object-contain">
-
-                                        <div class="p-2 flex flex-col flex-1 justify-between">
-                                            <p class="font-semibold text-sm line-clamp-1" x-text="product.name"></p>
-                                            {{-- <p class="text-xs text-gray-500 line-clamp-1 mt-1"
-                                                x-text="product.short_description || ''"></p> --}}
-
-                                            <template x-if="product.is_promotion && product.promotion_end_time">
-                                                <div x-data="countdownTimer(product.promotion_end_time)"
-                                                    class="p-0.5 px-1 w-fit text-primary italic mt-1 text-xs flex items-center gap-1">
-                                                    <span x-text="display"></span>
+                                    <div x-data='itemCardState()'
+                                        class="w-[160px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                        <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
+                                            class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
+                                        <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
+                                            <div>
+                                                <a :href="`/shop/${product.slug}`"
+                                                    class="text-sm font-semibold line-clamp-1" x-text="product.name"
+                                                    @click="saveCurrentState()"></a>
+                                                {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-2"
+                                                    x-text="product.short_description ?? 'No Description'"></p> --}}
+                                            </div>
+                                            <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
+                                                <div class="flex text-sm font-semibold">
+                                                    <template x-if="product.sale_price">
+                                                        <div>
+                                                            <span class="text-gray-500 line-through"><span>$<span
+                                                                        x-text="product.regular_price"></span></span></span>
+                                                            <span class=""><span>$<span
+                                                                        x-text="product.sale_price"></span></span></span>
+                                                            <span class="ml-1 text-[10px]"
+                                                                x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!product.sale_price">
+                                                        <span>$<span x-text="product.regular_price"></span></span>
+                                                    </template>
                                                 </div>
-                                            </template>
+                                                <div>
+                                                    <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                        <template x-show="addingToCart" x-if="addingToCart">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                        <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24" class="size-4" aria-hidden="true"
+                                                            fill="none" stroke="currentColor" stroke-width="1.5"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <path
+                                                                d="M3 3h2l1.6 9.6a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
+                                                            <circle cx="10" cy="20" r="1.5" />
+                                                            <circle cx="18" cy="20" r="1.5" />
+                                                        </svg>
+                                                    </button>
+                                                    <button x-show="$store.cart.getQuantity(product.id)>0"
+                                                        @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                        <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                                            <path fill-rule="evenodd"
+                                                                d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
 
-                                            <div class="my-2 flex items-center gap-1 font-semibold text-sm">
-                                                <template x-if="product.sale_price">
-                                                    <div class="flex gap-1">
-                                                        <span class="text-gray-400 line-through"
-                                                            x-text="GeneralHelper.formatPrice(product.regular_price)"></span>
-                                                        <span class=""
-                                                            x-text="GeneralHelper.formatPrice(product.sale_price)"></span>
-                                                    </div>
-                                                </template>
-                                                <template x-if="!product.sale_price">
-                                                    <span x-text="GeneralHelper.formatPrice(product.regular_price)"></span>
-                                                </template>
+                                                        <template x-if="removingFromCart">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                    </button>
+
+                                                    <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
+                                                            viewBox="0 0 24 24" fill="currentColor"
+                                                            class="size-4 fill-primary">
+                                                            <path
+                                                                d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                                        </svg>
+
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            x-show="!addingToWishlist && !$store.wishlist.isWishlist(product.id)"
+                                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                            stroke="currentColor" class="size-4">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                                        </svg>
+                                                        <template x-if="addingToWishlist">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <template x-if="product.sale_price">
-                                            <div class="absolute top-3 left-0 w-fit text-[10px] p-1 bg-black/80 text-primary-content rounded-tr-sm rounded-br-sm"
-                                                x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`">
-                                            </div>
-                                        </template>
-                                    </a>
+                                        <div x-show="$store.cart.getQuantity(product.id)>0" x-cloak
+                                            class="absolute top-0 left-2-0 -translate-y-1/3 -translate-x-1/3 flex items-center justify-center size-6 bg-primary text-primary-content rounded-md text-sm"
+                                            x-text="$store.cart.getQuantity(product.id)">
+                                        </div>
+                                    </div>
                                 </template>
                             </div>
 
-                            <div class="mt-3 w-full flex justify-end gap-3">
+                            <div class="mt-1 w-full flex justify-end gap-3">
                                 <button class="btn btn-circle" @click="prev()">❮</button>
                                 <button class="btn btn-circle" @click="next()">❯</button>
                             </div>
@@ -579,49 +639,91 @@
                         <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 lg:gap-5 "
                             x-show="showViewAll" x-cloak>
                             <template x-for="(product,index) in products" :key="index">
-                                <div
-                                    class="bg-base-100 border border-base-300 shadow-md select-none overflow-hidden hover:shadow-lg transition relative rounded-lg relative">
+                                <div x-data='itemCardState()'
+                                    class="bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                     <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                         class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
-                                    <div class="p-2 flex flex-col flex-1 justify-between">
-                                        <a :href="`/shop/${product.slug}`" class="font-semibold text-sm line-clamp-1"
-                                            x-text="product.name"></a>
-                                        {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-1"
-                                            x-text="product.short_description ?? 'No Description'"></p> --}}
-
-                                        <template x-if="product.is_promotion && product.promotion_end_time">
-                                            <div x-data="countdownTimer(product.promotion_end_time)"
-                                                class="p-0.5 px-1 w-fit text-primary italic mt-1 text-xs flex items-center gap-1">
-                                                <span x-text="display"></span>
+                                    <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
+                                        <div>
+                                            <a :href="`/shop/${product.slug}`" class="text-sm font-semibold line-clamp-1"
+                                                x-text="product.name" @click="saveCurrentState()"></a>
+                                            {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-2"
+                                                x-text="product.short_description ?? 'No Description'"></p> --}}
+                                        </div>
+                                        <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
+                                            <div class="flex text-sm font-semibold">
+                                                <template x-if="product.sale_price">
+                                                    <div>
+                                                        <span class="text-gray-500 line-through"><span>$<span
+                                                                    x-text="product.regular_price"></span></span></span>
+                                                        <span class=""><span>$<span
+                                                                    x-text="product.sale_price"></span></span></span>
+                                                        <span class="ml-1 text-[10px]"
+                                                            x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!product.sale_price">
+                                                    <span>$<span x-text="product.regular_price"></span></span>
+                                                </template>
                                             </div>
-                                        </template>
+                                            <div>
+                                                <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                    <template x-show="addingToCart" x-if="addingToCart">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                    <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24" class="size-4" aria-hidden="true"
+                                                        fill="none" stroke="currentColor" stroke-width="1.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path
+                                                            d="M3 3h2l1.6 9.6a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
+                                                        <circle cx="10" cy="20" r="1.5" />
+                                                        <circle cx="18" cy="20" r="1.5" />
+                                                    </svg>
+                                                </button>
+                                                <button x-show="$store.cart.getQuantity(product.id)>0"
+                                                    @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                    <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                                        <path fill-rule="evenodd"
+                                                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                    <template x-if="removingFromCart">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                </button>
 
-                                        <div class="my-2 flex text-sm font-semibold">
-                                            <template x-if="product.sale_price">
-                                                <div>
-                                                    <span class="text-gray-500 line-through"><span>$<span
-                                                                x-text="product.regular_price"></span></span></span>
-                                                    <span class=""><span>$<span
-                                                                x-text="product.sale_price"></span></span></span>
-                                                </div>
-                                            </template>
-                                            <template x-if="!product.sale_price">
-                                                <span>$<span x-text="product.regular_price"></span></span>
-                                            </template>
+                                                <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
+                                                        viewBox="0 0 24 24" fill="currentColor"
+                                                        class="size-4 fill-primary">
+                                                        <path
+                                                            d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                                    </svg>
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        x-show="!addingToWishlist && !$store.wishlist.isWishlist(product.id)"
+                                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                        stroke="currentColor" class="size-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                                    </svg>
+                                                    <template x-if="addingToWishlist">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <template x-if="product.sale_price">
-                                        <div class="absolute top-3 left-0 w-fit text-[10px] p-1 bg-black/80 text-primary-content rounded-tr-sm rounded-br-sm"
-                                            x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`">
-                                        </div>
-                                    </template>
+                                    <div x-show="$store.cart.getQuantity(product.id)>0" x-cloak
+                                        class="absolute top-0 left-2-0 -translate-y-1/3 -translate-x-1/3 flex items-center justify-center size-6 bg-primary text-primary-content rounded-md text-sm"
+                                        x-text="$store.cart.getQuantity(product.id)">
+                                    </div>
                                 </div>
                             </template>
-                        </div>
-
-                        <div x-show="loading" class="mt-3 flex justify-center items-center py-5 ">
-                            <span class="loading loading-spinner loading-lg text-primary"></span>
                         </div>
 
                         <div x-cloak x-show="!loading && pagination && pagination.next_page_url && showViewAll"
@@ -634,8 +736,8 @@
 
 
                 @if (isset($popular_display) && $popular_display == true)
-                    <div class="mt-5 w-full scroll-mt-[120px]" x-data="propularProductState()" x-show="products.length > 0"
-                        x-cloak id="populars">
+                    <div class="mt-5 w-full scroll-mt-[120px]" x-data="propularProductState()"
+                        x-show="loading || products.length > 0" x-cloak id="populars">
                         <div class="flex flex-row justify-between items-center">
                             <p class="font-semibold lg:text-lg">Popular Products</p>
                             <button class="btn btn-sm btn-ghost btn-primary" @click="showViewAll=!showViewAll"
@@ -653,54 +755,107 @@
                             </div>
                         </template>
 
+                        <div x-show="loading"
+                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                            <template x-for="i in 6" :key="i">
+                                <div class="skeleton w-full h-48 rounded-lg"></div>
+                            </template>
+                        </div>
+
                         {{-- Horizontal Scroll --}}
                         <div class="relative" x-show="!showViewAll" x-cloak>
                             <div x-ref="scrollContainer"
-                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar pb-3">
+                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar p-2">
                                 <template x-for="(product,index) in products" :key="product.slug">
-                                    <a :href="`/shop/${product.slug}`"
-                                        class="w-[140px] md:w-[160px] grow-0 shrink-0 bg-base-100 border border-base-300 shadow-sm rounded-lg overflow-hidden hover:shadow-md transition flex flex-col relative">
-
-                                        <img :src="product.image || '{{ asset('assets/images/computer_accessories.png') }}'"
-                                            :alt="product.name" class="w-full h-24 lg:h-32 p-2 object-contain">
-
-                                        <div class="p-2 flex flex-col flex-1 justify-between">
-                                            <p class="font-semibold text-sm line-clamp-1" x-text="product.name"></p>
-                                            {{-- <p class="text-xs text-gray-500 line-clamp-1 mt-1"
-                                                x-text="product.short_description || ''"></p> --}}
-
-                                            <template x-if="product.is_promotion && product.promotion_end_time">
-                                                <div x-data="countdownTimer(product.promotion_end_time)"
-                                                    class="p-0.5 px-1 w-fit text-primary italic mt-1 text-xs flex items-center gap-1">
-                                                    <span x-text="display"></span>
+                                    <div x-data='itemCardState()'
+                                        class="w-[160px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                        <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
+                                            class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
+                                        <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
+                                            <div>
+                                                <a :href="`/shop/${product.slug}`"
+                                                    class="text-sm font-semibold line-clamp-1" x-text="product.name"
+                                                    @click="saveCurrentState()"></a>
+                                                {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-2"
+                                                    x-text="product.short_description ?? 'No Description'"></p> --}}
+                                            </div>
+                                            <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
+                                                <div class="flex text-sm font-semibold">
+                                                    <template x-if="product.sale_price">
+                                                        <div>
+                                                            <span class="text-gray-500 line-through"><span>$<span
+                                                                        x-text="product.regular_price"></span></span></span>
+                                                            <span class=""><span>$<span
+                                                                        x-text="product.sale_price"></span></span></span>
+                                                            <span class="ml-1 text-[10px]"
+                                                                x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!product.sale_price">
+                                                        <span>$<span x-text="product.regular_price"></span></span>
+                                                    </template>
                                                 </div>
-                                            </template>
+                                                <div>
+                                                    <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                        <template x-show="addingToCart" x-if="addingToCart">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                        <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24" class="size-4" aria-hidden="true"
+                                                            fill="none" stroke="currentColor" stroke-width="1.5"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <path
+                                                                d="M3 3h2l1.6 9.6a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
+                                                            <circle cx="10" cy="20" r="1.5" />
+                                                            <circle cx="18" cy="20" r="1.5" />
+                                                        </svg>
+                                                    </button>
+                                                    <button x-show="$store.cart.getQuantity(product.id)>0"
+                                                        @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                        <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                                            <path fill-rule="evenodd"
+                                                                d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                        <template x-if="removingFromCart">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                    </button>
 
-                                            <div class="my-2 flex items-center gap-1 font-semibold text-sm">
-                                                <template x-if="product.sale_price">
-                                                    <div class="flex gap-1">
-                                                        <span class="text-gray-400 line-through"
-                                                            x-text="GeneralHelper.formatPrice(product.regular_price)"></span>
-                                                        <span class=""
-                                                            x-text="GeneralHelper.formatPrice(product.sale_price)"></span>
-                                                    </div>
-                                                </template>
-                                                <template x-if="!product.sale_price">
-                                                    <span x-text="GeneralHelper.formatPrice(product.regular_price)"></span>
-                                                </template>
+                                                    <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
+                                                            viewBox="0 0 24 24" fill="currentColor"
+                                                            class="size-4 fill-primary">
+                                                            <path
+                                                                d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                                        </svg>
+
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            x-show="!addingToWishlist && !$store.wishlist.isWishlist(product.id)"
+                                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                            stroke="currentColor" class="size-4">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                                        </svg>
+                                                        <template x-if="addingToWishlist">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <template x-if="product.sale_price">
-                                            <div class="absolute top-3 left-0 w-fit text-[10px] p-1 bg-black/80 text-primary-content rounded-tr-sm rounded-br-sm"
-                                                x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`">
-                                            </div>
-                                        </template>
-                                    </a>
+                                        <div x-show="$store.cart.getQuantity(product.id)>0" x-cloak
+                                            class="absolute top-0 left-2-0 -translate-y-1/3 -translate-x-1/3 flex items-center justify-center size-6 bg-primary text-primary-content rounded-md text-sm"
+                                            x-text="$store.cart.getQuantity(product.id)">
+                                        </div>
+                                    </div>
                                 </template>
                             </div>
 
-                            <div class="mt-3 w-full flex justify-end gap-3">
+                            <div class="mt-1 w-full flex justify-end gap-3">
                                 <button class="btn btn-circle" @click="prev()">❮</button>
                                 <button class="btn btn-circle" @click="next()">❯</button>
                             </div>
@@ -711,50 +866,96 @@
                         <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 lg:gap-5 "
                             x-show="showViewAll" x-cloak>
                             <template x-for="(product,index) in products" :key="index">
-                                <div
-                                    class="bg-base-100 border border-base-300 shadow-md select-none overflow-hidden hover:shadow-lg transition relative rounded-lg relative">
+                                <div x-data='itemCardState()'
+                                    class="bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                     <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                         class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
-                                    <div class="p-2 flex flex-col flex-1 justify-between">
-                                        <a :href="`/shop/${product.slug}`" class="font-semibold text-sm line-clamp-1"
-                                            x-text="product.name"></a>
-                                        {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-1"
-                                            x-text="product.short_description ?? 'No Description'"></p> --}}
-
-                                        <template x-if="product.is_promotion && product.promotion_end_time">
-                                            <div x-data="countdownTimer(product.promotion_end_time)"
-                                                class="p-0.5 px-1 w-fit text-primary italic mt-1 text-xs flex items-center gap-1">
-                                                <span x-text="display"></span>
+                                    <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
+                                        <div>
+                                            <a :href="`/shop/${product.slug}`" class="text-sm font-semibold line-clamp-1"
+                                                x-text="product.name" @click="saveCurrentState()"></a>
+                                            {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-2"
+                                                x-text="product.short_description ?? 'No Description'"></p> --}}
+                                        </div>
+                                        <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
+                                            <div class="flex text-sm font-semibold">
+                                                <template x-if="product.sale_price">
+                                                    <div>
+                                                        <span class="text-gray-500 line-through"><span>$<span
+                                                                    x-text="product.regular_price"></span></span></span>
+                                                        <span class=""><span>$<span
+                                                                    x-text="product.sale_price"></span></span></span>
+                                                        <span class="ml-1 text-[10px]"
+                                                            x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!product.sale_price">
+                                                    <span>$<span x-text="product.regular_price"></span></span>
+                                                </template>
                                             </div>
-                                        </template>
+                                            <div>
+                                                <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                    <template x-show="addingToCart" x-if="addingToCart">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                    <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24" class="size-4" aria-hidden="true"
+                                                        fill="none" stroke="currentColor" stroke-width="1.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path
+                                                            d="M3 3h2l1.6 9.6a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
+                                                        <circle cx="10" cy="20" r="1.5" />
+                                                        <circle cx="18" cy="20" r="1.5" />
+                                                    </svg>
+                                                </button>
+                                                <button x-show="$store.cart.getQuantity(product.id)>0"
+                                                    @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                    <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                                        <path fill-rule="evenodd"
+                                                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                    <template x-if="removingFromCart">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                </button>
 
-                                        <div class="my-2 flex text-sm font-semibold">
-                                            <template x-if="product.sale_price">
-                                                <div>
-                                                    <span class="text-gray-500 line-through"><span>$<span
-                                                                x-text="product.regular_price"></span></span></span>
-                                                    <span class=""><span>$<span
-                                                                x-text="product.sale_price"></span></span></span>
-                                                </div>
-                                            </template>
-                                            <template x-if="!product.sale_price">
-                                                <span>$<span x-text="product.regular_price"></span></span>
-                                            </template>
+                                                <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
+                                                        viewBox="0 0 24 24" fill="currentColor"
+                                                        class="size-4 fill-primary">
+                                                        <path
+                                                            d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                                    </svg>
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        x-show="!addingToWishlist && !$store.wishlist.isWishlist(product.id)"
+                                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                        stroke="currentColor" class="size-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                                    </svg>
+                                                    <template x-if="addingToWishlist">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <template x-if="product.sale_price">
-                                        <div class="absolute top-3 left-0 w-fit text-[10px] p-1 bg-black/80 text-primary-content rounded-tr-sm rounded-br-sm"
-                                            x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`">
-                                        </div>
-                                    </template>
+                                    <div x-show="$store.cart.getQuantity(product.id)>0" x-cloak
+                                        class="absolute top-0 left-2-0 -translate-y-1/3 -translate-x-1/3 flex items-center justify-center size-6 bg-primary text-primary-content rounded-md text-sm"
+                                        x-text="$store.cart.getQuantity(product.id)">
+                                    </div>
                                 </div>
                             </template>
                         </div>
 
-                        <div x-show="loading" class="mt-3 flex justify-center items-center py-5 ">
+                        {{-- <div x-show="loading" class="mt-3 flex justify-center items-center py-5 ">
                             <span class="loading loading-spinner loading-lg text-primary"></span>
-                        </div>
+                        </div> --}}
 
                         <div x-cloak x-show="!loading && pagination && pagination.next_page_url && showViewAll"
                             class="flex justify-center items-center py-5">
@@ -765,8 +966,8 @@
 
 
                 @if (isset($promotion_display) && $promotion_display)
-                    <div class="mt-5 w-full scroll-mt-[120px]" x-data="promotionProductState()" x-show="products.length > 0"
-                        x-cloak id="promotions-and-discounts">
+                    <div class="mt-5 w-full scroll-mt-[120px]" x-data="promotionProductState()"
+                        x-show="loading || products.length > 0" x-cloak id="promotions-and-discounts">
                         <div class="flex flex-row justify-between items-center">
                             <p class="font-semibold lg:text-lg">Promotions and Discounts</p>
                             <button class="btn btn-sm btn-ghost btn-primary" @click="showViewAll=!showViewAll"
@@ -784,54 +985,108 @@
                             </div>
                         </template>
 
+                        <div x-show="loading"
+                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                            <template x-for="i in 6" :key="i">
+                                <div class="skeleton w-full h-48 rounded-lg"></div>
+                            </template>
+                        </div>
+
                         {{-- Horizontal Scroll --}}
                         <div class="relative" x-show="!showViewAll" x-cloak>
                             <div x-ref="scrollContainer"
-                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar pb-3">
+                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar p-2">
                                 <template x-for="(product,index) in products" :key="product.slug">
-                                    <a :href="`/shop/${product.slug}`"
-                                        class="w-[140px] md:w-[160px] grow-0 shrink-0 bg-base-100 border border-base-300 shadow-sm rounded-lg overflow-hidden hover:shadow-md transition flex flex-col relative">
+                                    <div x-data='itemCardState()'
+                                        class="w-[160px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                        <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
+                                            class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
 
-                                        <img :src="product.image || '{{ asset('assets/images/computer_accessories.png') }}'"
-                                            :alt="product.name" class="w-full h-24 lg:h-32 p-2 object-contain">
-
-                                        <div class="p-2 flex flex-col flex-1 justify-between">
-                                            <p class="font-semibold text-sm line-clamp-1" x-text="product.name"></p>
-                                            {{-- <p class="text-xs text-gray-500 line-clamp-1 mt-1"
-                                                x-text="product.short_description || ''"></p> --}}
-
-                                            <template x-if="product.is_promotion && product.promotion_end_time">
-                                                <div x-data="countdownTimer(product.promotion_end_time)"
-                                                    class="p-0.5 px-1 w-fit text-primary italic mt-1 text-xs flex items-center gap-1">
-                                                    <span x-text="display"></span>
+                                        <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
+                                            <div>
+                                                <a :href="`/shop/${product.slug}`"
+                                                    class="text-sm font-semibold line-clamp-1" x-text="product.name"
+                                                    @click="saveCurrentState()"></a>
+                                                {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-2"
+                                                    x-text="product.short_description ?? 'No Description'"></p> --}}
+                                            </div>
+                                            <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
+                                                <div class="flex text-sm font-semibold">
+                                                    <template x-if="product.sale_price">
+                                                        <div>
+                                                            <span class="text-gray-500 line-through"><span>$<span
+                                                                        x-text="product.regular_price"></span></span></span>
+                                                            <span class=""><span>$<span
+                                                                        x-text="product.sale_price"></span></span></span>
+                                                            <span class="ml-1 text-[10px]"
+                                                                x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="!product.sale_price">
+                                                        <span>$<span x-text="product.regular_price"></span></span>
+                                                    </template>
                                                 </div>
-                                            </template>
+                                                <div>
+                                                    <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                        <template x-show="addingToCart" x-if="addingToCart">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                        <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24" class="size-4" aria-hidden="true"
+                                                            fill="none" stroke="currentColor" stroke-width="1.5"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <path
+                                                                d="M3 3h2l1.6 9.6a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
+                                                            <circle cx="10" cy="20" r="1.5" />
+                                                            <circle cx="18" cy="20" r="1.5" />
+                                                        </svg>
+                                                    </button>
+                                                    <button x-show="$store.cart.getQuantity(product.id)>0"
+                                                        @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                        <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                                            <path fill-rule="evenodd"
+                                                                d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                        <template x-if="removingFromCart">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                    </button>
 
-                                            <div class="my-2 flex items-center gap-1 font-semibold text-sm">
-                                                <template x-if="product.sale_price">
-                                                    <div class="flex gap-1">
-                                                        <span class="text-gray-400 line-through"
-                                                            x-text="GeneralHelper.formatPrice(product.regular_price)"></span>
-                                                        <span class=""
-                                                            x-text="GeneralHelper.formatPrice(product.sale_price)"></span>
-                                                    </div>
-                                                </template>
-                                                <template x-if="!product.sale_price">
-                                                    <span x-text="GeneralHelper.formatPrice(product.regular_price)"></span>
-                                                </template>
+                                                    <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
+                                                            viewBox="0 0 24 24" fill="currentColor"
+                                                            class="size-4 fill-primary">
+                                                            <path
+                                                                d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                                        </svg>
+
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            x-show="!addingToWishlist && !$store.wishlist.isWishlist(product.id)"
+                                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                            stroke="currentColor" class="size-4">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                                        </svg>
+                                                        <template x-if="addingToWishlist">
+                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                        </template>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <template x-if="product.sale_price">
-                                            <div class="absolute top-3 left-0 w-fit text-[10px] p-1 bg-black/80 text-primary-content rounded-tr-sm rounded-br-sm"
-                                                x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`">
-                                            </div>
-                                        </template>
-                                    </a>
+                                        <div x-show="$store.cart.getQuantity(product.id)>0" x-cloak
+                                            class="absolute top-0 left-2-0 -translate-y-1/3 -translate-x-1/3 flex items-center justify-center size-6 bg-primary text-primary-content rounded-md text-sm"
+                                            x-text="$store.cart.getQuantity(product.id)">
+                                        </div>
+                                    </div>
                                 </template>
                             </div>
 
-                            <div class="mt-3 w-full flex justify-end gap-3">
+                            <div class="mt-1 w-full flex justify-end gap-3">
                                 <button class="btn btn-circle" @click="prev()">❮</button>
                                 <button class="btn btn-circle" @click="next()">❯</button>
                             </div>
@@ -842,50 +1097,96 @@
                         <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 lg:gap-5"
                             x-show="showViewAll" x-cloak>
                             <template x-for="(product,index) in products" :key="index">
-                                <div
-                                    class="bg-base-100 border border-base-300 shadow-md select-none overflow-hidden hover:shadow-lg transition relative rounded-lg">
+                                <div x-data='itemCardState()'
+                                    class="bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                     <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                         class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
-                                    <div class="p-2 flex flex-col flex-1 justify-between">
-                                        <a :href="`/shop/${product.slug}`" class="font-semibold text-sm line-clamp-1"
-                                            x-text="product.name"></a>
-                                        {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-1"
-                                            x-text="product.short_description ?? 'No Description'"></p> --}}
-
-                                        <template x-if="product.is_promotion && product.promotion_end_time">
-                                            <div x-data="countdownTimer(product.promotion_end_time)"
-                                                class="p-0.5 px-1 w-fit text-primary italic mt-1 text-xs flex items-center gap-1">
-                                                <span x-text="display"></span>
+                                    <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
+                                        <div>
+                                            <a :href="`/shop/${product.slug}`" class="text-sm font-semibold line-clamp-1"
+                                                x-text="product.name" @click="saveCurrentState()"></a>
+                                            {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-2"
+                                                x-text="product.short_description ?? 'No Description'"></p> --}}
+                                        </div>
+                                        <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
+                                            <div class="flex text-sm font-semibold">
+                                                <template x-if="product.sale_price">
+                                                    <div>
+                                                        <span class="text-gray-500 line-through"><span>$<span
+                                                                    x-text="product.regular_price"></span></span></span>
+                                                        <span class=""><span>$<span
+                                                                    x-text="product.sale_price"></span></span></span>
+                                                        <span class="ml-1 text-[10px]"
+                                                            x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!product.sale_price">
+                                                    <span>$<span x-text="product.regular_price"></span></span>
+                                                </template>
                                             </div>
-                                        </template>
+                                            <div>
+                                                <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                    <template x-show="addingToCart" x-if="addingToCart">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                    <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24" class="size-4" aria-hidden="true"
+                                                        fill="none" stroke="currentColor" stroke-width="1.5"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path
+                                                            d="M3 3h2l1.6 9.6a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
+                                                        <circle cx="10" cy="20" r="1.5" />
+                                                        <circle cx="18" cy="20" r="1.5" />
+                                                    </svg>
+                                                </button>
+                                                <button x-show="$store.cart.getQuantity(product.id)>0"
+                                                    @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                    <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                                        <path fill-rule="evenodd"
+                                                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                    <template x-if="removingFromCart">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                </button>
 
-                                        <div class="my-2 flex text-sm font-semibold">
-                                            <template x-if="product.sale_price">
-                                                <div>
-                                                    <span class="text-gray-500 line-through"><span>$<span
-                                                                x-text="product.regular_price"></span></span></span>
-                                                    <span class=""><span>$<span
-                                                                x-text="product.sale_price"></span></span></span>
-                                                </div>
-                                            </template>
-                                            <template x-if="!product.sale_price">
-                                                <span>$<span x-text="product.regular_price"></span></span>
-                                            </template>
+                                                <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
+                                                        viewBox="0 0 24 24" fill="currentColor"
+                                                        class="size-4 fill-primary">
+                                                        <path
+                                                            d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                                    </svg>
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        x-show="!addingToWishlist && !$store.wishlist.isWishlist(product.id)"
+                                                        fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                        stroke="currentColor" class="size-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                                    </svg>
+                                                    <template x-if="addingToWishlist">
+                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                    </template>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <template x-if="product.sale_price">
-                                        <div class="absolute top-3 left-0 w-fit text-[10px] p-1 bg-black/80 text-primary-content rounded-tr-sm rounded-br-sm"
-                                            x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`">
-                                        </div>
-                                    </template>
+                                    <div x-show="$store.cart.getQuantity(product.id)>0" x-cloak
+                                        class="absolute top-0 left-2-0 -translate-y-1/3 -translate-x-1/3 flex items-center justify-center size-6 bg-primary text-primary-content rounded-md text-sm"
+                                        x-text="$store.cart.getQuantity(product.id)">
+                                    </div>
                                 </div>
                             </template>
                         </div>
 
-                        <div x-show="loading" class="mt-3 flex justify-center items-center py-5 ">
+                        {{-- <div x-show="loading" class="mt-3 flex justify-center items-center py-5 ">
                             <span class="loading loading-spinner loading-lg text-primary"></span>
-                        </div>
+                        </div> --}}
 
                         <div x-cloak x-show="!loading && pagination && pagination.next_page_url && showViewAll"
                             class="flex justify-center items-center py-5">
@@ -922,44 +1223,90 @@
                         <p class="text-gray-600 font-medium text-sm">Restoring your view...</p>
                     </div>
 
-
                     <div
                         class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 lg:gap-5">
-
                         <template x-for="(product,index) in products" :key="index">
-                            <div
-                                class="bg-base-100 border border-base-300 shadow-md select-none overflow-hidden hover:shadow-lg transition relative rounded-lg relative">
+                            <div x-data='itemCardState()'
+                                class="bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                 <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                     class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
                                 <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
                                     <div>
                                         <a :href="`/shop/${product.slug}`" class="text-sm font-semibold line-clamp-1"
                                             x-text="product.name" @click="saveCurrentState()"></a>
-                                        <p class="text-sm text-gray-600 mt-1 line-clamp-2"
-                                            x-text="product.short_description ?? 'No Description'"></p>
+                                        {{-- <p class="text-sm text-gray-600 mt-1 line-clamp-2"
+                                            x-text="product.short_description ?? 'No Description'"></p> --}}
                                     </div>
-                                    <div
-                                        class="my-2 flex flex-col lg:flex-row items-start justify-between lg:items-center gap-2">
-                                        <div class="flex text-sm">
+                                    <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
+                                        <div class="flex text-sm font-semibold">
                                             <template x-if="product.sale_price">
                                                 <div>
                                                     <span class="text-gray-500 line-through"><span>$<span
                                                                 x-text="product.regular_price"></span></span></span>
-                                                    <span class="text-primary"><span>$<span
+                                                    <span class=""><span>$<span
                                                                 x-text="product.sale_price"></span></span></span>
+                                                    <span class="ml-1 text-[10px]"
+                                                        x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
                                                 </div>
                                             </template>
                                             <template x-if="!product.sale_price">
                                                 <span>$<span x-text="product.regular_price"></span></span>
                                             </template>
                                         </div>
+                                        <div>
+                                            <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                <template x-show="addingToCart" x-if="addingToCart">
+                                                    <span class="loading loading-spinner loading-xs"></span>
+                                                </template>
+                                                <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24" class="size-4" aria-hidden="true" fill="none"
+                                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M3 3h2l1.6 9.6a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
+                                                    <circle cx="10" cy="20" r="1.5" />
+                                                    <circle cx="18" cy="20" r="1.5" />
+                                                </svg>
+                                            </button>
+                                            <button x-show="$store.cart.getQuantity(product.id)>0"
+                                                @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                                                    <path fill-rule="evenodd"
+                                                        d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                                <template x-if="removingFromCart">
+                                                    <span class="loading loading-spinner loading-xs"></span>
+                                                </template>
+                                            </button>
+
+                                            <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
+                                                    viewBox="0 0 24 24" fill="currentColor" class="size-4 fill-primary">
+                                                    <path
+                                                        d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+                                                </svg>
+
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    x-show="!addingToWishlist && !$store.wishlist.isWishlist(product.id)"
+                                                    fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                    stroke="currentColor" class="size-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                                                </svg>
+                                                <template x-if="addingToWishlist">
+                                                    <span class="loading loading-spinner loading-xs"></span>
+                                                </template>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <template x-if="product.sale_price">
-                                    <div class="absolute top-3 left-0 w-fit text-[10px] p-1 bg-black/80 text-primary-content rounded-tr-sm rounded-br-sm"
-                                        x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`">
-                                    </div>
-                                </template>
+
+                                <div x-show="$store.cart.getQuantity(product.id)>0" x-cloak
+                                    class="absolute top-0 left-2-0 -translate-y-1/3 -translate-x-1/3 flex items-center justify-center size-6 bg-primary text-primary-content rounded-md text-sm"
+                                    x-text="$store.cart.getQuantity(product.id)">
+                                </div>
                             </div>
                         </template>
                     </div>
@@ -1037,52 +1384,60 @@
         </div>
 
         {{-- Stats Board --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 py-5 rounded-lg">
+        <div class="flex flex-col sm:flex-row justify-evenly gap-6 bg-gray-50 py-5 rounded-lg">
 
             <!-- Branches -->
-            <div class="flex flex-col items-center text-center text-slate-800 cursor-default">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6 stroke-slate-500">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
-                </svg>
-                <h3 class="text-base font-semibold">Branches</h3>
-                <p class="text-lg font-semibold mt-1" x-text="branchCount">{{ $all_branch_count }}</p>
-            </div>
+            @if (isset($all_branch_count) && $all_branch_count > 0)
+                <div class="flex flex-col items-center text-center text-slate-800 cursor-default">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6 stroke-slate-500">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+                    </svg>
+                    <h3 class="text-base font-semibold">Branches</h3>
+                    <p class="text-lg font-semibold mt-1" x-text="branchCount">{{ $all_branch_count }}</p>
+                </div>
+            @endif
 
             <!-- Products -->
-            <div class="flex flex-col items-center text-center text-slate-800 cursor-default">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6 stroke-slate-500">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                </svg>
-                <h3 class="text-base font-semibold">Products</h3>
-                <p class="text-lg font-semibold mt-1" x-text="productCount">{{ $all_product_count }}</p>
-            </div>
+            @if (isset($all_product_count) && $all_product_count > 0)
+                <div class="flex flex-col items-center text-center text-slate-800 cursor-default">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6 stroke-slate-500">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                    <h3 class="text-base font-semibold">Products</h3>
+                    <p class="text-lg font-semibold mt-1" x-text="productCount">{{ $all_product_count }}</p>
+                </div>
+            @endif
 
             <!-- Categories -->
-            <div class="flex flex-col items-center text-center text-slate-800 cursor-default">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6 stroke-slate-500">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
-                </svg>
-                <h3 class="text-base font-semibold">Categories</h3>
-                <p class="text-lg font-semibold mt-1" x-text="categoryCount">{{ $all_categories_count }}</p>
-            </div>
+            @if (isset($all_categories_count) && $all_categories_count > 0)
+                <div class="flex flex-col items-center text-center text-slate-800 cursor-default">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6 stroke-slate-500">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z" />
+                    </svg>
+                    <h3 class="text-base font-semibold">Categories</h3>
+                    <p class="text-lg font-semibold mt-1" x-text="categoryCount">{{ $all_categories_count }}</p>
+                </div>
+            @endif
 
             <!-- Brands -->
-            <div class="flex flex-col items-center text-center text-slate-800 cursor-default">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6 stroke-slate-500">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                </svg>
-                <h3 class="text-base font-semibold">Brands</h3>
-                <p class="text-lg font-semibold mt-1" x-text="brandCount">{{ $all_brand_count }}</p>
-            </div>
+            @if (isset($all_brand_count) && $all_brand_count > 0)
+                <div class="flex flex-col items-center text-center text-slate-800 cursor-default">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6 stroke-slate-500">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                    </svg>
+                    <h3 class="text-base font-semibold">Brands</h3>
+                    <p class="text-lg font-semibold mt-1" x-text="brandCount">{{ $all_brand_count }}</p>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -1092,9 +1447,14 @@
 
 @push('script')
     <script>
+        document.addEventListener('alpine:init', function() {
+            Alpine.store('cart').syncCartItems();
+            Alpine.store('wishlist').syncWishlistProducts();
+        })
+
         function popupCarousel() {
             return {
-                originalImages: @json($popup_images ?? []), // full list from server
+                originalImages: @json($popup_images ?? []),
                 images: [],
                 currentIndex: 0,
                 visible: false,
@@ -1146,9 +1506,12 @@
         function carousel() {
             return {
                 interval: 4000,
-                images: @json($carousel_images ?? []),
+                images: @json($carousel_images),
                 current: 0,
                 timer: null,
+                get visible() {
+                    return this.images.length > 0;
+                },
                 next() {
                     this.current = (this.current + 1) % this.images.length;
                 },
@@ -1211,6 +1574,39 @@
             }
         }
 
+        function itemCardState() {
+            return {
+                addingToCart: false,
+                removingFromCart: false,
+                addingToWishlist: false,
+                async addItemToCart(product) {
+                    if (this.addingToCart) return;
+                    this.addingToCart = true;
+
+                    const added = await this.$store.cart.addItem({
+                        product_id: product.id,
+                        variant_id: null,
+                        variant_combination: null,
+                        quantity: 1,
+                    });
+
+                    this.addingToCart = false;
+                },
+                async removeFromCart(product) {
+                    if (this.removingFromCart) return;
+                    this.removingFromCart = true;
+                    const removed = await this.$store.cart.removeByProductId(product.id);
+                    this.removingFromCart = false;
+                },
+                async addWishlist(product) {
+                    if (this.addingToWishlist) return;
+                    this.addingToWishlist = true;
+                    await this.$store.wishlist.addWishlist(product.id);
+                    this.addingToWishlist = false;
+                }
+            }
+        }
+
         function propularProductState() {
             return {
                 loading: false,
@@ -1219,6 +1615,7 @@
                 finishedPagination: false,
                 showViewAll: false,
                 scrollAmount: 200,
+
                 init() {
                     this.loadMoreProducts();
                 },
@@ -1532,13 +1929,4 @@
             };
         }
     </script>
-
-
-
-    @if (session('clear_cart'))
-        <script>
-            console.log('Clear cart triggered from backend');
-            localStorage.removeItem('cart_state');
-        </script>
-    @endif
 @endpush

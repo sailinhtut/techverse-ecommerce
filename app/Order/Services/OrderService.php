@@ -22,21 +22,6 @@ class OrderService
         }
     }
 
-    public static function getOrders()
-    {
-        try {
-            $orders = Order::orderBy('id', 'desc')->paginate(20);
-
-            $orders->getCollection()->transform(function ($order) {
-                return $order->jsonResponse(['products', 'shippingMethod', 'paymentMethod']);
-            });
-
-            return $orders;
-        } catch (Exception $e) {
-            throw ($e);
-        }
-    }
-
     public static function getOrder(int $order_id)
     {
         try {

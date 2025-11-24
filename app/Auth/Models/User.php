@@ -90,6 +90,16 @@ class User extends Authenticatable
             : (array) $permissions;
     }
 
+    public function hasPermissions(array $permissions): bool
+    {
+        $userPermissions = $this->getPermissionList();
+
+        if (empty($userPermissions)) {
+            return false;
+        }
+        return count(array_intersect($permissions, $userPermissions)) > 0;
+    }
+
 
     public function jsonResponse(array $egar_list = []): array
     {
@@ -103,7 +113,9 @@ class User extends Authenticatable
             'phone_two' => $this->phone_two,
             'profile' => $profile,
             'role_id' => $this->role_id,
-            'date_of_birth' => $this->date_of_birth,
+            'date_of_birth' => $this->date_of_birth
+                ? $this->date_of_birth->format('Y-m-d')
+                : null,
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

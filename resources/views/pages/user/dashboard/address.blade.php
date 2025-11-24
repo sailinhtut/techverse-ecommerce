@@ -7,7 +7,7 @@
             <button onclick="create_address_modal.showModal()" class="btn btn-primary">Add Address</button>
         </div>
 
-        <div class="card shadow-sm border border-base-300">
+        <div class="mt-3 card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
                     <thead>
@@ -37,11 +37,11 @@
 
                                 <td>
                                     @if ($address['is_default_shipping'])
-                                        <div class="badge badge-success badge-outline">Default Shipping
+                                        <div class="badge bg-primary/80 text-sm text-white">Default Shipping
                                         </div>
                                     @endif
                                     @if ($address['is_default_billing'])
-                                        <div class="badge badge-info badge-outline">Default Billing</div>
+                                        <div class="badge bg-primary/80 text-sm text-white">Default Billing</div>
                                     @endif
                                 </td>
                                 <td>

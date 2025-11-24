@@ -1,4 +1,8 @@
-{{-- resources/views/cart/index.blade.php --}}
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_logo = getSiteLogoURL();
+@endphp
+
 @extends('layouts.web')
 
 @section('web_content')
@@ -13,7 +17,7 @@
                 Back
             </button>
         </div>
-        <p class="lg:text-lg font-semibold mb-3">Your Cart</p>
+        <p class="lg:text-lg font-semibold">Your Cart</p>
         <div class="card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
@@ -36,13 +40,14 @@
                                 <td x-text="index+1"></td>
                                 <td class="">
                                     <img :src="item.image ? item.image :
-                                        '{{ asset(config('app.app_logo_bare_path')) }}'"
+                                        '{{ $site_logo }}'"
                                         :alt="item.title" class="w-[20px] h-auto object-contain">
                                 </td>
 
                                 <td class="w-[200px] h-[30px] line-clamp-1">
-                                    <a :href="`/shop/${item.slug}`" class="cursor-default hover:underline"
-                                        x-text="item.name"></a>
+                                    <a :href="item.variant_id ? `/shop/${item.slug}?variant=${item.variant_id}` :
+                                        `/shop/${item.slug}`"
+                                        class="cursor-default hover:underline" x-text="item.name"></a>
                                 </td>
 
                                 <td x-text="item.variant_combination ? Object.entries(item.variant_combination).map(([key, value]) => value.toUpperCase()).join('-') : item.name "
@@ -67,11 +72,10 @@
 
                                     </button>
                                 </td>
-                                <td x-text="(item.price * item.quantity).toFixed(2)"></td>
+                                <td x-text="item.subtotal.toFixed(2)"></td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">
-
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="size-6">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -140,5 +144,9 @@
 @endsection
 
 @push('script')
-    <script></script>
+    <script>
+        document.addEventListener('alpine:init', function() {
+            Alpine.store('cart').syncCartItems();
+        })
+    </script>
 @endpush

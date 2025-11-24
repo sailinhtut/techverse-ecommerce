@@ -4,7 +4,7 @@
     <div class="p-3 lg:p-5">
         <p class="lg:text-lg font-semibold ">Order History</p>
 
-        <div class="card shadow-sm border border-base-300">
+        <div class="mt-3 card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
                     <thead>
@@ -31,7 +31,7 @@
                                     </a>
                                 </td>
 
-                                <td>{{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d H:i') : '-' }}
+                                <td>{{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d h:i A') : '-' }}
                                 </td>
 
                                 <td>
@@ -86,7 +86,8 @@
 
                                             <div class="text-sm space-y-2">
                                                 <p><strong>ID:</strong> {{ $order['id'] }}</p>
-                                                <p><strong>Date:</strong> {{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d H:i') }}
+                                                <p><strong>Date:</strong>
+                                                    {{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d h:i A') : '-' }}
                                                 </p>
                                                 <p><strong>Status:</strong>
                                                     <span class="badge {{ $color }} badge-outline">

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -627,7 +628,7 @@ class ProductController
     public function showProductDetail(Request $request, string $slug)
     {
         try {
-
+            $variantId = $request->get('variant');
             $product = Product::with('category')->where('slug', $slug)->firstOrFail();
 
             if ($product->is_promotion && $product->promotion_end_time && $product->promotion_end_time < now()) {
@@ -640,6 +641,12 @@ class ProductController
                     ->update(['sale_price' => 0]);
             }
 
+            $variant = null;
+            if ($variantId) {
+                $variant =  $product->productVariants()->find($variantId)?->jsonResponse();
+            }
+
+
             $product->increment('interest');
             $product = $product->jsonResponse(['category', 'brand', 'productVariants', 'crossSells', 'upSells', 'overall_review']);
 
@@ -649,11 +656,21 @@ class ProductController
                 $wishlists = Wishlist::where('user_id', auth()->id())->get();
                 $wishlists = $wishlists->map(fn($w) => $w->jsonResponse());
             }
+            $currentUrl = url()->current();
+            $shareTitle = urlencode($product['name']);
+            $shareDesc = urlencode(substr(strip_tags($product['description'] ?? ''), 0, 100)); // optional, 100 chars
+            $shareImage = isset($product['images'][0]['url']) ? urlencode($product['images'][0]['url']) : '';
+
+            $socialShareLinks = [
+                'facebook' => "https://www.facebook.com/sharer/sharer.php?u={$currentUrl}",
+                'twitter' => "https://twitter.com/intent/tweet?url={$currentUrl}&text={$shareTitle}",
+                'linkedin' => "https://www.linkedin.com/shareArticle?url={$currentUrl}&title={$shareTitle}&summary={$shareDesc}",
+                'whatsapp' => "https://api.whatsapp.com/send?text={$shareTitle} {$currentUrl}",
+                'telegram' => "https://t.me/share/url?url={$currentUrl}&text={$shareTitle}",
+            ];
 
 
-
-
-            return view('pages.user.core.product_detail', compact('product', 'wishlists'));
+            return view('pages.user.core.product_detail', compact('product', 'wishlists', 'variant', 'socialShareLinks'));
         } catch (ModelNotFoundException $error) {
             return redirect()->back()->with('status', 'Not Found Product');
         } catch (Exception $error) {
@@ -661,18 +678,108 @@ class ProductController
         }
     }
 
-    public function viewAdminProductListPage()
+    public function viewAdminProductListPage(Request $request)
     {
-        $products = Product::where('is_active', true)
-            ->orderByRaw('ISNULL(priority), priority ASC')
-            ->orderByDesc('id')
-            ->paginate(50);
+        $sortBy = $request->get('sortBy', 'last_updated');
+        $orderBy = $request->get('orderBy', 'desc');
+        $perPage = $request->get('perPage', 20);
+        $search = $request->get('query', null);
+        $product_type = $request->get('product_type', null);
+
+        $query = Product::where('is_active', true);
+        $category_slug = $request->get('category', null);
+        $brand_slug = $request->get('brand', null);
+        $is_sale = $request->boolean('isSale', false);
+        $is_promotion = $request->boolean('isPromotion', false);
+        $is_pinned = $request->boolean('isPinned', false);
+
+        if ($product_type) {
+            $query->where('product_type', $product_type);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")->orWhere('id', 'like', "%{$search}%");
+            });
+        }
+
+        if ($category_slug) {
+            $matched_category = Category::where('slug', $category_slug)->first();
+            if ($matched_category) $query->where('category_id', $matched_category->id);
+        }
+
+        if ($brand_slug) {
+            $matched_brand = Brand::where('slug', $brand_slug)->first();
+            if ($matched_brand) $query->where('brand_id', $matched_brand->id);
+        }
+
+        if ($is_sale) {
+            $query->where('sale_price', '>', 0);
+        }
+
+        if ($is_promotion) {
+            $query->where('is_promotion', true);
+        }
+
+        if ($is_pinned) {
+            $query->where('is_pinned', true);
+        }
+
+        switch ($sortBy) {
+            case 'last_updated':
+                $query->orderBy('updated_at', $orderBy)
+                    ->orderBy('id', $orderBy);
+                break;
+
+            case 'last_created':
+                $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                break;
+
+            case 'low_popularity':
+                $query->orderBy('interest', 'asc')
+                    ->orderBy('id', $orderBy);
+                break;
+
+            case 'high_popularity':
+                $query->orderBy('interest', 'desc')
+                    ->orderBy('id',  $orderBy);
+                break;
+
+            case 'low_priority':
+                $query->orderByRaw('ISNULL(priority), priority ASC')
+                    ->orderBy('id', $orderBy);
+                break;
+
+            case 'high_priority':
+                $query->orderByRaw('ISNULL(priority), priority DESC')
+                    ->orderBy('id', $orderBy);
+                break;
+
+            default:
+                $query->orderBy('updated_at', 'desc')
+                    ->orderBy('id', 'desc');
+        }
+
+        $products = $query->paginate($perPage);
+        $products->appends(request()->query());
 
         $products->getCollection()->transform(function ($product) {
             return $product->jsonResponse(['category', 'brand', 'paymentMethods', 'shippingClass', 'taxClass']);
         });
 
-        return view('pages.admin.dashboard.product.product_list', compact('products'));
+        $categories = Category::orderBy('id', 'desc')->get();
+        $brands = Brand::orderBy('id', 'desc')->get();
+        $payment_methods = PaymentMethod::orderBy('id', 'desc')->get();
+        $shipping_classes = ShippingClass::orderBy('id', 'desc')->get();
+
+        return view('pages.admin.dashboard.product.product_list', [
+            'products' => $products,
+            'categories' => $categories,
+            'brands' => $brands,
+            'payment_methods' => $payment_methods,
+            'shipping_classes' => $shipping_classes,
+        ]);
     }
 
     public function viewAdminProductAddPage()
@@ -897,6 +1004,7 @@ class ProductController
             'short_description' => 'nullable|string:65535',
             'long_description' => 'nullable|string',
             'tags' => 'nullable|string',
+            'buying_price' => 'required|numeric',
             'regular_price' => 'required|numeric',
             'sku' => 'required|string|max:255',
             'is_active' => 'nullable|boolean',
@@ -939,6 +1047,8 @@ class ProductController
             'width' => 'nullable|numeric',
             'height' => 'nullable|numeric',
             'weight' => 'nullable|numeric',
+
+            'enable_review' => 'nullable|boolean',
         ], [
             'product_variants.array' => 'The product variants must be a valid array.',
             'product_variants.*.sku.required' => 'Each product variant must have a SKU.',
@@ -999,6 +1109,7 @@ class ProductController
                     ? Carbon::parse($validated['promotion_end_time'])
                     : null,
                 'interest' => $validated['interest'] ?? 0,
+                'buying_price' => $validated['buying_price'],
                 'regular_price' => $validated['regular_price'],
                 'sale_price' => $validated['sale_price'] ?? null,
                 'enable_stock' => $validated['enable_stock'] ?? true,
@@ -1015,6 +1126,8 @@ class ProductController
                 'width' => $validated['width'] ?? null,
                 'height' => $validated['height'] ?? null,
                 'weight' => $validated['weight'] ?? null,
+                'enable_review' => $validated['enable_review'],
+
             ]);
 
             if (!empty($validated['payment_methods'])) {
@@ -1101,6 +1214,7 @@ class ProductController
             'tags' => 'nullable|string',
             'sku' => 'nullable|string|max:255',
             'is_active' => 'nullable|boolean',
+            'buying_price' => 'required|numeric',
             'regular_price' => 'required|numeric',
             'sale_price' => 'nullable|numeric',
             'enable_stock' => 'nullable|boolean',
@@ -1143,6 +1257,8 @@ class ProductController
             'width' => 'nullable|numeric',
             'height' => 'nullable|numeric',
             'weight' => 'nullable|numeric',
+
+            'enable_review' => 'nullable|boolean',
         ], [
             'product_variants.array' => 'The product variants must be a valid array.',
             'product_variants.*.sku.required' => 'Each product variant must have a SKU.',
@@ -1163,8 +1279,6 @@ class ProductController
             'product_variants.*.image.max' => 'The image cannot exceed 2MB.',
             'product_variants.*.remove_image.boolean' => 'The remove_image field must be true or false.',
         ]);
-
-
 
 
         if ($validator->fails()) {
@@ -1232,6 +1346,7 @@ class ProductController
                     ? Carbon::parse($validated['promotion_end_time'])
                     : null,
                 'interest' => $validated['interest'] ?? 0,
+                'buying_price' => $validated['buying_price'],
                 'regular_price' => $validated['regular_price'],
                 'sale_price' => $validated['sale_price'] ?? null,
                 'enable_stock' => $validated['enable_stock'] ?? false,
@@ -1247,8 +1362,8 @@ class ProductController
                 'width' => $validated['width'] ?? null,
                 'height' => $validated['height'] ?? null,
                 'weight' => $validated['weight'] ?? null,
+                'enable_review' => $validated['enable_review'],
             ]);
-
 
             $product->save();
 
@@ -1258,14 +1373,8 @@ class ProductController
                 $product->paymentMethods()->sync([]);
             }
 
-            if (!empty($validated['cross_sell_product_ids'])) {
-                $product->crossSells()->sync($validated['cross_sell_product_ids']);
-            }
-
-            if (!empty($validated['up_sell_product_ids'])) {
-                $product->upSells()->sync($validated['up_sell_product_ids']);
-            }
-
+            $product->crossSells()->sync($validated['cross_sell_product_ids'] ?? []);
+            $product->upSells()->sync($validated['up_sell_product_ids'] ?? []);
 
             DB::commit();
 
@@ -1322,6 +1431,144 @@ class ProductController
         }
     }
 
+    public function updateShippingClassSelected(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array',
+            'shipping_class_id' => 'nullable|exists:shipping_classes,id',
+        ]);
+
+        if ($validator->fails()) {
+            return handleErrors(new Exception($validator->errors()->first()), 'Validation failed', 422);
+        }
+
+        $validated = $validator->validated();
+
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No products selected for deletion.');
+            }
+
+            $products = Product::whereIn('id', $ids)->get();
+
+            foreach ($products as $product) {
+
+                $product->fill([
+                    'shipping_class_id' => $validated['shipping_class_id'] ?? null
+                ]);
+
+                $product->save();
+            }
+
+            return redirect()->back()->with('success', 'Selected products updated successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while updating selected products.");
+        }
+    }
+
+    public function updateShippingClassAll(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'shipping_class_id' => 'nullable|exists:shipping_classes,id',
+        ]);
+
+        if ($validator->fails()) {
+            return handleErrors(new Exception($validator->errors()->first()), 'Validation failed', 422);
+        }
+
+        $validated = $validator->validated();
+
+        try {
+            $products = Product::all();
+
+            foreach ($products as $product) {
+
+                $product->fill([
+                    'shipping_class_id' => $validated['shipping_class_id'] ?? null
+                ]);
+
+                $product->save();
+            }
+
+            return redirect()->back()->with('success', 'All products deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all products.");
+        }
+    }
+
+    public function updatePaymentMethodSelected(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array',
+            'payment_methods' => 'nullable|array',
+            'payment_methods.*' => 'exists:payment_methods,id',
+        ]);
+
+        if ($validator->fails()) {
+            return handleErrors(new Exception($validator->errors()->first()), 'Validation failed', 422);
+        }
+
+        $validated = $validator->validated();
+
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No products selected for deletion.');
+            }
+
+            $products = Product::whereIn('id', $ids)->get();
+
+            foreach ($products as $product) {
+
+                if (isset($validated['payment_methods'])) {
+                    $product->paymentMethods()->sync($validated['payment_methods']);
+                } else {
+                    $product->paymentMethods()->sync([]);
+                }
+            }
+
+            return redirect()->back()->with('success', 'Selected products updated successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while updating selected products.");
+        }
+    }
+
+    public function updatePaymentMethodAll(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'payment_methods' => 'nullable|array',
+            'payment_methods.*' => 'exists:payment_methods,id',
+        ]);
+
+        if ($validator->fails()) {
+            return handleErrors(new Exception($validator->errors()->first()), 'Validation failed', 422);
+        }
+
+        $validated = $validator->validated();
+
+        try {
+            $products = Product::all();
+
+            foreach ($products as $product) {
+
+                if (isset($validated['payment_methods'])) {
+                    $product->paymentMethods()->sync($validated['payment_methods']);
+                } else {
+                    $product->paymentMethods()->sync([]);
+                }
+            }
+
+            return redirect()->back()->with('success', 'All products deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all products.");
+        }
+    }
+
+
+
     public function deleteProduct(Request $request, string $id)
     {
         try {
@@ -1360,6 +1607,77 @@ class ProductController
             return redirect()->back()->with('success', 'Product Deleted Successfully');
         } catch (\Exception $error) {
             return handleErrors($error, "Something Went Wrong");
+        }
+    }
+
+    public function deleteSelectedProducts(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No products selected for deletion.');
+            }
+
+            $products = Product::with('productVariants')->whereIn('id', $ids)->get();
+
+            foreach ($products as $product) {
+                if ($product->image) {
+                    Storage::disk('public')->delete($product->image);
+                }
+
+                $image_gallery = $product->image_gallery ?? [];
+                foreach ($image_gallery as $gallery) {
+                    if (!empty($gallery['image'])) {
+                        Storage::disk('public')->delete($gallery['image']);
+                    }
+                }
+
+                foreach ($product->productVariants as $variant) {
+                    if ($variant->image) {
+                        Storage::disk('public')->delete($variant->image);
+                    }
+                }
+
+                $product->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected products deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected products.");
+        }
+    }
+
+
+    public function deleteAllProducts()
+    {
+        try {
+            $products = Product::with('productVariants')->get();
+
+            foreach ($products as $product) {
+                if ($product->image) {
+                    Storage::disk('public')->delete($product->image);
+                }
+
+                $image_gallery = $product->image_gallery ?? [];
+                foreach ($image_gallery as $gallery) {
+                    if (!empty($gallery['image'])) {
+                        Storage::disk('public')->delete($gallery['image']);
+                    }
+                }
+
+                foreach ($product->productVariants as $variant) {
+                    if ($variant->image) {
+                        Storage::disk('public')->delete($variant->image);
+                    }
+                }
+
+                $product->delete();
+            }
+
+            return redirect()->back()->with('success', 'All products deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all products.");
         }
     }
 }

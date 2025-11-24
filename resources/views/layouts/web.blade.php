@@ -1,9 +1,7 @@
-@extends('layouts.app') @section('app_content')
+@extends('layouts.app')
+@section('app_content')
     <div>
-
         @yield('web_content')
-
-
     </div>
 @endsection
 @push('script')

@@ -8,6 +8,35 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::create('carts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('session_id')->nullable();
+            $table->boolean('is_checked_out')->default(false);
+            $table->decimal('total', 12, 2)->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('cart_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('cart_id')->constrained('carts')->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
+
+            $table->foreignId('variant_id')->nullable()->constrained('product_variants')->onDelete('cascade');
+            $table->json('variant_combination')->nullable();
+
+            $table->string('name');
+            $table->string('slug');
+            $table->string('sku')->nullable();
+            $table->string('image')->nullable();
+            $table->decimal('price', 12, 2);
+
+            $table->unsignedInteger('quantity')->default(1);
+            $table->decimal('subtotal', 12, 2);
+
+            $table->timestamps();
+        });
+
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
@@ -107,7 +136,6 @@ return new class extends Migration
         });
     }
 
-
     public function down(): void
     {
         Schema::dropIfExists('product_review_replies');
@@ -117,5 +145,7 @@ return new class extends Migration
         Schema::dropIfExists('invoices');
         Schema::dropIfExists('order_products');
         Schema::dropIfExists('orders');
+        Schema::dropIfExists('cart_items');
+        Schema::dropIfExists('cart');
     }
 };

@@ -1,9 +1,14 @@
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_logo = getSiteLogoURL();
+@endphp
+
 @extends('layouts.user.user_dashboard')
 
 @section('user_dashboard_content')
     <div class="p-3 lg:p-5">
-        <p class="lg:text-lg font-semibold ">Wish List</p>
-        <div class="card shadow-sm border border-base-300">
+        <p class="lg:text-lg font-semibold">Wish List</p>
+        <div class="mt-3 card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
                     <thead>
@@ -29,8 +34,8 @@
                                         <img src="{{ $wishlist['product']['image'] }}"
                                             alt="{{ $wishlist['product']['name'] }}" class="w-[20px] h-auto object-contain">
                                     @else
-                                        <img src="{{ asset(config('app.app_logo_bare_path')) }}"
-                                            alt="{{ $wishlist['product']['name'] }}" class="w-[30px] h-auto">
+                                        <img src="{{ $site_logo }}" alt="{{ $wishlist['product']['name'] }}"
+                                            class="w-[30px] h-auto">
                                     @endif
                                 </td>
 
@@ -38,7 +43,8 @@
                                     <a href="{{ route('shop.slug.get', ['slug' => $wishlist['product']['slug']]) }}"
                                         class="cursor-default hover:underline">{{ $wishlist['product']['name'] }}</a>
                                 </td>
-                                <td class="max-w-[200px] truncate">{{ $wishlist['product']['short_description'] ?? '-' }}</td>
+                                <td class="max-w-[200px] truncate">{{ $wishlist['product']['short_description'] ?? '-' }}
+                                </td>
                                 <td>{{ $wishlist['note'] ?? '-' }}</td>
                                 <td>{{ $wishlist['created_at'] ?? '-' }}</td>
                                 <td>

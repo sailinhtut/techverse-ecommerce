@@ -8,10 +8,46 @@ use Illuminate\Http\Request;
 
 class ShippingZoneController
 {
-    public function viewAdminShippingZoneListPage()
+    public function viewAdminShippingZoneListPage(Request $request)
     {
         try {
-            $shipping_zones = ShippingZone::orderBy('id', 'desc')->paginate(10);
+
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = ShippingZone::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('country', 'like', "%{$search}%")
+                        ->orWhere('state', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%")
+                        ->orWhere('postal_code', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $shipping_zones = $query->paginate($perPage);
+            $shipping_zones->appends(request()->query());
 
             $shipping_zones->getCollection()->transform(function ($zone) {
                 return $zone->jsonResponse();
@@ -99,6 +135,44 @@ class ShippingZoneController
             return redirect()->back()->with('success', 'Shipping Zone deleted successfully.');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+
+    public function deleteSelectedShippingZones(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No zones selected for deletion.');
+            }
+
+            $zones = ShippingZone::whereIn('id', $ids)->get();
+
+            foreach ($zones as $zone) {
+                $zone->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected zones deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected zones.");
+        }
+    }
+
+
+    public function deleteAllShippingZones()
+    {
+        try {
+            $zones = ShippingZone::all();
+
+            foreach ($zones as $zone) {
+                $zone->delete();
+            }
+
+            return redirect()->back()->with('success', 'All zones deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all zones.");
         }
     }
 }

@@ -1,3 +1,8 @@
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_logo = getSiteLogoURL();
+@endphp
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 
@@ -19,14 +24,14 @@
         <meta property="og:description" content="" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="{{ url()->current() }}" />
-        <meta property="og:image" content="{{ asset(config('app.app_logo_bare_path')) }}" />
+        <meta property="og:image" content="{{ $site_logo }}" />
         <meta property="og:site_name" content="{{ config('app.name') }}" />
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ config('app.name') }}">
         <meta name="twitter:description" content="">
-        <meta name="twitter:image" content="{{ asset(config('app.app_logo_bare_path')) }}">
+        <meta name="twitter:image" content="{{ $site_logo }}">
     @endif
 
     @yield('head')
@@ -46,6 +51,25 @@
 <body>
 
     @yield('app_content')
+
+
+    @php
+        use App\Setting\Models\AppSetting;
+        $primaryColorSetting = AppSetting::where('key', 'site_primary_color')->first();
+        $primaryContentColorSetting = AppSetting::where('key', 'site_primary_content_color')->first();
+        $primaryColor = $primaryColorSetting?->value ?? config('app.site_primary_color');
+        $primaryContentColor = $primaryContentColorSetting?->value ?? config('app.site_primary_content_color');
+    @endphp
+    <script>
+        (function() {
+
+            const primaryColor = "{{ $primaryColor }}";
+            document.documentElement.style.setProperty('--color-primary', primaryColor);
+
+            const primaryContentColor = "{{ $primaryContentColor }}";
+            document.documentElement.style.setProperty('--color-primary-content', primaryContentColor);
+        })();
+    </script>
 
     @stack('script')
 

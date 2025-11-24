@@ -85,7 +85,8 @@
                         <div class="flex flex-col gap-1">
                             <label class="text-sm">Created At</label>
                             <input type="text" class="input input-bordered w-full cursor-default select-none"
-                                value="{{ $review['created_at'] ? \Carbon\Carbon::parse($review['created_at'])->format('Y-m-d H:i') : ''}}" readonly>
+                                value="{{ $review['created_at'] ? \Carbon\Carbon::parse($review['created_at'])->format('Y-m-d h:i A') : '' }}"
+                                readonly>
                         </div>
 
                         <div class="md:col-span-2 lg:col-span-3 flex flex-col gap-1">
@@ -163,7 +164,7 @@
                             <label class="text-sm">Email Verified At</label>
                             <input type="text"
                                 class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
-                                value="{{ $review['user']['email_verified_at'] ? \Carbon\Carbon::parse($review['user']['email_verified_at'])->format('Y-m-d H:i') : 'Not Verified' }}"
+                                value="{{ $review['user']['email_verified_at'] ? \Carbon\Carbon::parse($review['user']['email_verified_at'])->format('Y-m-d h:i A') : 'Not Verified' }}"
                                 readonly>
                         </div>
 
@@ -171,7 +172,8 @@
                             <label class="text-sm">Account Created</label>
                             <input type="text"
                                 class="input w-full focus:outline-none focus:ring-0 focus-border-base-300 cursor-default select-none"
-                                value="{{ $review['user']['created_at'] ? \Carbon\Carbon::parse($review['user']['created_at'])->format('Y-m-d H:i') : '' }}" readonly>
+                                value="{{ $review['user']['created_at'] ? \Carbon\Carbon::parse($review['user']['created_at'])->format('Y-m-d h:i A') : '' }}"
+                                readonly>
                         </div>
 
                         <div>
@@ -200,7 +202,7 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>No.</th>
+                                <th class="w-[10px]">No.</th>
                                 <th>User</th>
                                 <th>Comment</th>
                                 <th>Updated At</th>
@@ -213,7 +215,8 @@
                                     <td>{{ $loop->iteration + ($replies->currentPage() - 1) * $replies->perPage() }}</td>
                                     <td>{{ $reply['user']['name'] ?? 'Unknown' }}</td>
                                     <td class="truncate max-w-[300px]">{{ $reply['reply'] }}</td>
-                                    <td>{{ $reply['updated_at'] ? \Carbon\Carbon::parse($reply['updated_at'])->format('Y-m-d H:i'):'-'}}</td>
+                                    <td>{{ $reply['updated_at'] ? \Carbon\Carbon::parse($reply['updated_at'])->format('Y-m-d h:i A') : '-' }}
+                                    </td>
                                     <td>
                                         <div tabindex="0" role="button" class="dropdown dropdown-left">
                                             <div class="btn btn-sm btn-ghost">
@@ -253,7 +256,7 @@
                                             <div>
                                                 <label class="text-sm">Updated At</label>
                                                 <input type="text" class="input input-bordered w-full"
-                                                    value="{{ $reply['updated_at'] ? \Carbon\Carbon::parse($reply['updated_at'])->format('Y-m-d H:i') : '' }}"
+                                                    value="{{ $reply['updated_at'] ? \Carbon\Carbon::parse($reply['updated_at'])->format('Y-m-d h:i A') : '' }}"
                                                     readonly>
                                             </div>
                                         </div>

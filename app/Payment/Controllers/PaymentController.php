@@ -34,14 +34,45 @@ class PaymentController
         }
     }
 
-    public function viewAdminPaymentListPage()
+    public function viewAdminPaymentListPage(Request $request)
     {
         try {
-            $payments = Payment::orderBy('id', 'desc')->paginate(20);
+
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = Payment::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $payments = $query->paginate($perPage);
+            $payments->appends(request()->query());
 
             $payments->getCollection()->transform(function ($payment) {
                 return $payment->jsonResponse(['invoice', 'payment_method']);
             });
+
             return view('pages.admin.dashboard.payment.payment_list', [
                 'payments' => $payments
             ]);
@@ -106,8 +137,8 @@ class PaymentController
                 $transaction->update(['status' => 'completed']);
             }
 
-            
-            
+
+
             DB::commit();
 
             return redirect()->back()->with('success', 'Payment completed successfully!');
@@ -128,6 +159,43 @@ class PaymentController
             return redirect()->back()->with('success', 'Payment is deleted');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+    public function deleteSelectedPayments(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No payments selected for deletion.');
+            }
+
+            $payments = Payment::whereIn('id', $ids)->get();
+
+            foreach ($payments as $payment) {
+                $payment->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected payments deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected payments.");
+        }
+    }
+
+
+    public function deleteAllPayments()
+    {
+        try {
+            $payments = Payment::all();
+
+            foreach ($payments as $payment) {
+                $payment->delete();
+            }
+
+            return redirect()->back()->with('success', 'All payments deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all payments.");
         }
     }
 }

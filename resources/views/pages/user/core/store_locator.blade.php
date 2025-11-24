@@ -252,8 +252,6 @@
 
         // Initialize Leaflet map
         document.addEventListener('alpine:init', () => {
-            Alpine.start();
-
             document.addEventListener('DOMContentLoaded', () => {
                 window.mapInstance = L.map('map', {
                     dragging: false, // disable drag

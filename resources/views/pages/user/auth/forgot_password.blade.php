@@ -1,13 +1,35 @@
 @extends('layouts.web')
 
 @section('web_content')
-    <div>
-        <p>Forgot Password</p>
-        <p>If you forget your account password, don't be panic. Enter your account email and reset it real quick.</p>
-        <form action="{{ route('forgot-password.post') }}" method="POST">
-            @csrf
-            <input class="input" type="email" name="email" placeholder='Enter Your Account Email' required>
-            <button type='submit' class="btn btn-primary w-fit">Send Reset Password Email</button>
-        </form>
+    <div class="min-h-[70vh] flex items-center justify-center px-4">
+        <div class="w-full max-w-md bg-base-100 border border-base-300 rounded-xl p-6 md:p-8 shadow-sm">
+
+            <div class="mb-6 text-center">
+                <h1 class="text-xl font-bold">Forgot Password</h1>
+                <p class="text-sm text-base-content/70 mt-1">
+                    Enter the email associated with your account and we’ll send you a reset link.
+                </p>
+            </div>
+
+            <form action="{{ route('forgot-password.post') }}" method="POST" class="flex flex-col gap-4">
+                @csrf
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email Address</label>
+                    <input class="input input-bordered w-full" type="email" name="email" placeholder="your@email.com"
+                        required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-full">
+                    Send Reset Link
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <a href="{{ route('login') }}" class="text-sm text-primary hover:underline">
+                    Back to login
+                </a>
+            </div>
+        </div>
     </div>
 @endsection

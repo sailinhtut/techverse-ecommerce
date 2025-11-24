@@ -1,5 +1,5 @@
 @extends('layouts.app') @section('app_content')
-    <div class="min-h-screen bg-gradient-to-br from-green-300 to-black/10 relative flex">
+    <div class="min-h-screen bg-gradient-to-br from-primary/30 to-black/10 relative flex">
         <div class="xl:w-1/2 hidden xl:flex xl:flex-col items-center justify-start pt-30 px-20 bg-white">
 
             <p class="text-2xl font-semibold mb-3">Create Your Own Account And Enjoy Best Technical Devices In Life !</p>
@@ -50,7 +50,7 @@
                         <div class="relative">
                             <input :type="show ? 'text' : 'password'" id="password" name="password" required
                                 class="input w-full" placeholder="Enter your password" />
-                            <span class="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer" @click="show = !show">
+                            <span class="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer z-20" @click="show = !show">
                                 <template x-if="!show">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -78,7 +78,7 @@
                         <div class="relative">
                             <input :type="show ? 'text' : 'password'" id="password" name="password_confirmation" required
                                 class="input w-full" placeholder="Confirm your password" />
-                            <span class="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer" @click="show = !show">
+                            <span class="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer z-20" @click="show = !show">
                                 <template x-if="!show">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="size-4">

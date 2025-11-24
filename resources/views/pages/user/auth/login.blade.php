@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('app_content')
-    <div class="min-h-screen flex bg-gradient-to-br from-green-200 to-black/10 relative">
+    <div class="min-h-screen flex bg-gradient-to-br from-primary/30 to-black/10 relative">
 
         <div class="xl:w-1/2 w-screen min-h-screen px-6 pt-10 xl:pt-50 xl:px-50 flex flex-col justify-start items-center">
             <div class="w-full max-w-sm mx-auto flex flex-col justify-start items-start">
@@ -25,7 +25,7 @@
                         <div class="relative">
                             <input :type="show ? 'text' : 'password'" id="password" name="password" required
                                 class="input w-full" placeholder="Enter your password" />
-                            <span class="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer" @click="show = !show">
+                            <span class="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer z-20" @click="show = !show">
                                 <template x-if="!show">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="size-4">

@@ -12,14 +12,43 @@ use Exception;
 
 class ProductReviewController
 {
-    public function viewAdminReviewListPage()
+    public function viewAdminReviewListPage(Request $request)
     {
         try {
-            $reviews = ProductReview::orderBy('updated_at', 'desc')
-                ->paginate(10);
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
 
-            $reviews->getCollection()->transform(function ($review) {
-                return $review->jsonResponse(['product', 'user_full', 'order']);
+            $query = ProductReview::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('comment', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%")->orWhere('product_id', 'like', "%{$search}%")->orWhere('user_id', 'like', "%{$search}%")->orWhere('order_id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $reviews = $query->paginate($perPage);
+            $reviews->appends(request()->query());
+
+            $reviews->getCollection()->transform(function ($product) {
+                return $product->jsonResponse(['product', 'user_full', 'order']);
             });
 
             return view('pages.admin.dashboard.review.review_list', [
@@ -209,6 +238,43 @@ class ProductReviewController
             return redirect()->back()->with('success', 'Review deleted successfully.');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+    public function deleteSelectedReviews(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No reviews selected for deletion.');
+            }
+
+            $reviews = ProductReview::whereIn('id', $ids)->get();
+
+            foreach ($reviews as $review) {
+                $review->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected reviews deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected reviews.");
+        }
+    }
+
+
+    public function deleteAllReviews()
+    {
+        try {
+            $reviews = ProductReview::all();
+
+            foreach ($reviews as $review) {
+                $review->delete();
+            }
+
+            return redirect()->back()->with('success', 'All reviews deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all reviews.");
         }
     }
 }

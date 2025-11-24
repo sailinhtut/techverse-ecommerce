@@ -14,10 +14,42 @@ use Illuminate\Http\Request;
 
 class ShippingRateController
 {
-    public function viewAdminShippingRateListPage()
+    public function viewAdminShippingRateListPage(Request $request)
     {
         try {
-            $shipping_rates = ShippingRate::orderBy('updated_at', 'desc')->paginate(10);
+
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = ShippingRate::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $shipping_rates = $query->paginate($perPage);
+            $shipping_rates->appends(request()->query());
 
             $shipping_rates->getCollection()->transform(function ($rate) {
                 return $rate->jsonResponse(['zone', 'method', 'class']);
@@ -121,6 +153,43 @@ class ShippingRateController
             return redirect()->back()->with('success', 'Shipping rate deleted successfully.');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+
+    public function deleteSelectedShippingRates(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No rates selected for deletion.');
+            }
+
+            $rates = ShippingRate::whereIn('id', $ids)->get();
+
+            foreach ($rates as $rate) {
+                $rate->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected rates deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected rates.");
+        }
+    }
+
+    public function deleteAllShippingRates()
+    {
+        try {
+            $rates = ShippingRate::all();
+
+            foreach ($rates as $rate) {
+                $rate->delete();
+            }
+
+            return redirect()->back()->with('success', 'All rates deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all rates.");
         }
     }
 }

@@ -63,12 +63,13 @@ class ProductReview extends Model
             'image' => $this->image ? getDownloadableLink($this->image) : null,
             'is_approved' => $this->is_approved,
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
 
         if (in_array('user', $with) && $this->user_id) {
             // $response['user'] = $this->user->jsonResponse(['role']);
             $isAdmin = $this->user->hasRole('admin');
-             
+
             $profile = $isAdmin ? asset('assets/images/master_seller_background_primary.png') : getDownloadableLink($this->user->profile);
             $name = $isAdmin ? config('app.name') : $this->user->name;
 

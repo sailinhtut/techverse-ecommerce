@@ -35,6 +35,8 @@ class ShippingZone extends Model
             'state' => $this->state,
             'city' => $this->city,
             'postal_code' => $this->postal_code,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
 
         if (in_array('rates', $eager_list)) {

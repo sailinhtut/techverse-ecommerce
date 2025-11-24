@@ -30,7 +30,7 @@ export const Toast = {
                 text: "text-red-500",
                 icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
                     class="h-6 w-6 shrink-0 stroke-red-500">
-                    <path stroke-linecap="round" stroke-linejoin="round" 
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                         d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 
                         1.948 3.374h14.71c1.73 0 2.813-1.874 
                         1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 
@@ -42,7 +42,7 @@ export const Toast = {
                 text: "text-amber-500",
                 icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" 
                     viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-amber-500">
-                    <path stroke-linecap="round" stroke-linejoin="round" 
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                         d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 
                         11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 
                         9 11.622 5.176-1.332 9-6.03 9-11.622 
@@ -55,7 +55,7 @@ export const Toast = {
                 text: "text-blue-500",
                 icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" 
                     viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-blue-500">
-                    <path stroke-linecap="round" stroke-linejoin="round" 
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v3.75m9-.75a9 9 0 1 1-18 
                         0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                 </svg>`,
@@ -80,7 +80,9 @@ export const Toast = {
         container.appendChild(toast);
 
         // Close button
-        toast.querySelector("button").addEventListener("click", () => toast.remove());
+        toast
+            .querySelector("button")
+            .addEventListener("click", () => toast.remove());
 
         // Auto-remove
         if (delay > 0) {

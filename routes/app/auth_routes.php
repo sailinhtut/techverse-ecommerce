@@ -57,10 +57,3 @@ Route::controller(AddressController::class)->group(function () {
     Route::delete('/address/{id}', 'deleteAddress')->name('address.id.delete')->middleware('auth');
 });
 
-Route::controller(WishlistController::class)->group(function () {
-    Route::get('/wishlist', 'getWishlists')->name('wishlist.get')->middleware('auth');
-
-    Route::post('/wishlist', 'createWishlist')->name('wishlist.post')->middleware('auth');
-
-    Route::delete('/wishlist/{id}', 'deleteWishlist')->name('wishlist.id.delete')->middleware('auth');
-});

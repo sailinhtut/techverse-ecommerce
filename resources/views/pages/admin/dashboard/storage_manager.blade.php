@@ -72,6 +72,7 @@
                     <thead>
                         <tr>
                             <th>Name</th>
+                            <th>Preview</th>
                             <th class="">Size</th>
                             <th class="">Modified</th>
                             <th class="">Actions</th>
@@ -81,11 +82,14 @@
 
                         <template x-for="dir in directories" :key="dir.path">
                             <tr class="">
+
                                 <td>
                                     <button class="btn btn-ghost px-0 pr-5 btn-sm h-auto py-1 btn-sm"
                                         @click="openDir(dir.path)">
                                         <i class="">📁</i><span x-text="dir.basename"></span>
                                     </button>
+                                </td>
+                                <td class="flex items-center gap-2">
                                 </td>
                                 <td class=""></td>
                                 <td class=""></td>
@@ -119,6 +123,34 @@
                                         class="btn btn-ghost px-0 pr-5 btn-sm h-auto py-1">
                                         <i class="">📄</i> <span x-text="file.basename"></span>
                                     </a>
+                                </td>
+                                <td class="flex items-center gap-2">
+
+                                    <template x-if="file.mime_type.startsWith('image/')">
+                                        <img :src="file.download_url" alt=""
+                                            class="w-10 h-10 rounded object-cover border border-slate-300"
+                                            @click="document.getElementById(`image_modal_`+file.path).showModal()" />
+
+
+                                    </template>
+                                    <template x-if="file.mime_type.startsWith('image/')">
+                                        <dialog :id="`image_modal_` + file.path" class="modal">
+                                            <div class="modal-box max-w-2xl max-h-[85vh] overflow-y-auto">
+                                                <form method="dialog">
+                                                    <button
+                                                        class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                                                </form>
+                                                <img :src="file.download_url"
+                                                    class="w-full h-auto rounded-lg object-contain">
+                                            </div>
+                                        </dialog>
+                                    </template>
+
+                                    <template x-if="!file.mime_type">
+                                        <div class="text-center text-lg">
+                                            📄
+                                        </div>
+                                    </template>
                                 </td>
                                 <td class="" x-text="file.human_size"></td>
                                 <td class="" x-text="file.modified"></td>
@@ -378,9 +410,6 @@
 
                         this.page = response.data.current_page;
                         this.last_page = response.data.last_page;
-
-                        console.log(this.last_page);
-                        console.log(this.page);
 
                     } catch (error) {
                         console.error('Error fetching files:', error);

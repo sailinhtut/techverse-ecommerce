@@ -42,10 +42,10 @@ class ProductReviewReply extends Model
         ];
 
         if (in_array('user', $with) && $this->user) {
-            $isAdmin = $this->user->hasRole('admin');
+            $isFromCompany = $this->user->is_company_member;
 
-            $profile = $isAdmin ? asset('assets/images/master_seller_background_primary.png') : getDownloadableLink($this->user->profile);
-            $name = $isAdmin ? config('app.name') : $this->user->name;
+            $profile = $isFromCompany ? asset('assets/images/master_seller_background_primary.png') : getDownloadableLink($this->user->profile);
+            $name = $isFromCompany ? config('app.name') : $this->user->name;
 
             $response['user'] = [
                 'id' => $this->user->id,

@@ -13,7 +13,6 @@ class ShippingMethod extends Model
         return [
             'enabled' => 'boolean',
             'is_free' => 'boolean',
-
         ];
     }
 
@@ -29,7 +28,9 @@ class ShippingMethod extends Model
             'name' => $this->name,
             'description' => $this->description,
             'enabled' => $this->enabled,
-            'is_free' => $this->is_free
+            'is_free' => $this->is_free,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
 
         if (in_array('rates', $eager_list)) {

@@ -2,7 +2,7 @@
 
 @section('admin_dashboard_content')
     <div class="p-5 min-h-screen">
-        <p class="lg:text-lg font-semibold mb-3">Product Attributes</p>
+        <p class="lg:text-lg font-semibold">Product Attributes</p>
 
         <button class="btn btn-primary" onclick="create_attribute_modal.showModal()">Create Attribute</button>
 
@@ -11,7 +11,7 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>No.</th>
+                            <th class="w-[10px]">No.</th>
                             <th>Name</th>
                             <th>Values</th>
                             <th>Actions</th>

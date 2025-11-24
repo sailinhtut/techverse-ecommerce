@@ -2,19 +2,54 @@
 
 namespace App\Shipping\Controllers;
 
+use App\Cart\Models\Cart;
+use App\Cart\Models\CartItem;
 use App\Inventory\Models\Product;
 use App\Shipping\Models\ShippingMethod;
 use App\Shipping\Models\ShippingRate;
 use App\Shipping\Models\ShippingZone;
+use App\Shipping\Services\ShippingMethodService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ShippingMethodController
 {
-    public function viewAdminShippingMethodListPage()
+    public function viewAdminShippingMethodListPage(Request $request)
     {
         try {
-            $shipping_methods = ShippingMethod::orderBy('id', 'desc')->paginate(10);
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = ShippingMethod::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $shipping_methods = $query->paginate($perPage);
+            $shipping_methods->appends(request()->query());
 
             $shipping_methods->getCollection()->transform(function ($method) {
                 return $method->jsonResponse();
@@ -31,16 +66,11 @@ class ShippingMethodController
     public function filterShippingMethod(Request $request)
     {
         $validated = $request->validate([
-            'cart_items' => 'required|array|min:1',
             'shipping_address.country' => 'required|string',
             'shipping_address.state' => 'required|string',
             'shipping_address.city' => 'required|string',
             'shipping_address.postal_code' => 'required|string',
         ], [
-            'cart_items.required' => 'Your cart is empty. Please add at least one item before proceeding.',
-            'cart_items.array' => 'Cart items must be sent as a valid array.',
-            'cart_items.min' => 'Your cart must contain at least one item.',
-
             'shipping_address.country.required' => 'Please select your country for shipping.',
             'shipping_address.state.required' => 'Please provide your state or region.',
             'shipping_address.city.required' => 'Please provide your city.',
@@ -49,99 +79,25 @@ class ShippingMethodController
 
         $address = $validated['shipping_address'];
 
-        $country_zones = ShippingZone::where('country', $address['country'])
-            ->orWhere('country', '*')
-            ->get();
+        $cart = Cart::with('items.product')
+            ->where('user_id', auth()->id())
+            ->where('is_checked_out', false)
+            ->first();
 
-        if ($country_zones->isEmpty()) {
-            return response()->json(['message' => "No Shipping Method Available In Your Region ({$address['country']})"], 404);
+        if (!$cart || !$cart->items()->exists()) {
+            return response()->json(['message' => "Your cart is empty"], 400);
         }
 
-        $state_zones = $country_zones->whereIn('state', [$address['state'], '*']);
-        if ($state_zones->isEmpty()) {
-            return response()->json(['message' => "No Shipping Method Available In Your Region ({$address['country']},{$address['state']})"], 404);
-        }
+        $calculated_methods = ShippingMethodService::calculateShippingMethods($address, $cart->items);
 
-        $city_zones = $state_zones->whereIn('city', [$address['city'], '*']);
-        if ($city_zones->isEmpty()) {
-            return response()->json(['message' => "No Shipping Method Available In Your Region ({$address['country']},{$address['state']},{$address['city']})"], 404);
-        }
-
-        $postal_zones = $city_zones->whereIn('postal_code', [$address['postal_code'], '*']);
-        if ($postal_zones->isEmpty()) {
-            return response()->json(['message' => "No Shipping Method Available In Your Region ({$address['country']},{$address['state']},{$address['city']},{$address['postal_code']})"], 404);
-        }
-
-        $zone = $postal_zones->first();
-
-        $methods = ShippingMethod::where('enabled', true)->get();
-
-        $result = [];
-
-        foreach ($methods as $method) {
-            $method_total_cost = 0;
-
-
-            foreach ($validated['cart_items'] as $item) {
-                $product = Product::findOrFail($item['id']);
-
-                $zone_rates = ShippingRate::where(function ($q) use ($zone) {
-                    $q->where('shipping_zone_id', $zone->id)
-                        ->orWhereNull('shipping_zone_id');
-                })->get();
-
-                // $result[$product['name']][$method->name]['debug_zone_rates'] = $zone_rates->map(fn($e) => $e->jsonResponse());
-
-                if ($zone_rates->isEmpty()) continue;
-
-                $method_rates = $zone_rates->filter(
-                    fn($zone_rate) => $zone_rate->shipping_method_id == $method->id || is_null($zone_rate->shipping_method_id)
-                );
-
-                // $result[$product['name']][$method->name]['debug_method_rates'] = $method_rates->map(fn($e) => $e->jsonResponse());
-
-                if ($method_rates->isEmpty()) continue;
-
-                $class_rates = $method_rates->filter(
-                    fn($r) => $r->shipping_class_id == ($product['shipping_class_id'] ?? null) || is_null($r->shipping_class_id)
-                );
-
-                // $result[$product['name']][$method->name]['debug_class_rates'] = $class_rates->map(fn($e) => $e->jsonResponse());
-
-                if ($class_rates->isEmpty()) continue;
-
-                if (is_null($product['shipping_class_id'])) {
-                    // $result['aborted_product'][$method->name][] = $product['name'];
-                    continue;
-                }
-
-                $matched_rate = null;
-                
-                if($class_rates->count() > 1){
-                    $matched_rate = $class_rates->whereNotNull('shipping_class_id')->first();
-                } else {
-                    $matched_rate = $class_rates->first();
-                }
-
-                $method_total_cost += $matched_rate->calculateCost(array_merge($item, ['price' => $item['price']]));
-
-                $result['debug_shipping_cost'][$method->name][$product['name']] = $matched_rate->calculateCost(array_merge($item, ['price' => $item['price']]));
-            }
-
-            if ($method_total_cost > 0 || $method->is_free) {
-                $result['data'][] = [
-                    'method' => $method->jsonResponse(),
-                    'zone' => $zone->jsonResponse(),
-                    'total_cost' => $method_total_cost,
-                ];
-            }
-        }
-
-        if (empty($result)) {
+        if (empty($calculated_methods)) {
             return response()->json(['message' => 'No Shipping Method Available For This Order'], 404);
         }
 
-        return response()->json($result);
+        return response()->json([
+            'success' => true,
+            'data' => $calculated_methods
+        ]);
     }
 
     public function createMethod(Request $request)
@@ -212,6 +168,44 @@ class ShippingMethodController
             return redirect()->back()->with('success', 'Shipping Method deleted successfully.');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+
+    public function deleteSelectedShippingMethods(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No methods selected for deletion.');
+            }
+
+            $methods = ShippingMethod::whereIn('id', $ids)->get();
+
+            foreach ($methods as $method) {
+                $method->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected methods deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected methods.");
+        }
+    }
+
+
+    public function deleteAllShippingMethods()
+    {
+        try {
+            $methods = ShippingMethod::all();
+
+            foreach ($methods as $method) {
+                $method->delete();
+            }
+
+            return redirect()->back()->with('success', 'All methods deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all methods.");
         }
     }
 }

@@ -14,7 +14,7 @@ class Category extends Model
         'name',
         'slug',
         'description',
-        'parent_id',
+        'parent_id',    
     ];
 
     protected function casts(): array

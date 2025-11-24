@@ -1,11 +1,21 @@
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_description = getParsedTemplate('site_description');
+    $site_support_email = getParsedTemplate('site_support_email');
+    $site_phone_1 = getParsedTemplate('site_phone_1');
+    $site_phone_2 = getParsedTemplate('site_phone_2');
+    $site_address = getParsedTemplate('site_address');
+    $site_map_location_link = getParsedTemplate('site_map_location_link');
+    $site_logo = getSiteLogoURL();
+@endphp
+
 <footer class="bg-base-200 border-t border-base-300">
     <div class="pt-10 pb-10 px-6 lg:px-20 md:flex md:justify-between md:items-start gap-10">
 
         <div class="mb-6 md:mb-0 md:w-1/3">
-            <p class="text-xl font-semibold mb-3">{{ config('app.name') }}</p>
+            <p class="text-xl font-semibold mb-3">{!! $site_name !!}</p>
             <p class="text-sm">
-                Your one-stop shop for computers, peripherals, and tech accessories.
-                We provide high-quality products with excellent customer support.
+                {!! $site_description !!}
             </p>
         </div>
 
@@ -20,7 +30,8 @@
                         class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Shop</a>
                 </li>
                 <li><a href="/store-locator"
-                        class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Store Locator</a>
+                        class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Store
+                        Locator</a>
                 </li>
                 <li><a href="/about"
                         class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">About
@@ -43,25 +54,29 @@
             <ul class="space-y-2  text-sm p-0">
                 <li>
                     <div class="tooltip" data-tip="View On Map">
-                        <a target="_blank" href="https://www.google.com/maps" class="hover:text-primary"><i
-                                class="bi bi-geo-alt-fill"></i> 123
-                            Tech Street,
-                            Yangon, Myanmar</a>
+                        <a target="_blank" href="{!! $site_map_location_link !!}" class="hover:text-primary"><i
+                                class="bi bi-geo-alt-fill"></i> {!! $site_address !!}</a>
                     </div>
                 </li>
                 <li>
-                    <div class="tooltip" data-tip="Call Now">
+                    <span class="tooltip" data-tip="Call Phone 1">
                         <a target="_blank" href="tel:+959252203838" class="hover:text-primary">
                             <i class="bi bi-telephone-fill"></i>
-                            +95 (252) 203-838
+                            {!! $site_phone_1 !!}
                         </a>
-                    </div>
+                        </sp>
+                        <span class="tooltip" data-tip="Call Phone 2">
+                            <a target="_blank" href="tel:+959252203838" class="hover:text-primary">
+                                <i class="bi bi-telephone-fill"></i>
+                                {!! $site_phone_2 !!}
+                            </a>
+                        </span>
                 </li>
                 <li>
                     <div class="tooltip" data-tip="Send Mail Now">
-                        <a target="_blank" href="mailto:support@techverse.com" class="hover:text-primary"><i
+                        <a target="_blank" href="mailto:{!! $site_support_email !!}" class="hover:text-primary"><i
                                 class="bi bi-envelope-at-fill"></i>
-                            support@techverse.com</a>
+                            {!! $site_support_email !!}</a>
                     </div>
                 </li>
             </ul>
@@ -87,16 +102,6 @@
     <div class="border-t border-base-300 "></div>
 
     <div class="py-2 text-center text-sm px-2">
-        &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+        &copy; {{ date('Y') }} {!! $site_name !!}. All rights reserved.
     </div>
 </footer>
-
-@push('script')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
-                tooltipTriggerEl))
-        })
-    </script>
-@endpush

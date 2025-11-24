@@ -2,10 +2,12 @@
 
 namespace App\Tax\Controllers;
 
+use App\Cart\Models\Cart;
 use App\Inventory\Models\Product;
 use App\Tax\Models\TaxClass;
 use App\Tax\Models\TaxZone;
 use App\Tax\Models\TaxRate;
+use App\Tax\Services\TaxRateService;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -15,16 +17,11 @@ class TaxRateController
     public function calculateTaxCost(Request $request)
     {
         $validated = $request->validate([
-            'cart_items' => 'required|array|min:1',
             'shipping_address.country' => 'required|string',
             'shipping_address.state' => 'required|string',
             'shipping_address.city' => 'required|string',
             'shipping_address.postal_code' => 'required|string',
         ], [
-            'cart_items.required' => 'Your cart is empty. Please add at least one item before proceeding.',
-            'cart_items.array' => 'Cart items must be sent as a valid array.',
-            'cart_items.min' => 'Your cart must contain at least one item.',
-
             'shipping_address.country.required' => 'Please select your country for shipping.',
             'shipping_address.state.required' => 'Please provide your state or region.',
             'shipping_address.city.required' => 'Please provide your city.',
@@ -33,89 +30,60 @@ class TaxRateController
 
         $address = $validated['shipping_address'];
 
-        $country_zones = TaxZone::where('country', $address['country'])
-            ->orWhere('country', '*')
-            ->get();
+        $cart = Cart::with('items.product')
+            ->where('user_id', auth()->id())
+            ->where('is_checked_out', false)
+            ->first();
 
-        if ($country_zones->isEmpty()) {
-            return response()->json(['message' => "No Tax Available In Your Region ({$address['country']})"], 404);
+        if (!$cart || !$cart->items()->exists()) {
+            return response()->json(['message' => "Your cart is empty"], 400);
         }
 
-        $state_zones = $country_zones->whereIn('state', [$address['state'], '*']);
-        if ($state_zones->isEmpty()) {
-            return response()->json(['message' => "No Tax Available In Your Region ({$address['country']},{$address['state']})"], 404);
-        }
+        $calculated_tax_cost = TaxRateService::calculateTax($address, $cart->items);
 
-        $city_zones = $state_zones->whereIn('city', [$address['city'], '*']);
-        if ($city_zones->isEmpty()) {
-            return response()->json(['message' => "No Tax Available In Your Region ({$address['country']},{$address['state']},{$address['city']})"], 404);
-        }
 
-        $postal_zones = $city_zones->whereIn('postal_code', [$address['postal_code'], '*']);
-        if ($postal_zones->isEmpty()) {
-            return response()->json(['message' => "No Tax Available In Your Region ({$address['country']},{$address['state']},{$address['city']},{$address['postal_code']})"], 404);
-        }
-
-        $zone = $postal_zones->first();
-
-        $result = [];
-
-        $tax_total_cost = 0;
-
-        foreach ($validated['cart_items'] as $item) {
-            $product = Product::findOrFail($item['id']);
-
-            $zone_rates = TaxRate::where(function ($q) use ($zone) {
-                $q->where('tax_zone_id', $zone->id)
-                    ->orWhereNull('tax_zone_id');
-            })->get();
-
-            // $result[$product['name']]['debug_zone_rates'] = $zone_rates->map(fn($e) => $e->jsonResponse());
-
-            if ($zone_rates->isEmpty()) continue;
-
-            $class_rates = $zone_rates->filter(
-                fn($zr) => $zr->tax_class_id == ($product['tax_class_id'] ?? null) || is_null($zr->tax_class_id)
-            );
-
-            // $result[$product['name']]['debug_class_rates'] = $class_rates->map(fn($e) => $e->jsonResponse());
-
-            if ($class_rates->isEmpty()) continue;
-
-            if (is_null($product['tax_class_id'])) {
-                continue;
-            }
-
-            $matched_rate = null;
-                
-            if($class_rates->count() > 1){
-                $matched_rate = $class_rates->whereNotNull('tax_class_id')->first();
-            } else {
-                $matched_rate = $class_rates->first();
-            }
-
-            $matched_rate = $class_rates->first();
-            $tax_total_cost += $matched_rate->calculateTax($item);
-
-            $result['debug_tax_cost'][$product['name']] = $matched_rate->calculateTax($item);
-        }
-
-        $result['data'] = [
-            'zone' => $zone->jsonResponse(),
-            'total_cost' => $tax_total_cost,
-        ];
-
-        if (empty($result)) {
-            return response()->json(['message' => 'No Tax Available For This Order'], 404);
-        }
-
-        return response()->json($result);
+        return response()->json([
+            'data' => [
+                'tax_cost' => $calculated_tax_cost
+            ]
+        ]);
     }
 
-    public function viewAdminTaxRateListPage()
+    public function viewAdminTaxRateListPage(Request $request)
     {
         try {
-            $tax_rates = TaxRate::orderBy('updated_at', 'desc')->paginate(10);
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = TaxRate::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $tax_rates = $query->paginate($perPage);
+            $tax_rates->appends(request()->query());
 
             $tax_rates->getCollection()->transform(function ($rate) {
                 return $rate->jsonResponse(['zone', 'class']);
@@ -212,6 +180,44 @@ class TaxRateController
             return redirect()->back()->with('success', 'Tax Rate deleted successfully.');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+
+    public function deleteSelectedTaxRates(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No rates selected for deletion.');
+            }
+
+            $rates = TaxRate::whereIn('id', $ids)->get();
+
+            foreach ($rates as $rate) {
+                $rate->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected rates deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected rates.");
+        }
+    }
+
+
+    public function deleteAllTaxRates()
+    {
+        try {
+            $rates = TaxRate::all();
+
+            foreach ($rates as $rate) {
+                $rate->delete();
+            }
+
+            return redirect()->back()->with('success', 'All rates deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all rates.");
         }
     }
 }

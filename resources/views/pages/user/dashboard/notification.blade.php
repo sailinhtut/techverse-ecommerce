@@ -1,10 +1,15 @@
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_logo = getSiteLogoURL();
+@endphp
+
 @extends('layouts.user.user_dashboard')
 
 @section('user_dashboard_content')
     <div class="p-3 lg:p-5">
         <p class="lg:text-lg font-semibold ">Notifications</p>
 
-        <div class="card shadow-sm border border-base-300">
+        <div class="card shadow-sm border border-base-300 mt-3">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
                     <thead>
@@ -29,8 +34,8 @@
                                         <img src="{{ $notification['image'] }}" alt="{{ $notification['title'] }}"
                                             class="w-[20px] h-auto object-contain">
                                     @else
-                                        <img src="{{ asset(config('app.app_logo_bare_path')) }}"
-                                            alt="{{ $notification['title'] }}" class="w-[30px] h-auto">
+                                        <img src="{{ $site_logo }}" alt="{{ $notification['title'] }}"
+                                            class="w-[30px] h-auto">
                                     @endif
                                 </td>
 
@@ -75,8 +80,8 @@
                                                         alt="{{ $notification['title'] }}"
                                                         class="w-[100px] h-auto object-contain">
                                                 @else
-                                                    <img src="{{ asset(config('app.app_logo_bare_path')) }}"
-                                                        alt="{{ $notification['title'] }}" class="w-[100px] h-auto">
+                                                    <img src="{{ $site_logo }}" alt="{{ $notification['title'] }}"
+                                                        class="w-[100px] h-auto">
                                                 @endif
                                                 <p><strong>ID:</strong> {{ $notification['id'] ?? 'No ID' }}</p>
 

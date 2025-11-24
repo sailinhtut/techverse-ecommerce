@@ -76,6 +76,8 @@ class ShippingRate extends Model
             'type' => $this->type,
             'is_percentage' => $this->is_percentage,
             'cost' => (float)$this->cost ?? 0,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
 
         if (in_array('zone', $eager_list) && $this->zone) {

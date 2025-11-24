@@ -73,19 +73,19 @@
                                 class="text-red-500">No
                                 Available Shipping Method
                             </p>
-                            <template x-show="shipping_methods" x-for="method in shipping_methods" :key="method.method.id">
+                            <template x-show="shipping_methods" x-for="method in shipping_methods" :key="method.id">
                                 <label class="flex flex-col cursor-pointer border p-3 rounded-lg hover:bg-base-200"
-                                    :class="selectedPaymentId === method.method.id ? 'border-primary bg-base-100' :
+                                    :class="selectedPaymentId === method.id ? 'border-primary bg-base-100' :
                                         'border-gray-200'">
                                     <div class="flex items-start gap-3">
-                                        <input type="radio" name="shipping_method_id" :value="method.method.id"
+                                        <input type="radio" name="shipping_method_id" :value="method.id"
                                             class="radio mt-1" x-model="selectedShippingId" />
                                         <div class="flex flex-col">
-                                            <span class="font-medium" x-text="method.method.name"></span>
+                                            <span class="font-medium" x-text="method.name"></span>
                                             <span class="text-sm opacity-70"><span
-                                                    x-text="`${method.total_cost > 0 ? method.total_cost : ''}${method.total_cost ? '$ - ' : ''}`"></span>
+                                                    x-text="`${method.shipping_cost > 0 ? method.shipping_cost : ''}${method.shipping_cost ? '$ - ' : ''}`"></span>
 
-                                                <span x-text="method.method.description"></span></span>
+                                                <span x-text="method.description"></span></span>
                                         </div>
                                     </div>
 
@@ -146,32 +146,16 @@
 
                 <div class="lg:col-span-1 space-y-6">
 
-                    <section class="border rounded-lg p-4">
+                    <section class="border border-base-300 rounded-lg p-4">
                         <h2 class="text-lg font-semibold mb-3">Your Cart</h2>
 
                         <template x-for="(item, index) in cartItems" :key="item.id">
-                            <div class="flex justify-between items-center border-b py-2">
-                                {{-- 'cart_items' => 'required|array|min:1',
-                                'cart_items.*.id' => 'required|integer|exists:products,id',
-                                'cart_items.*.name' => 'required|string|max:150',
-                                'cart_items.*.slug' => 'required|string|max:150',
-                                'cart_items.*.price' => 'required|numeric|min:0',
-                                'cart_items.*.quantity' => 'required|integer|min:1',
-                                'cart_items.*.tax' => 'nullable|numeric|min:0',
-                                'cart_items.*.discount' => 'nullable|numeric|min:0', --}}
-                                <input type="hidden" :name="`cart_items[${index}][id]`" :value="item.id">
-                                <input type="hidden" :name="`cart_items[${index}][variant_id]`"
-                                    :value="item.variant_id">
-                                <input type="hidden" :name="`cart_items[${index}][name]`" :value="item.name">
-                                <input type="hidden" :name="`cart_items[${index}][sku]`" :value="item.sku">
-                                <input type="hidden" :name="`cart_items[${index}][price]`" :value="item.price">
-                                <input type="hidden" :name="`cart_items[${index}][quantity]`" :value="item.quantity">
-                                <input type="hidden" :name="`cart_items[${index}][tax]`" :value="item.tax_total_cost">
-                                <input type="hidden" :name="`cart_items[${index}][discount]`" :value="item.discount">
+                            <div class="flex justify-between items-center py-2">
                                 <div>
                                     <p class="font-medium" x-text="item.name"></p>
                                     <p class="font-medium" x-text="item.variant_id"></p>
-                                    <p class="text-sm text-gray-500">Qty: <span x-text="item.quantity"></span></p>
+                                    <p class="text-sm text-gray-500">Price: <span x-text="item.price"></span>, Qty: <span
+                                            x-text="item.quantity"></span></p>
                                 </div>
                                 <div class="text-right">
                                     <p>$<span x-text="(item.price * item.quantity).toFixed(2)"></span></p>
@@ -180,7 +164,7 @@
                         </template>
                     </section>
 
-                    <section class="border rounded-lg p-4 space-y-2">
+                    <section class="border border-base-300 rounded-lg p-4 space-y-2">
                         <h2 class="text-lg font-semibold mb-3">Order Summary</h2>
 
                         <div class="flex justify-between">
@@ -190,13 +174,13 @@
                         <div x-show="discount > 0" class="flex justify-between">
                             <span>Discount</span>
                             <input type="hidden" name="discount_total" :value="discount">
-                            <input type="hidden" name="coupon_code" :value="applied_coupon.code">
+                            <input type="hidden" x-show="applied_coupon" name="coupon_code"
+                                :value="applied_coupon?.code ?? ''">
                             <span>− $<span x-text="discount.toFixed(2)"></span></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Shipping</span>
-                            <input type="hidden" name="shipping_cost_total" :value="shipping_cost.toFixed(2)">
-                            <span>$<span x-text="shipping_cost.toFixed(2)"></span></span>
+                            <span>$<span x-text="shipping_cost?.toFixed(2) ?? 0"></span></span>
                         </div>
                         <div class="">
                             <span x-show="tax_calculation_error" x-text="`Tax Error: ${tax_calculation_error}`"
@@ -204,20 +188,17 @@
                         </div>
                         <div x-show="!tax_calculation_error" class="flex justify-between">
                             <span>Tax</span>
-                            <input type="hidden" name="tax_cost_total" :value="tax_total_cost.toFixed(2)">
                             <div x-show="loadingTaxTotalCost" class="loading loading-spinner-sm"></div>
                             <span x-show="!loadingTaxTotalCost">$<span x-text="tax_total_cost.toFixed(2)"></span></span>
                         </div>
-                        <hr>
                         <div class="flex justify-between font-semibold text-lg">
                             <span>Total</span>
                             <span>$<span x-text="grand_total.toFixed(2)"></span></span>
                         </div>
                     </section>
 
-                    <section class="border rounded-lg p-4 space-y-3">
+                    <section class="border border-base-300 rounded-lg p-4 space-y-3">
                         <h2 class="text-lg font-semibold mb-3">Apply Coupon</h2>
-
                         <div class="flex gap-2">
                             <input type="text" x-model="coupon_code" placeholder="Enter coupon code"
                                 class="input input-bordered flex-1" />
@@ -231,7 +212,7 @@
 
                         <p x-show="coupon_error" class="text-sm text-red-500" x-text="coupon_error"></p>
                         <p x-show="applied_coupon" class="text-sm text-green-600">
-                            Applied: <span x-text="applied_coupon.code"></span> —
+                            Applied: <span x-text="applied_coupon?.code ?? ''"></span> —
                             <span x-text="applied_coupon_summary"></span>
                         </p>
                     </section>
@@ -301,6 +282,8 @@
                     country: '{{ old('billing_address.country', $default_billing_address->country ?? '') }}'
                 },
                 init() {
+
+
                     this.loadPaymentMethods();
                     this.loadShippingMethods();
                     this.calculateTaxTotalCost();
@@ -323,9 +306,28 @@
                         this.selectedPaymentId && !this
                         .payment_method_error && this.payment_methods.length > 0 && !this.tax_calculation_error;
                 },
+                calculateTotals() {
+                    const selectedShippingMethod = this.selectedShippingId ? this.shipping_methods.find(
+                        (e) => e.id == this.selectedShippingId
+                    ) : null;
+
+                    this.shipping_cost = selectedShippingMethod ? selectedShippingMethod.shipping_cost : 0;
+
+                    this.subtotal = this.cartItems
+                        .reduce((sum, i) => sum + i.subtotal, 0);
+
+                    const totalBeforeDiscount = this.subtotal + this.tax_total_cost + this.shipping_cost;
+                    this.grand_total = Math.max(totalBeforeDiscount - this.discount, 0);
+                },
+
+
                 async applyCoupon() {
                     if (!this.coupon_code.trim()) {
                         this.coupon_error = 'Please enter a coupon code.';
+                        this.discount = 0;
+                        this.applied_coupon = null;
+                        this.applied_coupon_summary = '';
+                        this.calculateTotals();
                         return;
                     }
 
@@ -343,45 +345,27 @@
                             subtotal: this.subtotal
                         };
 
-                        const res = await axios.post('/order/apply-coupon', {
+                        const res = await axios.post('/order/check-coupon', {
                             code: this.coupon_code,
-                            cart
                         }, {
                             headers: {
                                 'Accept': 'application/json'
                             }
                         });
 
-                        const data = res.data;
+                        const data = res.data.data;
                         this.applied_coupon = data.coupon;
-                        this.discount = data.discount ?? 0;
-
-                        // Build a readable summary
+                        this.discount = data.coupon_discount ?? 0;
                         this.applied_coupon_summary = data.coupon_message;
-                        this.calculateTotals();
-                        console.log(data);
-
                     } catch (err) {
-                        console.log(err);
                         this.discount = 0;
                         this.applied_coupon = null;
                         this.applied_coupon_summary = '';
                         this.coupon_error = err.response?.data?.error || 'Invalid or expired coupon.';
                     } finally {
                         this.loadingCoupon = false;
+                        this.calculateTotals();
                     }
-                },
-                calculateTotals() {
-                    const selectedShippingMethod = this.shipping_methods.find(
-                        (e) => e.method.id == this.selectedShippingId
-                    );
-                    this.shipping_cost = selectedShippingMethod ? selectedShippingMethod.total_cost : 0;
-
-                    this.subtotal = Object.values(this.cartItems)
-                        .reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-                    const totalBeforeDiscount = this.subtotal + this.tax_total_cost + this.shipping_cost;
-                    this.grand_total = Math.max(totalBeforeDiscount - this.discount, 0);
                 },
                 async calculateTaxTotalCost() {
                     try {
@@ -398,7 +382,6 @@
 
                         const response = await axios.post(
                             '/calculate-tax', {
-                                cart_items: cart_items,
                                 shipping_address: this.shipping
                             }, {
                                 headers: {
@@ -406,9 +389,8 @@
                                 }
                             }
                         );
-                        this.tax_total_cost = response.data.data.total_cost ?? [];
+                        this.tax_total_cost = response.data.data.tax_cost ?? [];
                         this.tax_calculation_error = '';
-                        console.log(response.data);
                     } catch (error) {
                         this.tax_total_cost = 0;
                         this.tax_calculation_error = error.response.data.message ?? 'Unexpected Error Occured';
@@ -420,20 +402,12 @@
                 async loadShippingMethods() {
                     try {
                         if (this.loadingShippingMethods) return;
+
                         console.log('Fetching Shipping Methods...');
                         this.loadingShippingMethods = true;
-                        const cart_items = Object.values(this.cartItems).map((e) => {
-                            return {
-                                'id': e.id,
-                                'variant_id': e.variant_id,
-                                'price': e.price,
-                                'quantity': e.quantity,
-                            }
-                        });
 
                         const response = await axios.post(
                             '/filter-shipping-method', {
-                                cart_items: cart_items,
                                 shipping_address: this.shipping
                             }, {
                                 headers: {
@@ -443,7 +417,6 @@
                         );
                         this.shipping_methods = response.data.data ?? [];
                         this.shipping_method_error = '';
-                        console.log(response.data);
                     } catch (error) {
                         this.shipping_methods = [];
                         this.selectedShippingId = '';
@@ -460,8 +433,6 @@
                         const product_id_list = Object.values(this.cartItems).map(e => e.id);
                         const response = await axios.post(
                             '/filter-payment-method', {
-                                product_ids: product_id_list,
-                            }, {
                                 headers: {
                                     'Accept': 'application/json'
                                 }

@@ -12,7 +12,7 @@
                 Shop smarter and upgrade your digital lifestyle today.
             </p>
             <a href="{{ route('shop.get') }}" class="btn btn-primary">Shop Now</a>
-            
+
 
         </div>
         <div class="w-full lg:w-1/2 flex justify-center pt-16">
@@ -118,7 +118,8 @@
                 <p class="mt-3 font-semibold">– David K.</p>
             </div>
             <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition">
-                <p class="text-sm italic">“I trust {{ config('app.name') }} for all my accessories. Reliable and affordable.”</p>
+                <p class="text-sm italic">“I trust {{ config('app.name') }} for all my accessories. Reliable and
+                    affordable.”</p>
                 <p class="mt-3 font-semibold">– Emma W.</p>
             </div>
         </div>

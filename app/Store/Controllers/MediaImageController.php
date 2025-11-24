@@ -10,11 +10,40 @@ use Exception;
 
 class MediaImageController
 {
-    public function viewAdminMediaImageListPage()
+    public function viewAdminMediaImageListPage(Request $request)
     {
         try {
-            $mediaImages = MediaImage::orderBy('priority', 'asc')
-                ->paginate(10);
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = MediaImage::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $mediaImages = $query->paginate($perPage);
+            $mediaImages->appends(request()->query());
 
             $mediaImages->getCollection()->transform(function ($image) {
                 return $image->jsonResponse();
@@ -134,6 +163,43 @@ class MediaImageController
             return redirect()->back()->with('success', 'Media image deleted successfully.');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+    public function deleteSelectedMediaImages(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No images selected for deletion.');
+            }
+
+            $images = MediaImage::whereIn('id', $ids)->get();
+
+            foreach ($images as $image) {
+                $image->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected images deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected images.");
+        }
+    }
+
+
+    public function deleteAllMediaImages()
+    {
+        try {
+            $images = MediaImage::all();
+
+            foreach ($images as $image) {
+                $image->delete();
+            }
+
+            return redirect()->back()->with('success', 'All images deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all images.");
         }
     }
 }

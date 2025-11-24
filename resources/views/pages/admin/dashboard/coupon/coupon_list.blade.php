@@ -2,16 +2,280 @@
 
 @section('admin_dashboard_content')
     <div class="p-5 min-h-screen">
-        <p class="lg:text-lg font-semibold mb-3">Coupons</p>
+        <p class="lg:text-lg font-semibold">Coupons</p>
 
-        <button class="btn btn-primary" onclick="create_coupon_modal.showModal()">Create Coupon</button>
+        <div class="mt-3 flex xl:flex-row flex-col justify-between gap-2">
+
+            <div class="flex flex-row gap-2 flex-wrap" x-data>
+                <div class="join join-horizontal">
+                    <select class="select select-sm join-item" x-model="$store.bulk.current_action">
+                        <option value="">Bulk Actions</option>
+                        <option value="bulk_delete_selected">Delete Selected</option>
+                        <option value="bulk_delete_all">Delete All</option>
+                    </select>
+                    <button class="join-item btn btn-sm" @click="$store.bulk.commit()">Commit</button>
+                </div>
+                <button class="btn btn-sm shadow-none" onclick="create_coupon_modal.showModal()">Add Coupon</button>
+            </div>
+
+            {{-- bulk delete selected modal --}}
+            <dialog id="bulk_delete_selected" class="modal" x-data="{ loading: false }">
+                <div class="modal-box relative">
+                    <form method="dialog">
+                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    </form>
+
+                    <p class="text-lg font-semibold py-0">Confirm Delete</p>
+                    <p class="py-2 mb-0 text-sm">
+                        Are you sure you want to delete
+                        <span class="italic text-error">Selected Coupons</span>?
+                    </p>
+
+                    <template x-if="$store.bulk.hasCandidates">
+                        <ul class="text-sm pl-10 list-decimal max-h-24 overflow-y-auto bg-base-200 p-3">
+                            <template x-for="id in $store.bulk.candidates" :key="id">
+                                <li x-text="'Coupon ID: ' + id"></li>
+                            </template>
+                        </ul>
+                    </template>
+
+                    <div class="mt-3 modal-action">
+                        <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
+
+                        <form method="POST" action="{{ route('admin.dashboard.product.coupon.bulk.delete-selected') }}"
+                            @submit="loading = true">
+                            @csrf
+                            @method('DELETE')
+                            <template x-for="id in $store.bulk.candidates" :key="id">
+                                <input type="hidden" name="ids[]" :value="id">
+                            </template>
+                            <button type="submit" class="btn btn-error flex items-center gap-2" :disabled="loading">
+                                <span x-show="!loading">Delete Candidates</span>
+                                <span x-show="loading" class="loading loading-spinner loading-xs"></span>
+                                <span x-show="loading">Deleting...</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
+
+            {{-- bulk delete all modal --}}
+            <dialog id="bulk_delete_all" class="modal" x-data="{ loading: false }">
+                <div class="modal-box relative">
+                    <form method="dialog">
+                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    </form>
+
+                    <p class="text-lg font-semibold">Confirm Delete</p>
+                    <p class="text-sm mb-4">
+                        Are you sure you want to delete
+                        <span class="text-error">All Coupons</span>?
+                    </p>
+
+                    <div class="modal-action">
+                        <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
+
+                        <form method="POST" action="{{ route('admin.dashboard.product.coupon.bulk.delete-all') }}"
+                            @submit="loading = true">
+                            @csrf
+                            @method('DELETE')
+                            <template x-for="id in $store.bulk.candidates" :key="id">
+                                <input type="hidden" name="ids[]" :value="id">
+                            </template>
+                            <button type="submit" class="btn btn-error flex items-center gap-2" :disabled="loading">
+                                <span x-show="!loading">Delete</span>
+                                <span x-show="loading" class="loading loading-spinner loading-xs"></span>
+                                <span x-show="loading">Deleting...</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
+
+
+            {{-- Filtering Section --}}
+            <div class="flex flex-row flex-wrap justify-start xl:justify-end gap-2">
+                {{-- product searching --}}
+                <form id="queryForm" method="GET" action="{{ request()->url() }}" class="join join-horizontal">
+                    <template x-data x-if="$store.coupon_search_setting.sortBy">
+                        <input type="hidden" name="sortBy" :value="$store.coupon_search_setting.sortBy">
+                    </template>
+
+                    <template x-data x-if="$store.coupon_search_setting.perPage">
+                        <input type="hidden" x-data name="perPage" :value="$store.coupon_search_setting.perPage">
+                    </template>
+
+                    <template x-data x-if="$store.coupon_search_setting.orderBy">
+                        <input type="hidden" x-data name="orderBy" :value="$store.coupon_search_setting.orderBy">
+                    </template>
+
+                    <input type="text" x-data x-cloak class="join-item input input-sm rounded-l-box" name="query"
+                        :value="$store.coupon_search_setting.query"
+                        @change="$store.coupon_search_setting.query = $event.target.value; $store.coupon_search_setting.save(); $el.form.submit()">
+
+                    <button class="join-item btn btn-sm">Search</button>
+                </form>
+
+                {{-- page limiting --}}
+                <form method="GET" action="{{ request()->url() }}">
+                    <template x-data
+                        x-if="$store.coupon_search_setting.query && $store.coupon_search_setting.query.length > 0">
+                        <input type="hidden" name="query" :value="$store.coupon_search_setting.query">
+                    </template>
+
+                    <template x-data x-if="$store.coupon_search_setting.sortBy">
+                        <input type="hidden" x-data name="sortBy" :value="$store.coupon_search_setting.sortBy">
+                    </template>
+
+                    <template x-data x-if="$store.coupon_search_setting.orderBy">
+                        <input type="hidden" x-data name="orderBy" :value="$store.coupon_search_setting.orderBy">
+                    </template>
+
+                    <select name="perPage" x-data x-cloak class="select select-sm w-fit shrink-0" x-data
+                        x-model="$store.coupon_search_setting.perPage"
+                        @change="$store.coupon_search_setting.perPage = $event.target.value; $store.coupon_search_setting.save(); $el.form.submit()">
+                        <option value="5">Show 5</option>
+                        <option value="10">Show 10</option>
+                        <option value="20">Show 20</option>
+                        <option value="50">Show 50</option>
+                    </select>
+                </form>
+
+                {{-- ascending & descending --}}
+                <form method="GET" action="{{ request()->url() }}">
+                    <template x-data
+                        x-if="$store.coupon_search_setting.query && $store.coupon_search_setting.query.length > 0">
+                        <input type="hidden" name="query" :value="$store.coupon_search_setting.query">
+                    </template>
+
+                    <template x-data x-if="$store.coupon_search_setting.perPage">
+                        <input type="hidden" x-data name="perPage" :value="$store.coupon_search_setting.perPage">
+                    </template>
+
+                    <template x-data x-if="$store.coupon_search_setting.sortBy">
+                        <input type="hidden" x-data name="sortBy" :value="$store.coupon_search_setting.sortBy">
+                    </template>
+
+                    <select name="orderBy" x-data x-cloak x-model="$store.coupon_search_setting.orderBy"
+                        class="select select-sm w-fit shrink-0" x-data :value="$store.coupon_search_setting.orderBy"
+                        @change="$store.coupon_search_setting.orderBy = $event.target.value; $store.coupon_search_setting.save() ; $el.form.submit()">
+                        <option value="desc">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0-3.75-3.75M17.25 21 21 17.25" />
+                            </svg>
+                            Descending
+                        </option>
+                        <option value="asc">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="size-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12" />
+                            </svg>
+                            Ascending
+                        </option>
+                    </select>
+                </form>
+
+                {{-- sorting --}}
+                <form method="GET" action="{{ request()->url() }}">
+                    <template x-data
+                        x-if="$store.coupon_search_setting.query && $store.coupon_search_setting.query.length > 0">
+                        <input type="hidden" name="query" :value="$store.coupon_search_setting.query">
+                    </template>
+
+                    <template x-data x-if="$store.coupon_search_setting.perPage">
+                        <input type="hidden" x-data name="perPage" :value="$store.coupon_search_setting.perPage">
+                    </template>
+
+                    <template x-data x-if="$store.coupon_search_setting.orderBy">
+                        <input type="hidden" x-data name="orderBy" :value="$store.coupon_search_setting.orderBy">
+                    </template>
+
+                    <select name="sortBy" class="select select-sm w-fit shrink-0" x-data x-cloak
+                        :value="$store.coupon_search_setting.sortBy"
+                        @change="$store.coupon_search_setting.sortBy = $event.target.value; $store.coupon_search_setting.save() ; $el.form.submit()">
+                        <option value="last_updated">Sort By Last Updated
+                        </option>
+                        <option value="last_created">Sort By Last Created
+                        </option>
+                    </select>
+                </form>
+
+                {{-- <button class="btn btn-sm bg-base-100 font-normal shadow-none border-slate-300" x-data x-transition x-cloak
+                    @click="$store.coupon_search_setting.showFilterOption = !$store.coupon_search_setting.showFilterOption;$store.coupon_search_setting.save()">
+                    <span x-text="$store.coupon_search_setting.showFilterOption ? 'Hide Filter' : 'Filter Option'"></span>
+                </button> --}}
+                <button class="btn btn-sm bg-base-100 font-normal shadow-none border-slate-300" x-data x-transition x-cloak
+                    @click="$store.coupon_search_setting.showDisplayOption = !$store.coupon_search_setting.showDisplayOption;$store.coupon_search_setting.save()">
+                    <span
+                        x-text="$store.coupon_search_setting.showDisplayOption ? 'Hide Display' : 'Display Option'"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-3 p-3 border border-base-300 rounded-md flex flex-col gap-2" x-cloak x-transition x-data
+            x-show="$store.coupon_search_setting.showFilterOption">
+            <p class="text-xs">Filter Options</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
+                {{-- <div class="flex flex-col gap-1">
+                    <select x-data class="select select-sm text-xs" name="brand"
+                        :value="$store.coupon_search_setting.pinnedFilter ? 'true' : 'false'"
+                        @change="$store.coupon_search_setting.pinnedFilter = $event.target.value; $store.coupon_search_setting.save()">
+                        <option value="false">Filter Pinned</option>
+                        <option value="true">Pinned Product</option>
+                    </select>
+                </div> --}}
+            </div>
+            <div class="flex flex-row gap-2">
+                {{-- <button class="btn btn-primary btn-sm">Save</button> --}}
+                <button class="btn btn-sm" x-data @click="$store.coupon_search_setting.resetFilter()">Reset</button>
+            </div>
+        </div>
+
+        {{-- column displaying --}}
+        <div class="mt-3 p-3 border border-base-300 rounded-md flex flex-col gap-2" x-cloak x-transition x-data
+            x-show="$store.coupon_search_setting.showDisplayOption">
+            <p class="text-xs">Display Options</p>
+            <div class="flex sm:flex-row flex-col flex-wrap gap-3">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm" x-data
+                        :checked="$store.coupon_search_setting.showIDColumn"
+                        @change="$store.coupon_search_setting.showIDColumn = !$store.coupon_search_setting.showIDColumn; $store.coupon_search_setting.save()">
+                    <span class="text-xs">Show ID</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm" x-data
+                        :checked="$store.coupon_search_setting.showUpdatedTimeColumn || $store.coupon_search_setting
+                            .is_last_updated_filter"
+                        @change="$store.coupon_search_setting.showUpdatedTimeColumn = !$store.coupon_search_setting.showUpdatedTimeColumn; $store.coupon_search_setting.save()">
+                    <span class="text-xs">Show Updated Time</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm" x-data
+                        :checked="$store.coupon_search_setting.showCreatedTimeColumn || $store.coupon_search_setting
+                            .is_last_created_filter"
+                        @change="$store.coupon_search_setting.showCreatedTimeColumn = !$store.coupon_search_setting.showCreatedTimeColumn; $store.coupon_search_setting.save()">
+                    <span class="text-xs">Show Created Time</span>
+                </label>
+            </div>
+        </div>
+
 
         <div class="card shadow-sm border border-base-300 mt-4">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>No.</th>
+                            <th class="w-[10px]">
+                                <input type="checkbox" class="checkbox checkbox-xs rounded-sm" x-data
+                                    :checked="$store.bulk.isAllSelected()"
+                                    @change="$store.bulk.toggleSelectAll($el.checked)">
+                            </th>
+                            <th class="w-[10px]">No.</th>
+                            <th x-cloak x-data x-show="$store.coupon_search_setting.showIDColumn" class="w-[50px]">ID
+                            </th>
                             <th>Code</th>
                             <th>Type</th>
                             <th>Value</th>
@@ -21,13 +285,28 @@
                             <th>Valid To</th>
                             <th>Usage Limit</th>
                             <th>Used Limit</th>
+                            <th x-cloak x-data
+                                x-show="$store.coupon_search_setting.showUpdatedTimeColumn || $store.coupon_search_setting.is_last_updated_filter">
+                                Updated At</th>
+                            <th x-cloak x-data
+                                x-show="$store.coupon_search_setting.showCreatedTimeColumn || $store.coupon_search_setting.is_last_created_filter">
+                                Created At</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($coupons as $coupon)
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm row-checkbox"
+                                        data-id="{{ $coupon['id'] }}" x-data
+                                        :checked="$store.bulk.candidates.includes({{ $coupon['id'] }})"
+                                        @change="$store.bulk.toggleCandidate({{ $coupon['id'] }})">
+                                </td>
                                 <td>{{ $loop->iteration + ($coupons->currentPage() - 1) * $coupons->perPage() }}</td>
+                                <td x-cloak x-data x-show="$store.coupon_search_setting.showIDColumn">
+                                    {{ $coupon['id'] }}
+                                </td>
                                 <td>
                                     <p onclick="document.getElementById('detail_modal_{{ $coupon['id'] }}').showModal()"
                                         class="cursor-pointer hover:underline">
@@ -40,10 +319,20 @@
                                 <td>{{ ucfirst($coupon['apply_to']) }}</td>
                                 <td>{{ $coupon['min_cart_value'] ? number_format($coupon['min_cart_value'], 0) : '-' }}
                                 </td>
-                                <td>{{ $coupon['valid_from'] ? \Carbon\Carbon::parse($coupon['valid_from'])->format('Y-m-d H:i') : '-' }}</td>
-                                <td>{{ $coupon['valid_to'] ? \Carbon\Carbon::parse($coupon['valid_to'])->format('Y-m-d H:i') : '-' }}</td>
+                                <td>{{ $coupon['valid_from'] ? \Carbon\Carbon::parse($coupon['valid_from'])->format('Y-m-d h:i A') : '-' }}
+                                </td>
+                                <td>{{ $coupon['valid_to'] ? \Carbon\Carbon::parse($coupon['valid_to'])->format('Y-m-d h:i A') : '-' }}
+                                </td>
                                 <td>{{ $coupon['usage_limit'] ?? '-' }}</td>
                                 <td>{{ $coupon['used'] ?? '-' }}</td>
+                                <td x-cloak x-data
+                                    x-show="$store.coupon_search_setting.showUpdatedTimeColumn || $store.coupon_search_setting.is_last_updated_filter">
+                                    {{ $coupon['updated_at'] ? \Carbon\Carbon::parse($coupon['updated_at'])->format('Y-m-d h:i A') : '-' }}
+                                </td>
+                                <td x-cloak x-data
+                                    x-show="$store.coupon_search_setting.showCreatedTimeColumn || $store.coupon_search_setting.is_last_created_filter">
+                                    {{ $coupon['created_at'] ? \Carbon\Carbon::parse($coupon['created_at'])->format('Y-m-d h:i A') : '-' }}
+                                </td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">
@@ -121,14 +410,14 @@
                                         <div>
                                             <label class="text-sm">Valid From</label>
                                             <input type="datetime-local" name="valid_from"
-                                                value="{{ old('valid_from', isset($coupon['valid_from']) ? \Carbon\Carbon::parse($coupon['valid_from'])->format('Y-m-d H:i') : '') }}"
+                                                value="{{ old('valid_from', isset($coupon['valid_from']) ? \Carbon\Carbon::parse($coupon['valid_from'])->format('Y-m-d\TH:i') : '') }}"
                                                 class="input input-bordered w-full" readonly />
                                         </div>
 
                                         <div>
                                             <label class="text-sm">Valid To</label>
                                             <input type="datetime-local" name="valid_to"
-                                                value="{{ old('valid_to', isset($coupon['valid_to']) ? \Carbon\Carbon::parse($coupon['valid_to'])->format('Y-m-d H:i') : '') }}"
+                                                value="{{ old('valid_to', isset($coupon['valid_to']) ? \Carbon\Carbon::parse($coupon['valid_to'])->format('Y-m-d\TH:i') : '') }}"
                                                 class="input input-bordered w-full" readonly />
                                         </div>
 
@@ -144,8 +433,8 @@
                                                 x-cloak>
                                                 <div
                                                     class="flex justify-between items-center mb-1 border border-base-300 rounded-box py-1 px-3">
-                                                    <span class="text-xs" x-text="product.name"></span>
-
+                                                    <span class="text-xs"
+                                                        x-text="`ID ${product.id} - ${product.name}`"></span>
                                                 </div>
                                             </template>
                                         </div>
@@ -159,11 +448,12 @@
                                             <template x-if="!categoryLoading && selectedCategories.length === 0" x-cloak>
                                                 <p class="text-sm text-gray-500">No category</p>
                                             </template>
-                                            <template x-for="(category, index) in selectedCategories" :key="category.id"
-                                                x-cloak>
+                                            <template x-for="(category, index) in selectedCategories"
+                                                :key="category.id" x-cloak>
                                                 <div
                                                     class="flex justify-between items-center mb-1 border border-base-300 rounded-box py-1 px-3">
-                                                    <span class="text-xs" x-text="category.name"></span>
+                                                    <span class="text-xs"
+                                                        x-text="`ID ${category.id} - ${category.name}`"></span>
 
                                                 </div>
                                             </template>
@@ -257,15 +547,15 @@
                                             <div>
                                                 <label class="text-sm">Valid From</label>
                                                 <input type="datetime-local" name="valid_from"
-                                                    value="{{ old('valid_from', isset($coupon['valid_from']) ? \Carbon\Carbon::parse($coupon['valid_from'])->format('Y-m-d H:i') : '') }}"
-                                                    class="input input-bordered w-full"/>
+                                                    value="{{ old('valid_from', isset($coupon['valid_from']) ? \Carbon\Carbon::parse($coupon['valid_from'])->format('Y-m-d\TH:i') : '') }}"
+                                                    class="input input-bordered w-full" />
                                             </div>
 
                                             <div>
                                                 <label class="text-sm">Valid To</label>
                                                 <input type="datetime-local" name="valid_to"
-                                                    value="{{ old('valid_to', isset($coupon['valid_to']) ? \Carbon\Carbon::parse($coupon['valid_to'])->format('Y-m-d H:i') : '') }}"
-                                                    class="input input-bordered w-full"/>
+                                                    value="{{ old('valid_to', isset($coupon['valid_to']) ? \Carbon\Carbon::parse($coupon['valid_to'])->format('Y-m-d\TH:i') : '') }}"
+                                                    class="input input-bordered w-full" />
                                             </div>
 
                                             <div class="mt-5">
@@ -284,7 +574,7 @@
                                                         <template x-for="item in productResults" :key="item.id">
                                                             <li @click="addProduct(item)"
                                                                 class="px-3 py-2 cursor-pointer hover:bg-base-200 flex justify-between text-sm">
-                                                                <span x-text="item.name"></span>
+                                                                <span x-text="`ID ${item.id} - ${item.name}`"></span>
                                                                 <span class="text-gray-500">$<span
                                                                         x-text="item.regular_price"></span></span>
                                                             </li>
@@ -301,7 +591,8 @@
                                                         :key="product.id">
                                                         <div
                                                             class="flex justify-between items-center mb-1 border border-base-300 rounded-box py-1 px-3">
-                                                            <span class="text-xs" x-text="product.name"></span>
+                                                            <span class="text-xs"
+                                                                x-text="`ID ${product.id} - ${product.name}`"></span>
                                                             <button type="button" @click="removeProduct(index)"
                                                                 class="btn btn-xs btn-ghost btn-square">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -333,7 +624,7 @@
                                                         <template x-for="item in categoryResults" :key="item.id">
                                                             <li @click="addCategory(item)"
                                                                 class="px-3 py-2 cursor-pointer hover:bg-base-200 flex justify-between text-sm">
-                                                                <span x-text="item.name"></span>
+                                                                <span x-text="`ID ${item.id} - ${item.name}`"></span>
                                                             </li>
                                                         </template>
                                                     </ul>
@@ -348,7 +639,8 @@
                                                         :key="category.id">
                                                         <div
                                                             class="flex justify-between items-center mb-1 border border-base-300 rounded-box py-1 px-3">
-                                                            <span class="text-xs" x-text="category.name"></span>
+                                                            <span class="text-xs"
+                                                                x-text="`ID ${category.id} - ${category.name}`"></span>
                                                             <button type="button" @click="removeCategory(index)"
                                                                 class="btn btn-xs btn-ghost btn-square">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -485,14 +777,12 @@
 
                         <div>
                             <label class="text-sm">Valid From</label>
-                            <input type="datetime-local" name="valid_from"
-                                class="input input-bordered w-full" />
+                            <input type="datetime-local" name="valid_from" class="input input-bordered w-full" />
                         </div>
 
                         <div>
                             <label class="text-sm">Valid To</label>
-                            <input type="datetime-local" name="valid_to"
-                                class="input input-bordered w-full"  />
+                            <input type="datetime-local" name="valid_to" class="input input-bordered w-full" />
                         </div>
 
                         <div class="mt-5">
@@ -605,23 +895,29 @@
                 productLoading: false,
 
                 async fetchProducts() {
-                    if (!this.initialProductIds || this.initialProductIds.length === 0) return;
+                    if (this.productLoading || this.categoryLoading) return;
 
                     this.productLoading = true;
                     this.categoryLoading = true;
                     try {
 
-                        let categoryResponse = await axios.post('/admin/dashboard/category/search-ids', {
-                            ids: this.initialCategoryIds
-                        });
-                        this.selectedCategories = categoryResponse.data.data ?? [];
-                        this.categoryLoading = false;
+                        if (this.initialCategoryIds.length > 0) {
+                            let categoryResponse = await axios.post('/admin/dashboard/category/search-ids', {
+                                ids: this.initialCategoryIds
+                            });
+                            this.selectedCategories = categoryResponse.data.data ?? [];
+                            this.categoryLoading = false;
+                        }
 
-                        let productResponse = await axios.post('/admin/dashboard/product/search-ids', {
-                            ids: this.initialProductIds
-                        });
-                        this.selectedProducts = productResponse.data.data ?? [];
-                        this.productLoading = false;
+                        if (this.initialProductIds.length > 0) {
+                            let productResponse = await axios.post('/admin/dashboard/product/search-ids', {
+                                ids: this.initialProductIds
+                            });
+                            this.selectedProducts = productResponse.data.data ?? [];
+                            this.productLoading = false;
+                        }
+
+
 
                     } catch (e) {
                         console.error('Failed to load existing products', e);
@@ -758,5 +1054,118 @@
                 }
             };
         }
+
+        document.addEventListener('alpine:init', function() {
+
+            Alpine.store('bulk', {
+                candidates: [],
+                current_action: '',
+                loading: false,
+
+                get hasCandidates() {
+                    return this.candidates.length > 0;
+                },
+
+                isAllSelected() {
+                    const visibleIds = Array.from(document.querySelectorAll('.row-checkbox')).map(cb =>
+                        Number(cb.dataset.id));
+                    return visibleIds.length > 0 && visibleIds.every(id => this.candidates.includes(
+                        id));
+                },
+
+                toggleSelectAll(checked) {
+                    const visibleIds = Array.from(document.querySelectorAll('.row-checkbox')).map(cb =>
+                        Number(cb.dataset.id));
+                    if (checked) {
+                        this.candidates = [...visibleIds];
+                    } else {
+                        this.candidates = [];
+                    }
+                },
+
+                toggleCandidate(id) {
+                    if (this.candidates.includes(id)) {
+                        this.candidates = this.candidates.filter(i => i !== id);
+                    } else {
+                        this.candidates.push(id);
+                    }
+                },
+
+                commit() {
+                    if (this.current_action === '') {
+                        Toast.show('Please select a bulk action', {
+                            type: 'error'
+                        });
+                        return;
+                    }
+                    if (!this.hasCandidates && !this.current_action.includes('_all')) {
+                        Toast.show('Please select at least one product', {
+                            type: 'error'
+                        });
+                        return;
+                    }
+                    const modal = document.getElementById(this.current_action);
+                    if (modal) modal.showModal();
+                },
+            });
+
+            Alpine.store('coupon_search_setting', {
+                showDisplayOption: false,
+                showFilterOption: false,
+                query: "",
+                perPage: "20",
+                orderBy: "desc",
+                sortBy: "last_updated",
+
+                is_last_updated_filter: @json(request('sortBy') == 'last_updated'),
+                is_last_created_filter: @json(request('sortBy') == 'last_created'),
+
+                showIDColumn: false,
+                showUpdatedTimeColumn: false,
+                showCreatedTimeColumn: false,
+
+                init() {
+                    const savedSetting = JSON.parse(localStorage.getItem('coupon_search_setting') ?? "{}");
+
+                    this.showDisplayOption = savedSetting.showDisplayOption ?? false;
+                    this.showFilterOption = savedSetting.showFilterOption ?? false;
+                    this.query = savedSetting.query ?? "";
+                    this.perPage = savedSetting.perPage ?? "20";
+                    this.orderBy = savedSetting.orderBy ?? "desc";
+                    this.sortBy = savedSetting.sortBy ?? "last_updated";
+
+                    this.showIDColumn = savedSetting.showIDColumn ?? false;
+                    this.showUpdatedTimeColumn = savedSetting.showUpdatedTimeColumn ?? false;
+                    this.showCreatedTimeColumn = savedSetting.showCreatedTimeColumn ?? false;
+                },
+
+                save() {
+                    const data = {
+                        showDisplayOption: this.showDisplayOption,
+                        showFilterOption: this.showFilterOption,
+                        query: this.query,
+                        perPage: this.perPage,
+                        orderBy: this.orderBy,
+                        sortBy: this.sortBy,
+                        showIDColumn: this.showIDColumn,
+                        showUpdatedTimeColumn: this.showUpdatedTimeColumn,
+                        showCreatedTimeColumn: this.showCreatedTimeColumn,
+
+                    };
+                    localStorage.setItem('coupon_search_setting', JSON.stringify(data));
+                },
+
+                resetFilter() {
+                    // this.categoryFilter = "";
+                    // this.brandFilter = "";
+                    // this.saleFilter = false;
+                    // this.promotionFilter = false;
+                    // this.pinnedFilter = false;
+                    this.save();
+                }
+            });
+
+            Alpine.store('coupon_search_setting').init();
+        });
     </script>
 @endpush

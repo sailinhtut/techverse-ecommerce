@@ -7,9 +7,39 @@ use App\Inventory\Models\Brand;
 
 class BrandController
 {
-    public function viewAdminBrandListPage()
+    public function viewAdminBrandListPage(Request $request)
     {
-        $product_brands = Brand::orderBy('id', 'desc')->paginate(10);
+        $sortBy = $request->get('sortBy', 'last_updated');
+        $orderBy = $request->get('orderBy', 'desc');
+        $perPage = $request->get('perPage', 20);
+        $search = $request->get('query', null);
+
+        $query = Brand::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$search}%");
+            });
+        }
+
+        switch ($sortBy) {
+            case 'last_updated':
+                $query->orderBy('updated_at', $orderBy)
+                    ->orderBy('id', $orderBy);
+                break;
+
+            case 'last_created':
+                $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                break;
+
+            default:
+                $query->orderBy('updated_at', 'desc')
+                    ->orderBy('id', 'desc');
+        }
+
+        $product_brands = $query->paginate($perPage);
+        $product_brands->appends(request()->query());
 
         $product_brands->getCollection()->transform(function ($brand) {
             return $brand->jsonResponse();
@@ -89,6 +119,43 @@ class BrandController
             return redirect()->back()->with('success', "{$brand->name} is deleted successfully");
         } catch (\Exception $error) {
             return handleErrors($error, "Something Went Wrong");
+        }
+    }
+
+    public function deleteSelectedBrands(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No brands selected for deletion.');
+            }
+
+            $brands = Brand::whereIn('id', $ids)->get();
+
+            foreach ($brands as $brand) {
+                $brand->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected brands deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected brands.");
+        }
+    }
+
+
+    public function deleteAllBrands()
+    {
+        try {
+            $brands = Brand::all();
+
+            foreach ($brands as $brand) {
+                $brand->delete();
+            }
+
+            return redirect()->back()->with('success', 'All brands deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all brands.");
         }
     }
 }

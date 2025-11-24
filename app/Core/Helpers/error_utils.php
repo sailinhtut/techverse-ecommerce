@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('handleErrors')) {
-    function handleErrors(?Exception $error = null, string $message = 'Something went wrong', int $status = 500)
+    function handleErrors(?Exception $error = null, $message = null, int $status = 500)
     {
         if (request()->expectsJson()) {
             $response = [
@@ -13,6 +13,6 @@ if (!function_exists('handleErrors')) {
             }
             return response()->json($response, $status);
         }
-        return redirect()->back()->withInput()->with('error', $error->getMessage());
+        return redirect()->back()->withInput()->with('error', $message ?? $error->getMessage() ?? "Something Went Wrong");
     }
 }

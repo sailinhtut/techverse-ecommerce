@@ -23,9 +23,9 @@
                 <li class="rounded-box {{ request()->is('payment') ? 'bg-neutral dark:bg-primary text-white' : '' }}">
                     <a href="/payment">Payments</a>
                 </li>
-                <li class="rounded-box {{ request()->is('setting') ? 'bg-neutral dark:bg-primary text-white' : '' }}">
+                {{-- <li class="rounded-box {{ request()->is('setting') ? 'bg-neutral dark:bg-primary text-white' : '' }}">
                     <a href="/setting">Setting</a>
-                </li>
+                </li> --}}
                 <button type="button" class="mt-10 btn btn-outline btn-error btn-sm" onclick="logout_modal.showModal()">Log
                     Out
                 </button>

@@ -36,12 +36,14 @@ class StorageManager
             $files = Storage::disk($this->disk)->files($path);
 
             $fileData = array_map(function ($file) {
+                $disk = Storage::disk($this->disk);
                 return [
                     'path' => $file,
                     'basename' => basename($file),
                     'size' => Storage::disk($this->disk)->size($file),
                     'human_size' => $this->humanFilesize(Storage::disk($this->disk)->size($file)),
-                    'modified' => date('Y-m-d H:i:s', Storage::disk($this->disk)->lastModified($file)),
+                    'mime_type' => $disk->mimeType($file),
+                    'modified' => date('Y-m-d h:i A', Storage::disk($this->disk)->lastModified($file)),
                     'download_url' => Storage::disk('public')->url($file),
                 ];
             }, $files);

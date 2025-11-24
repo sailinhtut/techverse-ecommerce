@@ -6,6 +6,7 @@ use App\Auth\Models\User;
 use App\Payment\Models\PaymentMethod;
 use App\Shipping\Models\ShippingMethod;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Order extends Model
 {
@@ -27,6 +28,7 @@ class Order extends Model
         'shipping_method_id',
         'payment_method_id',
         'coupon_code',
+        // to add note
     ];
 
     protected function casts(): array
@@ -64,6 +66,33 @@ class Order extends Model
     {
         return $this->hasMany(OrderProduct::class);
     }
+
+    public function getProfit(): float
+    {
+
+        return $this->products->sum(function ($item) {
+            $product = $item->product;
+
+
+            if (!$product) {
+                return 0;
+            }
+
+            $buy = (float) $product->buying_price ?? 0;
+            $sell = $item->unit_price ?? 0;
+
+            $profitPerItem = $sell - $buy;
+
+            if ($profitPerItem < 0) {
+                $profitPerItem = 0;
+            }
+
+            $profit = $profitPerItem * (int) $item->quantity;
+
+            return $profit;
+        });
+    }
+
 
     public function jsonResponse(array $eager_list = []): array
     {

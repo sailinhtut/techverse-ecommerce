@@ -146,10 +146,9 @@
 @endsection
 
 @push('script')
-    @if (session('clear_cart'))
-        <script>
-            console.log('Clear cart triggered from backend');
-            localStorage.removeItem('cart_state');
-        </script>
-    @endif
+    <script>
+        document.addEventListener('alpine:init', function() {
+            Alpine.store('cart').syncCartItems();
+        })
+    </script>
 @endpush

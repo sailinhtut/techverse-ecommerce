@@ -3,13 +3,15 @@
 namespace App\Order\Controllers;
 
 use App\Auth\Models\Address;
-use App\Inventory\Models\Product;
+use App\Cart\Models\Cart;
+use App\Inventory\Models\Coupon;
 use App\Inventory\Services\CouponService;
 use App\Order\Models\Order;
 use App\Order\Models\OrderProduct;
 use App\Order\Services\OrderService;
 use App\Payment\Models\Invoice;
-use App\Payment\Models\PaymentMethod;
+use App\Shipping\Services\ShippingMethodService;
+use App\Tax\Services\TaxRateService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -80,10 +82,44 @@ class OrderController
         }
     }
 
-    public function viewAdminOrderListPage()
+    public function viewAdminOrderListPage(Request $request)
     {
         try {
-            $orders = OrderService::getOrders();
+            $sortBy = $request->get('sortBy', 'last_updated');
+            $orderBy = $request->get('orderBy', 'desc');
+            $perPage = $request->get('perPage', 20);
+            $search = $request->get('query', null);
+
+            $query = Order::query();
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('order_number', 'like', "%{$search}%")
+                        ->orWhere('id', 'like', "%{$search}%");
+                });
+            }
+
+            switch ($sortBy) {
+                case 'last_updated':
+                    $query->orderBy('updated_at', $orderBy)
+                        ->orderBy('id', $orderBy);
+                    break;
+
+                case 'last_created':
+                    $query->orderBy('created_at', $orderBy)->orderBy('id', $orderBy);
+                    break;
+
+                default:
+                    $query->orderBy('updated_at', 'desc')
+                        ->orderBy('id', 'desc');
+            }
+
+            $orders = $query->paginate($perPage);
+            $orders->appends(request()->query());
+
+            $orders->getCollection()->transform(function ($order) {
+                return $order->jsonResponse(['products', 'shippingMethod', 'paymentMethod']);
+            });
 
             return view('pages.admin.dashboard.order.order_list', [
                 'orders' => $orders
@@ -112,19 +148,19 @@ class OrderController
             $user = auth()->user();
 
             $validated = $request->validate([
-                'cart_items' => 'required|array|min:1',
-                'cart_items.*.id' => 'required|integer|exists:products,id',
-                'cart_items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
-                'cart_items.*.name' => 'required|string|max:150',
-                'cart_items.*.sku' => 'required|string|max:150',
-                'cart_items.*.price' => 'required|numeric|min:0',
-                'cart_items.*.quantity' => 'required|integer|min:1',
-                'cart_items.*.tax' => 'nullable|numeric|min:0',
-                'cart_items.*.shipping_cost' => 'nullable|numeric|min:0',
-                'cart_items.*.discount' => 'nullable|numeric|min:0',
-                'shipping_cost_total' => 'required|numeric',
-                'tax_cost_total' => 'required|numeric',
-                'discount_total' => 'nullable|numeric',
+                // 'cart_items' => 'required|array|min:1',
+                // 'cart_items.*.id' => 'required|integer|exists:products,id',
+                // 'cart_items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
+                // 'cart_items.*.name' => 'required|string|max:150',
+                // 'cart_items.*.sku' => 'required|string|max:150',
+                // 'cart_items.*.price' => 'required|numeric|min:0',
+                // 'cart_items.*.quantity' => 'required|integer|min:1',
+                // 'cart_items.*.tax' => 'nullable|numeric|min:0',
+                // 'cart_items.*.shipping_cost' => 'nullable|numeric|min:0',
+                // 'cart_items.*.discount' => 'nullable|numeric|min:0',
+                // 'shipping_cost_total' => 'required|numeric',
+                // 'tax_cost_total' => 'required|numeric',
+                // 'discount_total' => 'nullable|numeric',
                 'coupon_code' => 'nullable|string',
 
                 'shipping_address' => 'required|array',
@@ -152,52 +188,55 @@ class OrderController
                 'billing_address.country' => 'required|string|max:100',
                 'billing_address.latitude' => 'nullable|numeric|between:-90,90',
                 'billing_address.longitude' => 'nullable|numeric|between:-180,180',
-            ], [
-                'cart_items.required' => 'Cart cannot be empty.',
-                'cart_items.*.id.exists' => 'One or more products do not exist.',
-                'shipping_address.required' => 'Shipping address is required.',
-                'billing_address.required' => 'Billing address is required.',
-                'shipping_address.recipient_name.required' => 'Shipping recipient name cannot be empty.',
-                'billing_address.recipient_name.required' => 'Billing recipient name cannot be empty.',
-                'shipping_address.street_address.required' => 'Shipping address must have a street address.',
-                'billing_address.street_address.required' => 'Billing address must have a street address.',
             ]);
 
-            $cart_items = collect($validated['cart_items']);
+            $cart = Cart::with('items.product')
+                ->where('user_id', auth()->id())
+                ->where('is_checked_out', false)
+                ->first();
+
+            if (!$cart || !$cart->items()->exists()) {
+                return response()->json(['message' => "Your cart is empty"], 400);
+            }
+
+            $cart_items = $cart->items;
             $shipping_address = $validated['shipping_address'];
             $billing_address = $validated['billing_address'];
+            $shipping_method_id = $validated['shipping_method_id'];
+            $payment_method_id = $validated['payment_method_id'];
 
-            DB::beginTransaction();
+            // shipping cost calculation
+            $matched_shipping_method = collect(ShippingMethodService::calculateShippingMethods($shipping_address, $cart_items))
+                ->firstWhere('id', $shipping_method_id);
 
-            if (!$user->addresses()->where('is_default_shipping', true)->exists()) {
-                Address::create(array_merge($shipping_address, [
-                    'label' => $shipping_address['recipient_name'],
-                    'user_id' => $user->id,
-                    'is_default_shipping' => true,
-                    'type' => 'shipping',
-                ]));
+            if (!$matched_shipping_method) {
+                abort(400, 'Shipping method not invalid');
+            }
+            $order_shipping_total = $matched_shipping_method['shipping_cost'];
+
+            // coupon discount calculation
+            $order_discount_total = 0;
+            $order_coupon_code =  $validated['coupon_code'] ?? null;
+
+            if (!empty($validated['coupon_code'])) {
+                $coupon = Coupon::where('code', $order_coupon_code)->first();
+                if ($coupon) {
+                    $order_discount_total = $coupon->calculateDiscount($cart_items)['coupon_discount'] ?? 0;
+                }
             }
 
-            if (!$user->addresses()->where('is_default_billing', true)->exists()) {
-                Address::create(array_merge($billing_address, [
-                    'label' => $billing_address['recipient_name'],
-                    'user_id' => $user->id,
-                    'is_default_billing' => true,
-                    'type' => 'billing',
-                ]));
-            }
+            // tax calculation
+            $order_tax_total =  TaxRateService::calculateTax($shipping_address, $cart_items);
 
-            $order_subtotal = $cart_items->sum(fn($i) => $i['price'] * $i['quantity']);
-
-            $order_discount_total = $validated['discount_total'] ?? 0;
-            $order_coupon_code = $validated['coupon_code'] ?? null;
-
-            $order_tax_total =  $validated['tax_cost_total'];
-            $order_shipping_total = $validated['shipping_cost_total'];
-            $order_grand_total = $order_subtotal - $order_discount_total + $order_tax_total + $order_shipping_total;
+            // grand total calculation
+            $order_subtotal = $cart_items->sum('subtotal');
+            $order_grand_total = $order_subtotal + $order_tax_total + $order_shipping_total;
+            $order_grand_total = $order_grand_total - $order_discount_total;
 
             $today = now();
             $order_number = sprintf('ORD-%d-%d-%d-%04d', $today->year, $today->month, $today->day, (Order::max('id') ?? 0) + 1);
+
+            DB::beginTransaction();
 
             $order = Order::create([
                 'user_id' => $user->id,
@@ -212,22 +251,22 @@ class OrderController
                 'grand_total' => $order_grand_total,
                 'shipping_address' => $shipping_address,
                 'billing_address' => $billing_address,
-                'shipping_method_id' => $validated['shipping_method_id'],
-                'payment_method_id' => $validated['payment_method_id'],
+                'shipping_method_id' => $shipping_method_id,
+                'payment_method_id' => $payment_method_id,
             ]);
 
             foreach ($cart_items as $item) {
                 OrderProduct::create([
                     'order_id' => $order->id,
-                    'product_id' => $item['id'],
+                    'product_id' => $item['product_id'],
                     'variant_id' => $item['variant_id'] ?? null,
                     'sku' => $item['sku'],
                     'name' => $item['name'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['price'],
-                    'discount' => $item['discount'] ?? 0,
-                    'tax' => $item['tax'] ?? 0,
-                    'subtotal' => ($item['price'] * $item['quantity']) - ($item['discount'] ?? 0) + ($item['tax'] ?? 0),
+                    'discount' => 0,
+                    'tax' => 0,
+                    'subtotal' => $item['subtotal'] ?? 0
                 ]);
             }
 
@@ -256,15 +295,33 @@ class OrderController
                 abort(400, 'Stock is not sufficient for order');
             }
 
+            if (!$user->addresses()->where('is_default_shipping', true)->exists()) {
+                Address::create(array_merge($shipping_address, [
+                    'label' => $shipping_address['recipient_name'],
+                    'user_id' => $user->id,
+                    'is_default_shipping' => true,
+                    'type' => 'shipping',
+                ]));
+            }
+
+            if (!$user->addresses()->where('is_default_billing', true)->exists()) {
+                Address::create(array_merge($billing_address, [
+                    'label' => $billing_address['recipient_name'],
+                    'user_id' => $user->id,
+                    'is_default_billing' => true,
+                    'type' => 'billing',
+                ]));
+            }
+
+            $cart->delete();
+
 
             DB::commit();
 
             return redirect()->route(
                 'order_detail.id.get',
                 $order->id
-            )->with('success', 'Order created successfully')->with('clear_cart', true)->with('clear_cart', true);
-
-            // return redirect()->route('shop.get')->with('success', 'Order created successfully')->with('clear_cart', true);
+            )->with('success', 'Order created successfully');
         } catch (Exception $e) {
             DB::rollBack();
             return handleErrors($e);
@@ -366,6 +423,43 @@ class OrderController
             return redirect()->route('admin.dashboard.order.get')->with('success', 'Order is deleted');
         } catch (Exception $e) {
             return handleErrors($e);
+        }
+    }
+
+    public function deleteSelectedOrders(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No orders selected for deletion.');
+            }
+
+            $orders = Order::whereIn('id', $ids)->get();
+
+            foreach ($orders as $order) {
+                $order->delete();
+            }
+
+            return redirect()->back()->with('success', 'Selected orders deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting selected orders.");
+        }
+    }
+
+
+    public function deleteAllOrders()
+    {
+        try {
+            $orders = Order::all();
+
+            foreach ($orders as $order) {
+                $order->delete();
+            }
+
+            return redirect()->back()->with('success', 'All orders deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all orders.");
         }
     }
 }

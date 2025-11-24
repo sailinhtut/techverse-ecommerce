@@ -46,7 +46,7 @@ class AuthController
 
             $remember = $request->filled('remember');
 
-            Auth::login($user,$remember);
+            Auth::login($user, $remember);
 
             $request->session()->regenerate();
 
@@ -72,7 +72,7 @@ class AuthController
 
             $remember = $request->filled('remember');
 
-            if (!Auth::attempt($credentials,$remember)) {
+            if (!Auth::attempt($credentials, $remember)) {
                 throw (new Exception('Incorrect Password'));
             }
 

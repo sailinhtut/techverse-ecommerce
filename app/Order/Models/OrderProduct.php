@@ -19,8 +19,8 @@ class OrderProduct extends Model
         'name',
         'quantity',
         'unit_price',
-        'discount',
-        'tax',
+        'discount', // to remove
+        'tax', // to remove
         'subtotal',
     ];
 
@@ -45,12 +45,12 @@ class OrderProduct extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 
     public function variant()
     {
-        return $this->belongsTo(ProductVariant::class, 'variant_id');
+        return $this->belongsTo(ProductVariant::class, 'variant_id','id');
     }
 
     public function jsonResponse(array $eager_list = []): array

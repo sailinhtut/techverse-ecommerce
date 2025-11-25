@@ -52,19 +52,6 @@
                         class="w-full flex flex-col p-3 gap-3 resize" enctype="multipart/form-data">
                         @csrf
 
-                        {{-- <div class="flex flex-col gap-2 text-sm">
-                            <label>Site Logo</label>
-                            <img src="{{ $site_logo }}"
-                                class="size-28 rounded-full border border-slate-300 object-cover object-center" />
-                            <div class="flex items-center gap-2">
-                                <label class="btn btn-xs w-fit cursor-pointer">
-                                    Choose Image
-                                    <input type="file" name="site_logo" class="hidden" accept="image/*" />
-                                </label>
-                                <button class="btn btn-xs w-fit text-error">Delete</button>
-                            </div>
-                        </div> --}}
-
                         <div x-data="logoPickerState('{{ $site_logo }}')" class="flex flex-col gap-2 text-sm">
                             <label>Site Logo</label>
 
@@ -106,6 +93,50 @@
                             <textarea class="textarea textarea-bordered w-full max-w-sm" name="settings[1][value]" placeholder="">{{ $settings['site_description'] ?? '' }}
                             </textarea>
                         </div>
+
+                        <div class="flex flex-col gap-2 text-sm">
+                            <label>Site Phone 1</label>
+                            <input type="hidden" name="settings[2][key]" value="site_phone_1" />
+                            <input type="text" class="input input-bordered w-full max-w-sm" name="settings[2][value]"
+                                value="{{ $settings['site_phone_1'] ?? config('app.phone_1') }}" />
+                        </div>
+
+                        <div class="flex flex-col gap-2 text-sm">
+                            <label>Site Phone 2</label>
+                            <input type="hidden" name="settings[3][key]" value="site_phone_2" />
+                            <input type="text" class="input input-bordered w-full max-w-sm" name="settings[3][value]"
+                                value="{{ $settings['site_phone_2'] ?? config('app.phone_2') }}" />
+                        </div>
+
+                        <div class="flex flex-col gap-2 text-sm">
+                            <label>Site Contact Email</label>
+                            <input type="hidden" name="settings[4][key]" value="site_contact_email" />
+                            <input type="text" class="input input-bordered w-full max-w-sm" name="settings[4][value]"
+                                value="{{ $settings['site_contact_email'] ?? config('app.contact_email') }}" />
+                        </div>
+
+                        <div class="flex flex-col gap-2 text-sm">
+                            <label>Site Support Email</label>
+                            <input type="hidden" name="settings[5][key]" value="site_support_email" />
+                            <input type="text" class="input input-bordered w-full max-w-sm" name="settings[5][value]"
+                                value="{{ $settings['site_support_email'] ?? config('app.support_email') }}" />
+                        </div>
+
+                        <div class="flex flex-col gap-2 text-sm">
+                            <label>Site Address</label>
+                            <input type="hidden" name="settings[6][key]" value="site_address" />
+                            <textarea class="textarea textarea-bordered w-full max-w-sm" name="settings[6][value]">{{ $settings['site_address'] ?? config('app.address') }}</textarea>
+                        </div>
+
+                        <div class="flex flex-col gap-2 text-sm">
+                            <label>Site Map Location Link</label>
+                            <input type="hidden" name="settings[7][key]" value="site_map_location_link" />
+                            <input type="text" class="input input-bordered w-full max-w-sm" name="settings[7][value]"
+                                value="{{ $settings['site_map_location_link'] ?? config('app.map_location_link') }}" />
+                        </div>
+
+
+
                         <button class="mt-5 btn btn-sm btn-primary w-fit">Save Settings</button>
                     </form>
                 </div>

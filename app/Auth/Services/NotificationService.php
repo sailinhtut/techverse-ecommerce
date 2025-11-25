@@ -11,8 +11,8 @@ class NotificationService
     public static function getNotifications()
     {
         try {
-            if (!auth()->check()) abort(403, 'Unauthenticated');
-            $notifications = Notification::where('user_id',auth()->id())->orderBy('id', 'desc')->paginate(20);
+            if (!auth()->check()) abort(403, 'Please log in to continue');
+            $notifications = Notification::where('user_id', auth()->id())->orderBy('id', 'desc')->paginate(20);
             $notifications->getCollection()->transform(function ($notification) {
                 return $notification->jsonResponse();
             });

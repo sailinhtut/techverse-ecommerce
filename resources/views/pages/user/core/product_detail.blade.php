@@ -1,11 +1,15 @@
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_logo = getSiteLogoURL();
+@endphp
 @extends('layouts.web')
 
 @section('head')
     <!-- Page Title & Meta -->
-    <title>{{ $product['name'] }} | {{ config('app.name') }}</title>
+    <title>{{ $product['name'] }} | {{ $site_name }}</title>
     <meta name="description" content="{{ $product['short_description'] }}">
     <meta name="keywords" content="{{ implode(',', $product['tags'] ?? []) }}">
-    <meta name="author" content="{{ config('app.name') }}">
+    <meta name="author" content="{{ $site_name }}">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph (Facebook / LinkedIn) -->
@@ -14,7 +18,7 @@
     <meta property="og:type" content="product" />
     <meta property="og:url" content="{{ url()->current() }}" />
     <meta property="og:image" content="{{ $product['image'] }}" />
-    <meta property="og:site_name" content="{{ config('app.name') }}" />
+    <meta property="og:site_name" content="{{ $site_name }}" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -337,7 +341,7 @@
                 <div class="tab-content">
                     <div class="mt-5 min-h-[300px]">
                         @if (!empty($product['long_description']))
-                            <div class="prose !text-justify w-full overflow-scroll">{!! $product['long_description'] !!}</div>
+                            <div class="prose !text-justify w-full overflow-auto">{!! $product['long_description'] !!}</div>
                         @else
                             <p class="mt-20 text-sm text-gray-500 italic text-center">No Description Available</p>
                         @endif
@@ -753,7 +757,7 @@
                     <h2 class="font-semibold mb-3">You May Also Like</h2>
                     <div x-data="scrollController()" class="relative">
                         <div x-ref="scrollContainer"
-                            class="flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar">
+                            class="flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar py-2">
                             @foreach ($product['cross_sell_products'] as $cross)
                                 <a href="{{ url('/shop/' . $cross['slug']) }}"
                                     class="w-[140px] md:w-[160px] grow-0 shrink-0 bg-base-100 border border-base-300 shadow-sm rounded-lg overflow-hidden hover:shadow-md transition flex flex-col">
@@ -796,7 +800,7 @@
                     <h2 class="font-semibold mb-3">Similar and Alternatives</h2>
                     <div x-data="scrollController()" class="relative">
                         <div x-ref="scrollContainer"
-                            class="flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar">
+                            class="flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar py-2">
                             @foreach ($product['up_sell_products'] as $up)
                                 <a href="{{ url('/shop/' . $up['slug']) }}"
                                     class="w-[140px] md:w-[160px] grow-0 shrink-0 bg-base-100 border border-base-300 shadow-sm rounded-lg overflow-hidden hover:shadow-md transition flex flex-col">

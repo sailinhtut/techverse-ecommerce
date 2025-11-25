@@ -76,7 +76,7 @@
                 <label for="mobile-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
                 <ul class="menu w-60 min-h-full bg-base-100 text-base-content space-y-2 relative">
 
-                    <p class="font-semibold px-2 py-1">{{ config('app.name') }}</p>
+                    <p class="font-semibold px-2 py-1">{{ $site_name }}</p>
 
                     <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'active' : '' }}">Shop</a>
                     </li>

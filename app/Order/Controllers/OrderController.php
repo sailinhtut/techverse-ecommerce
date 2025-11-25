@@ -49,7 +49,7 @@ class OrderController
     {
         try {
             if (!auth()->check()) {
-                abort(403, 'Unauthenticated. Please Log in');
+                abort(403, 'Please log in to continue. Please Log in');
             }
 
             $orders = OrderService::getOrdersByUserId(auth()->id());
@@ -66,7 +66,7 @@ class OrderController
     {
         try {
             if (!auth()->check()) {
-                abort(403, 'Unauthenticated. Please Log in');
+                abort(403, 'Please log in to continue. Please Log in');
             }
 
             $order = Order::find($id);

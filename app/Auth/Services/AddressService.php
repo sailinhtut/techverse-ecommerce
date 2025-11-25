@@ -11,9 +11,9 @@ class AddressService
     public static function getAddresss()
     {
         try {
-            if (!auth()->check()) abort(403, 'Unauthenticated');
-            
-            $addresses = Address::where('user_id',auth()->id())->orderBy('id', 'desc')->paginate(20);
+            if (!auth()->check()) abort(403, 'Please log in to continue');
+
+            $addresses = Address::where('user_id', auth()->id())->orderBy('id', 'desc')->paginate(20);
             $addresses->getCollection()->transform(function ($address) {
                 return $address->jsonResponse();
             });

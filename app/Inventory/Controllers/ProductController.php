@@ -658,8 +658,8 @@ class ProductController
             }
             $currentUrl = url()->current();
             $shareTitle = urlencode($product['name']);
-            $shareDesc = urlencode(substr(strip_tags($product['description'] ?? ''), 0, 100)); // optional, 100 chars
-            $shareImage = isset($product['images'][0]['url']) ? urlencode($product['images'][0]['url']) : '';
+            $shareDesc = urlencode(substr(strip_tags($product['short_description'] ?? ''), 0, 100));
+            $shareImage = isset($product['image']) ? urlencode($product['image']) : '';
 
             $socialShareLinks = [
                 'facebook' => "https://www.facebook.com/sharer/sharer.php?u={$currentUrl}",

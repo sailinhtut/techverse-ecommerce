@@ -1,3 +1,9 @@
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_logo = getSiteLogoURL();
+@endphp
+
+
 @extends('layouts.app') @section('app_content')
     <div class="min-h-screen bg-gradient-to-br from-primary/30 to-black/10 relative flex">
         <div class="xl:w-1/2 hidden xl:flex xl:flex-col items-center justify-start pt-30 px-20 bg-white">
@@ -27,9 +33,9 @@
 
         <div class="xl:w-1/2 w-screen px-6 pt-10 xl:pt-28 xl:px-50 flex flex-col justify-start items-center">
             <div class="w-full max-w-sm flex flex-col justify-center items-start">
-                <img src="{{ asset('assets/images/techverse_black_logo.png') }}" alt="{{ config('app.name') }}"
+                <img src="{{ $site_logo }}" alt="{{ $site_name }}"
                     class="w-32 mb-6 xl:hidden">
-                <p class="text-xl font-semibold mb-6">{{ config('app.name') }}</p>
+                <p class="text-xl font-semibold mb-6">{{ $site_name }}</p>
                 <p class="font-semibold mb-2 text-gray-700">Log In Your Account</p>
                 <form method="POST" action="{{ route('register.post') }}" class="space-y-2 w-full" x-data="{ signingUp: false }"
                     @submit="signingUp=true">

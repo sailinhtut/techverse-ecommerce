@@ -16,7 +16,7 @@
 
         <p class="text-lg font-semibold text-gray-800 mb-3">What We Do</p>
         <p class="text-gray-600 leading-relaxed mb-6">
-            At {{ config('app.name') }}, we provide a wide selection of laptops, desktops, accessories,
+            At {{ $site_name }}, we provide a wide selection of laptops, desktops, accessories,
             and the latest tech devices from top global brands. Whether you are a student,
             a professional, or a gamer, we strive to equip you with the technology
             you need to stay connected and empowered.

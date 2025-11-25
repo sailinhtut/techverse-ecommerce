@@ -13,23 +13,23 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     @if (!View::hasSection('head'))
-        <title>{{ config('app.name') }}</title>
+        <title>{{ $site_name }}</title>
         <meta name="description" content="">
         <meta name="keywords" content="product, tech, ecommerce">
-        <meta name="author" content="{{ config('app.name') }}">
+        <meta name="author" content="{{ $site_name }}">
         <meta name="robots" content="index, follow">
 
         <!-- Open Graph -->
-        <meta property="og:title" content="{{ config('app.name') }}" />
+        <meta property="og:title" content="{{ $site_name }}" />
         <meta property="og:description" content="" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="{{ url()->current() }}" />
         <meta property="og:image" content="{{ $site_logo }}" />
-        <meta property="og:site_name" content="{{ config('app.name') }}" />
+        <meta property="og:site_name" content="{{ $site_name }}" />
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="{{ config('app.name') }}">
+        <meta name="twitter:title" content="{{ $site_name }}">
         <meta name="twitter:description" content="">
         <meta name="twitter:image" content="{{ $site_logo }}">
     @endif

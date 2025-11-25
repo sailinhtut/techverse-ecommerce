@@ -11,11 +11,11 @@ class WishlistService
     public static function getWishlists()
     {
         try {
-            if (!auth()->check()) abort(403, 'Unauthenticated');
+            if (!auth()->check()) abort(403, 'Please log in to continue');
 
             $wishlists = Wishlist::where('user_id', auth()->id())->orderBy('id', 'desc')->paginate(20);
             $wishlists->getCollection()->transform(fn($item) => $item->jsonResponse(['product', 'productVariant']));
-            
+
             return $wishlists;
         } catch (Exception $e) {
             throw ($e);

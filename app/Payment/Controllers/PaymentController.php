@@ -18,7 +18,7 @@ class PaymentController
     public function viewUserInvoiceListPage()
     {
         try {
-            if (!auth()->check()) abort(403, 'Unauthenticated');
+            if (!auth()->check()) abort(403, 'Please log in to continue');
             $invoices = auth()->user()->invoices()->latest()
                 ->paginate(10);
 

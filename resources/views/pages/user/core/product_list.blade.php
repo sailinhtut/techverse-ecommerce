@@ -10,8 +10,7 @@
 
     {{-- Categories Bar --}}
     {{-- sticky top-[60px] --}}
-    <div x-cloak
-        class="hidden lg:flex flex-row md:justify-between bg-white z-10 w-full text-sm border-b border-b-base-300"
+    <div x-cloak class="hidden lg:flex flex-row md:justify-between bg-white z-10 w-full text-sm border-b border-b-base-300"
         x-data="{ showCategoryBoard: false }">
 
         <div class="px-3 py-2 flex flex-row items-center gap-1 cursor-default hover:text-primary select-none"
@@ -529,19 +528,19 @@
                         </template>
 
                         <div x-show="loading"
-                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 place-items-center gap-3">
                             <template x-for="i in 6" :key="i">
-                                <div class="skeleton w-full h-48 rounded-lg"></div>
+                                <div class="skeleton w-[150px] h-48 rounded-lg"></div>
                             </template>
                         </div>
 
                         {{-- Horizontal Scroll --}}
                         <div class="relative" x-show="!showViewAll" x-cloak>
                             <div x-ref="scrollContainer"
-                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar p-2">
+                                class="mt-3 flex gap-5 justify-start overflow-auto hidden-scrollbar p-2">
                                 <template x-for="(product,index) in products" :key="product.slug">
                                     <div x-data='itemCardState()'
-                                        class="w-[160px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                        class="min-w-[150px] max-w-[150px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                         <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                             class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
                                         <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
@@ -569,9 +568,9 @@
                                                     </template>
                                                 </div>
                                                 <div>
-                                                    <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                    <button @click="addItemToCart(product)" class="btn btn-sm btn-square">
                                                         <template x-show="addingToCart" x-if="addingToCart">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                         <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
                                                             viewBox="0 0 24 24" class="size-4" aria-hidden="true"
@@ -584,7 +583,7 @@
                                                         </svg>
                                                     </button>
                                                     <button x-show="$store.cart.getQuantity(product.id)>0"
-                                                        @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                        @click="removeFromCart(product)" class="btn btn-sm btn-square">
                                                         <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
                                                             viewBox="0 0 24 24" fill="currentColor" class="size-4">
                                                             <path fill-rule="evenodd"
@@ -593,11 +592,11 @@
                                                         </svg>
 
                                                         <template x-if="removingFromCart">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                     </button>
 
-                                                    <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                    <button @click="addWishlist(product)" class="btn btn-sm btn-square">
                                                         <svg xmlns="http://www.w3.org/2000/svg"
                                                             x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
                                                             viewBox="0 0 24 24" fill="currentColor"
@@ -614,7 +613,7 @@
                                                                 d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                                         </svg>
                                                         <template x-if="addingToWishlist">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                     </button>
                                                 </div>
@@ -637,11 +636,11 @@
 
 
                         {{-- View All Vertical Scroll with Pagination --}}
-                        <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 lg:gap-5 "
+                        <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 place-items-center gap-5"
                             x-show="showViewAll" x-cloak>
                             <template x-for="(product,index) in products" :key="index">
                                 <div x-data='itemCardState()'
-                                    class="bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                    class="min-w-[150px] max-w-[150px] bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                     <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                         class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
                                     <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
@@ -668,9 +667,9 @@
                                                 </template>
                                             </div>
                                             <div>
-                                                <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                <button @click="addItemToCart(product)" class="btn btn-sm btn-square">
                                                     <template x-show="addingToCart" x-if="addingToCart">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                     <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
                                                         viewBox="0 0 24 24" class="size-4" aria-hidden="true"
@@ -683,7 +682,7 @@
                                                     </svg>
                                                 </button>
                                                 <button x-show="$store.cart.getQuantity(product.id)>0"
-                                                    @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                    @click="removeFromCart(product)" class="btn btn-sm btn-square">
                                                     <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
                                                         viewBox="0 0 24 24" fill="currentColor" class="size-4">
                                                         <path fill-rule="evenodd"
@@ -691,11 +690,11 @@
                                                             clip-rule="evenodd" />
                                                     </svg>
                                                     <template x-if="removingFromCart">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                 </button>
 
-                                                <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                <button @click="addWishlist(product)" class="btn btn-sm btn-square">
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                         x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
                                                         viewBox="0 0 24 24" fill="currentColor"
@@ -712,7 +711,7 @@
                                                             d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                                     </svg>
                                                     <template x-if="addingToWishlist">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                 </button>
                                             </div>
@@ -757,19 +756,19 @@
                         </template>
 
                         <div x-show="loading"
-                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 place-items-center gap-3">
                             <template x-for="i in 6" :key="i">
-                                <div class="skeleton w-full h-48 rounded-lg"></div>
+                                <div class="skeleton w-[150px] h-48 rounded-lg"></div>
                             </template>
                         </div>
 
                         {{-- Horizontal Scroll --}}
                         <div class="relative" x-show="!showViewAll" x-cloak>
                             <div x-ref="scrollContainer"
-                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar p-2">
+                                class="mt-3 flex gap-5 justify-start overflow-auto hidden-scrollbar p-2">
                                 <template x-for="(product,index) in products" :key="product.slug">
                                     <div x-data='itemCardState()'
-                                        class="w-[160px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                        class="min-w-[150px] max-w-[150px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                         <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                             class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
                                         <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
@@ -797,9 +796,9 @@
                                                     </template>
                                                 </div>
                                                 <div>
-                                                    <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                    <button @click="addItemToCart(product)" class="btn btn-sm btn-square">
                                                         <template x-show="addingToCart" x-if="addingToCart">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                         <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
                                                             viewBox="0 0 24 24" class="size-4" aria-hidden="true"
@@ -812,7 +811,7 @@
                                                         </svg>
                                                     </button>
                                                     <button x-show="$store.cart.getQuantity(product.id)>0"
-                                                        @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                        @click="removeFromCart(product)" class="btn btn-sm btn-square">
                                                         <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
                                                             viewBox="0 0 24 24" fill="currentColor" class="size-4">
                                                             <path fill-rule="evenodd"
@@ -820,11 +819,11 @@
                                                                 clip-rule="evenodd" />
                                                         </svg>
                                                         <template x-if="removingFromCart">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                     </button>
 
-                                                    <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                    <button @click="addWishlist(product)" class="btn btn-sm btn-square">
                                                         <svg xmlns="http://www.w3.org/2000/svg"
                                                             x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
                                                             viewBox="0 0 24 24" fill="currentColor"
@@ -841,7 +840,7 @@
                                                                 d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                                         </svg>
                                                         <template x-if="addingToWishlist">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                     </button>
                                                 </div>
@@ -864,11 +863,11 @@
 
 
                         {{-- View All Vertical Scroll with Pagination --}}
-                        <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 lg:gap-5 "
+                        <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 place-items-center gap-5"
                             x-show="showViewAll" x-cloak>
                             <template x-for="(product,index) in products" :key="index">
                                 <div x-data='itemCardState()'
-                                    class="bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                    class="min-w-[150px] max-w-[150px]bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                     <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                         class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
                                     <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
@@ -895,9 +894,9 @@
                                                 </template>
                                             </div>
                                             <div>
-                                                <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                <button @click="addItemToCart(product)" class="btn btn-sm btn-square">
                                                     <template x-show="addingToCart" x-if="addingToCart">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                     <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
                                                         viewBox="0 0 24 24" class="size-4" aria-hidden="true"
@@ -910,7 +909,7 @@
                                                     </svg>
                                                 </button>
                                                 <button x-show="$store.cart.getQuantity(product.id)>0"
-                                                    @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                    @click="removeFromCart(product)" class="btn btn-sm btn-square">
                                                     <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
                                                         viewBox="0 0 24 24" fill="currentColor" class="size-4">
                                                         <path fill-rule="evenodd"
@@ -918,11 +917,11 @@
                                                             clip-rule="evenodd" />
                                                     </svg>
                                                     <template x-if="removingFromCart">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                 </button>
 
-                                                <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                <button @click="addWishlist(product)" class="btn btn-sm btn-square">
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                         x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
                                                         viewBox="0 0 24 24" fill="currentColor"
@@ -939,7 +938,7 @@
                                                             d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                                     </svg>
                                                     <template x-if="addingToWishlist">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                 </button>
                                             </div>
@@ -987,19 +986,19 @@
                         </template>
 
                         <div x-show="loading"
-                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                            class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 place-items-center gap-3">
                             <template x-for="i in 6" :key="i">
-                                <div class="skeleton w-full h-48 rounded-lg"></div>
+                                <div class="skeleton w-[150px] h-48 rounded-lg"></div>
                             </template>
                         </div>
 
                         {{-- Horizontal Scroll --}}
                         <div class="relative" x-show="!showViewAll" x-cloak>
                             <div x-ref="scrollContainer"
-                                class="mt-3 flex gap-2 justify-start lg:gap-4 overflow-auto hidden-scrollbar p-2">
+                                class="mt-3 flex gap-5 justify-start overflow-auto hidden-scrollbar p-2">
                                 <template x-for="(product,index) in products" :key="product.slug">
                                     <div x-data='itemCardState()'
-                                        class="w-[160px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                        class="min-w-[150px] max-w-[150px] shrink-0 grow-0 bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                         <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                             class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
 
@@ -1028,9 +1027,9 @@
                                                     </template>
                                                 </div>
                                                 <div>
-                                                    <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                    <button @click="addItemToCart(product)" class="btn btn-sm btn-square">
                                                         <template x-show="addingToCart" x-if="addingToCart">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                         <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
                                                             viewBox="0 0 24 24" class="size-4" aria-hidden="true"
@@ -1043,7 +1042,7 @@
                                                         </svg>
                                                     </button>
                                                     <button x-show="$store.cart.getQuantity(product.id)>0"
-                                                        @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                        @click="removeFromCart(product)" class="btn btn-sm btn-square">
                                                         <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
                                                             viewBox="0 0 24 24" fill="currentColor" class="size-4">
                                                             <path fill-rule="evenodd"
@@ -1051,11 +1050,11 @@
                                                                 clip-rule="evenodd" />
                                                         </svg>
                                                         <template x-if="removingFromCart">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                     </button>
 
-                                                    <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                    <button @click="addWishlist(product)" class="btn btn-sm btn-square">
                                                         <svg xmlns="http://www.w3.org/2000/svg"
                                                             x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
                                                             viewBox="0 0 24 24" fill="currentColor"
@@ -1072,7 +1071,7 @@
                                                                 d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                                         </svg>
                                                         <template x-if="addingToWishlist">
-                                                            <span class="loading loading-spinner loading-xs"></span>
+                                                            <span class="loading loading-spinner loading-sm"></span>
                                                         </template>
                                                     </button>
                                                 </div>
@@ -1095,11 +1094,11 @@
 
 
                         {{-- View All Vertical Scroll with Pagination --}}
-                        <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 lg:gap-5"
+                        <div class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 place-items-center gap-5"
                             x-show="showViewAll" x-cloak>
                             <template x-for="(product,index) in products" :key="index">
                                 <div x-data='itemCardState()'
-                                    class="bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
+                                    class="min-w-[150px] max-w-[150px] bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">
                                     <img :src="product.image ?? '{{ asset('assets/images/computer_accessories.png') }}'"
                                         class="w-full h-24 lg:h-32 p-2 lg:p-5 object-contain" alt="">
                                     <div class="p-2 flex flex-col justify-between h-[calc(100%-12rem)]">
@@ -1126,9 +1125,9 @@
                                                 </template>
                                             </div>
                                             <div>
-                                                <button @click="addItemToCart(product)" class="btn btn-xs btn-square">
+                                                <button @click="addItemToCart(product)" class="btn btn-sm btn-square">
                                                     <template x-show="addingToCart" x-if="addingToCart">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                     <svg x-show="!addingToCart" xmlns="http://www.w3.org/2000/svg"
                                                         viewBox="0 0 24 24" class="size-4" aria-hidden="true"
@@ -1141,7 +1140,7 @@
                                                     </svg>
                                                 </button>
                                                 <button x-show="$store.cart.getQuantity(product.id)>0"
-                                                    @click="removeFromCart(product)" class="btn btn-xs btn-square">
+                                                    @click="removeFromCart(product)" class="btn btn-sm btn-square">
                                                     <svg x-show="!removingFromCart" xmlns="http://www.w3.org/2000/svg"
                                                         viewBox="0 0 24 24" fill="currentColor" class="size-4">
                                                         <path fill-rule="evenodd"
@@ -1149,11 +1148,11 @@
                                                             clip-rule="evenodd" />
                                                     </svg>
                                                     <template x-if="removingFromCart">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                 </button>
 
-                                                <button @click="addWishlist(product)" class="btn btn-xs btn-square">
+                                                <button @click="addWishlist(product)" class="btn btn-sm btn-square">
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                         x-show="!addingToWishlist && $store.wishlist.isWishlist(product.id)"
                                                         viewBox="0 0 24 24" fill="currentColor"
@@ -1170,7 +1169,7 @@
                                                             d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                                     </svg>
                                                     <template x-if="addingToWishlist">
-                                                        <span class="loading loading-spinner loading-xs"></span>
+                                                        <span class="loading loading-spinner loading-sm"></span>
                                                     </template>
                                                 </button>
                                             </div>
@@ -1225,7 +1224,7 @@
                     </div>
 
                     <div
-                        class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 place-items-center gap-2 lg:gap-5">
+                        class="mt-3 w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 place-items-center gap-5">
                         <template x-for="(product,index) in products" :key="index">
                             <div x-data='itemCardState()'
                                 class="min-w-[150px] max-w-[150px] bg-base-100 shadow-md border border-base-300 select-none hover:shadow-lg transition-all relative rounded-lg">

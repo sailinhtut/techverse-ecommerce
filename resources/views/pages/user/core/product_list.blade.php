@@ -1447,10 +1447,7 @@
 
 @push('script')
     <script>
-        document.addEventListener('alpine:init', function() {
-            Alpine.store('cart').syncCartItems();
-            Alpine.store('wishlist').syncWishlistProducts();
-        })
+       
 
         function popupCarousel() {
             return {

@@ -14,40 +14,50 @@
                     <thead>
                         <tr>
                             <th class="w-[50px]">No.</th>
-                            <th class="w-[50px]">Image</th>
-                            <th class="w-[200px]">Name</th>
-                            <th class="w-[200px]">Description</th>
-                            <th class="">Note</th>
-                            <th class="">Added At</th>
-                            <th style="width:180px;">Actions</th>
+                            {{-- <th class="w-[50px]">Image</th> --}}
+                            <th class="">Name</th>
+                            {{-- <th class="w-[200px]">Description</th> --}}
+                            {{-- <th class="">Note</th>
+                            <th class="">Added At</th> --}}
+                            <th class="w-[200px]"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($wishlists as $wishlist)
                             <tr>
-                                <td style="" class="">
+                                <td style="" class="w-[50px]">
                                     {{ $loop->iteration + ($wishlists->currentPage() - 1) * $wishlists->perPage() }}.
                                 </td>
 
-                                <td class="w-[50px]">
-                                    @if ($wishlist['product']['image'])
-                                        <img src="{{ $wishlist['product']['image'] }}"
-                                            alt="{{ $wishlist['product']['name'] }}" class="w-[20px] h-auto object-contain">
-                                    @else
-                                        <img src="{{ $site_logo }}" alt="{{ $wishlist['product']['name'] }}"
-                                            class="w-[30px] h-auto">
-                                    @endif
+                                <td class="">
+                                    <div class="flex flex-row flex-nowrap items-start gap-3">
+                                        <div class="w-[50px] shrink-0">
+                                            @if ($wishlist['product']['image'])
+                                                <img src="{{ $wishlist['product']['image'] }}"
+                                                    alt="{{ $wishlist['product']['name'] }}"
+                                                    class="w-[50px] h-auto object-contain  border border-base-300">
+                                            @else
+                                                <img src="{{ $site_logo }}" alt="{{ $wishlist['product']['name'] }}"
+                                                    class="w-[50px] h-auto object-contain   border border-base-300">
+                                            @endif
+                                        </div>
+                                        <a href="{{ route('shop.slug.get', ['slug' => $wishlist['product']['slug']]) }}"
+                                            class="flex flex-col">
+                                            <span
+                                                class="font-semibold cursor-default hover:underline">{{ $wishlist['product']['name'] }}</span>
+                                            <span
+                                                class="line-clamp-2">{{ $wishlist['product']['short_description'] ?? 'No Description' }}</span>
+                                        </a>
+                                    </div>
+
+
                                 </td>
 
-                                <td class="w-[200px] h-[30px] line-clamp-1">
-                                    <a href="{{ route('shop.slug.get', ['slug' => $wishlist['product']['slug']]) }}"
-                                        class="cursor-default hover:underline">{{ $wishlist['product']['name'] }}</a>
-                                </td>
-                                <td class="max-w-[200px] truncate">{{ $wishlist['product']['short_description'] ?? '-' }}
-                                </td>
-                                <td>{{ $wishlist['note'] ?? '-' }}</td>
-                                <td>{{ $wishlist['created_at'] ?? '-' }}</td>
-                                <td>
+                                {{-- <td class="max-w-[200px] truncate">{{ $wishlist['product']['short_description'] ?? '-' }}
+                                </td> --}}
+                                {{-- <td>{{ $wishlist['note'] ?? '-' }}</td> --}}
+                                {{-- <td>{{ $wishlist['created_at'] ?? '-' }}</td> --}}
+                                <td class="w-[200px]">
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">
                                             <i data-lucide="ellipsis-vertical" class="size-5"></i>

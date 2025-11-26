@@ -27,7 +27,7 @@
             </a>
         </li>
         <li>
-            <a x-data href="{{ route('cart.get') }}" class="relative">
+            <a x-data href="{{ route('cart.get') }}" class="relative inline-block mt-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
                     aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                     stroke-linejoin="round">
@@ -36,12 +36,26 @@
                     <circle cx="18" cy="20" r="1.5" />
                 </svg>
 
-                <span class="badge badge-error badge-sm absolute -top-2 -right-3" x-text="$store.cart.totalItems()"
-                    x-show="$store.cart.totalItems() > 0"></span>
+                <span class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 text-xs badge badge-error badge-sm"
+                    x-text="$store.cart.totalItems()" x-show="$store.cart.totalItems() > 0"></span>
             </a>
         </li>
 
         @auth
+            <li>
+                <a x-data href="{{ route('notification.get') }}" class="relative inline-block mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                    </svg>
+
+                    <!-- Badge -->
+                    <span class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 text-xs badge badge-error badge-sm"
+                        x-cloak x-text="$store.notification.unread_count" x-show="$store.notification.unread_count > 0">
+                    </span>
+                </a>
+            </li>
             <div class="dropdown dropdown-end">
                 <div tabindex="0">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -68,15 +82,27 @@
 
 
     <div class="lg:hidden flex flex-row items-center gap-3">
-        <a x-data href="{{ route('cart.get') }}" class="relative">
+        <a x-data href="{{ route('cart.get') }}" class="relative inline-block">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"
                 fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 3h2l1.6 9.6a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.6L21 7H6" />
                 <circle cx="10" cy="20" r="1.5" />
                 <circle cx="18" cy="20" r="1.5" />
             </svg>
-            <span class="badge badge-error badge-sm absolute -top-2 -right-3" x-text="$store.cart.totalItems()"
-                x-show="$store.cart.totalItems() > 0"></span>
+            <span class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 text-xs badge badge-error badge-sm"
+                x-text="$store.cart.totalItems()" x-show="$store.cart.totalItems() > 0"></span>
+        </a>
+
+        <a x-data href="{{ route('notification.get') }}" class="relative inline-block">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+            </svg>
+
+            <span class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 text-xs badge badge-error badge-sm"
+                x-cloak x-text="$store.notification.unread_count" x-show="$store.notification.unread_count > 0">
+            </span>
         </a>
 
 
@@ -108,9 +134,19 @@
                                 class="{{ request()->is('profile') ? 'bg-primary text-primary-content' : '' }}">User
                                 Profile</a>
                         </li>
-                        <li>
+                        <li x-data>
                             <a href="{{ route('notification.get') }}"
-                                class="{{ request()->is('notification') ? 'bg-primary text-primary-content' : '' }}">Notifications</a>
+                                class="{{ request()->is('notification') ? 'bg-primary text-primary-content ' : '' }}w-full">
+                                <div class="w-fit inline-block relative">
+                                    <span>Notifications</span>
+                                    <span
+                                        class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 text-xs badge badge-error badge-sm"
+                                        x-cloak x-text="$store.notification.unread_count"
+                                        x-show="$store.notification.unread_count > 0">
+                                    </span>
+                                </div>
+
+                            </a>
                         </li>
                         <li>
                             <a href="{{ route('address.get') }}"

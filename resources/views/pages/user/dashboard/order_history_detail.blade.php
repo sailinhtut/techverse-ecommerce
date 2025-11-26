@@ -16,7 +16,7 @@
         {{-- 🧾 Header --}}
         <div class="flex flex-col lg:flex-row justify-between lg:items-center mb-8 border-b pb-4">
             <div>
-                <h1 class="text-box font-semibold">Order #{{ $order['order_number'] }}</h1>
+                <h1 class="text-box font-semibold">Order {{ $order['order_number'] }}</h1>
                 <p class="text-gray-500 text-sm mt-1">
                     Placed on {{ $order['created_at']->format('F d, Y h:i A') }}
                 </p>
@@ -62,13 +62,10 @@
 
                             <p class="text-xs text-gray-500 mt-1">
                                 SKU: {{ $item['sku'] ?? '-' }}
-                                @if ($item['sku'])
-                                    <span> | {{ $item['sku'] }}</span>
-                                @endif
                             </p>
                         </div>
 
-                        <div class="flex justify-between items-center mt-2">
+                        <div class="flex justify-between items-center">
                             <p class="text-sm text-gray-600">Qty: {{ $item['quantity'] }}</p>
                             <p class="font-medium text-sm">
                                 Subtotal: ${{ number_format($item['subtotal'], 2) }}

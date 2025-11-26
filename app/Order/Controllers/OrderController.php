@@ -3,11 +3,14 @@
 namespace App\Order\Controllers;
 
 use App\Auth\Models\Address;
+use App\Auth\Models\Notification;
 use App\Cart\Models\Cart;
 use App\Inventory\Models\Coupon;
 use App\Inventory\Services\CouponService;
 use App\Order\Models\Order;
 use App\Order\Models\OrderProduct;
+use App\Order\Services\OrderMailService;
+use App\Order\Services\OrderNotificationService;
 use App\Order\Services\OrderService;
 use App\Payment\Models\Invoice;
 use App\Shipping\Services\ShippingMethodService;
@@ -318,6 +321,8 @@ class OrderController
 
             DB::commit();
 
+            OrderNotificationService::sendOrderCreated($order, $user);
+
             return redirect()->route(
                 'order_detail.id.get',
                 $order->id
@@ -391,6 +396,11 @@ class OrderController
                     'country' => $validated['billing_address']['country'] ?? $order->billing_address['country'] ?? null,
                 ],
             ]);
+
+            if ($order->wasChanged('status')) {
+                $user = $order->user;
+                OrderNotificationService::sendOrderUpdated($order, $user);
+            }
 
             return redirect()
                 ->back()

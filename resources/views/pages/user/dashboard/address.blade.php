@@ -14,7 +14,7 @@
                         <tr>
                             <th class="w-[50px]">No.</th>
                             <th class="w-[50px]">Address</th>
-                            <th class="w-[200px]">Recipient</th>
+                            {{-- <th class="w-[200px]">Recipient</th> --}}
                             <th class="w-[200px]">Type</th>
                             <th style="width:180px;">Actions</th>
                         </tr>
@@ -31,9 +31,9 @@
                                         class="cursor-default hover:underline">{{ $address['label'] }}</div>
                                 </td>
 
-                                <td class="w-[200px] h-[30px] line-clamp-1">
+                                {{-- <td class="w-[200px] h-[30px] line-clamp-1">
                                     <div>{{ $address['recipient_name'] ?? 'Not Set' }}</div>
-                                </td>
+                                </td> --}}
 
                                 <td>
                                     @if ($address['is_default_shipping'])

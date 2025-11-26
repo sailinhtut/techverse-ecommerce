@@ -15,10 +15,8 @@
                     <thead>
                         <tr>
                             <th class="w-[50px]">No.</th>
-                            <th class="w-[50px]">Image</th>
-                            <th class="w-[200px]">Title</th>
-                            <th class="w-[200px]">Message</th>
-                            <th style="width:180px;">Actions</th>
+                            <th class="">Notification</th>
+                            <th style="width:180px;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -28,22 +26,30 @@
                                     {{ $loop->iteration + ($notifications->currentPage() - 1) * $notifications->perPage() }}.
                                 </td>
 
-                                <td class="w-[50px]">
+                                <td class="">
+                                    <div class="flex flex-row gap-3">
+                                        <div class="w-[45px] h-full flex-shrink-0">
+                                            @if ($notification['image'])
+                                                <img src="{{ $notification['image'] }}" alt="{{ $notifications['title'] }}"
+                                                    class="w-[45px] h-auto object-contain border border-base-300">
+                                            @else
+                                                <img src="{{ $site_logo }}" alt="{{ $notification['title'] }}"
+                                                    class="w-[45px] h-auto object-contain border border-base-300">
+                                            @endif
+                                        </div>
 
-                                    @if ($notification['image'])
-                                        <img src="{{ $notification['image'] }}" alt="{{ $notification['title'] }}"
-                                            class="w-[20px] h-auto object-contain">
-                                    @else
-                                        <img src="{{ $site_logo }}" alt="{{ $notification['title'] }}"
-                                            class="w-[30px] h-auto">
-                                    @endif
+                                        <a href="{{ $notification['link'] }}" class="flex flex-col">
+                                            <span
+                                                class="font-semibold cursor-default hover:underline">{{ $notification['title'] }}</span>
+                                            <span class="line-clamp-2">{{ $notification['message'] ?? 'No Message' }}</span>
+                                            <span
+                                                class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($notification['created_at'])->diffForHumans() }}
+                                                at
+                                                {{ $notification['created_at'] ? \Carbon\Carbon::parse($notification['created_at'])->format('Y-m-d h:i A') : '-' }}</span>
+                                        </a>
+                                    </div>
                                 </td>
 
-                                <td class="w-[200px] h-[30px] line-clamp-1">
-                                    <div onclick="document.getElementById('detailModal{{ $notification['id'] }}').showModal()"
-                                        class="cursor-default hover:underline">{{ $notification['title'] }}</div>
-                                </td>
-                                <td>{{ $notification['message'] ?? 'No Message' }}</td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">
@@ -78,18 +84,19 @@
                                                 @if ($notification['image'])
                                                     <img src="{{ $notification['image'] }}"
                                                         alt="{{ $notification['title'] }}"
-                                                        class="w-[100px] h-auto object-contain">
+                                                        class="w-[100px] h-auto object-contain border border-base-300">
                                                 @else
                                                     <img src="{{ $site_logo }}" alt="{{ $notification['title'] }}"
-                                                        class="w-[100px] h-auto">
+                                                        class="w-[100px] h-auto object-contain border border-base-300">
                                                 @endif
-                                                <p><strong>ID:</strong> {{ $notification['id'] ?? 'No ID' }}</p>
-
-                                                <p><strong>Title:</strong>
-                                                    {{ $notification['title'] ?? 'No Title' }}</p>
-                                                <p><strong>Type:</strong>
-                                                    {{ ucfirst($notification['type']) ?? 'No Type' }}</p>
-                                                <p><strong>Message:</strong>
+                                                <p class="text-sm text-gray-500">
+                                                    Sent:
+                                                    {{ $notification['created_at'] ? \Carbon\Carbon::parse($notification['updated_at'])->format('Y-m-d h:i A') : '-' }} 
+                                                    ({{ \Carbon\Carbon::parse($notification['created_at'])->diffForHumans() }})
+                                                </p>
+                                                <p class="white-space-pre-wrap"><strong>
+                                                        {{ $notification['title'] ?? 'No Title' }}</strong></p>
+                                                <p class="white-space-pre-wrap text-justify">
                                                     {{ $notification['message'] ?? 'Message' }}</p>
                                             </div>
                                             <div class="modal-action mt-3">
@@ -186,3 +193,11 @@
         </div>
     </div>
 @endsection
+
+@push('script')
+    <script>
+        document.addEventListener('alpine:init', function() {
+            Alpine.store('notification').markAsRead([]);
+        })
+    </script>
+@endpush

@@ -1,6 +1,8 @@
 @php
     $site_name = getParsedTemplate('site_name');
     $site_logo = getSiteLogoURL();
+    $primaryColor = getParsedTemplate('site_primary_color');
+    $primaryContentColor = getParsedTemplate('site_primary_content_color');
 @endphp
 
 <!DOCTYPE html>
@@ -52,14 +54,6 @@
 
     @yield('app_content')
 
-
-    @php
-        use App\Setting\Models\AppSetting;
-        $primaryColorSetting = AppSetting::where('key', 'site_primary_color')->first();
-        $primaryContentColorSetting = AppSetting::where('key', 'site_primary_content_color')->first();
-        $primaryColor = $primaryColorSetting?->value ?? config('app.site_primary_color');
-        $primaryContentColor = $primaryContentColorSetting?->value ?? config('app.site_primary_content_color');
-    @endphp
     <script>
         (function() {
 
@@ -70,6 +64,15 @@
             document.documentElement.style.setProperty('--color-primary-content', primaryContentColor);
         })();
     </script>
+
+    <script>
+        document.addEventListener('alpine:init', function() {
+            Alpine.store('cart').syncCartItems();
+            Alpine.store('wishlist').syncWishlistProducts();
+            Alpine.store('notification').init();
+        })
+    </script>
+
 
     @stack('script')
 
@@ -131,9 +134,6 @@
             </div>
         </div>
     </dialog>
-
-
-
 </body>
 
 </html>

@@ -41,11 +41,7 @@ Route::controller(UserController::class)->group(function () {
     Route::delete('/profile/delete/{id}', 'deleteProfile')->name('profile.delete.delete')->middleware('auth');
 });
 
-Route::controller(NotificationController::class)->group(function () {
-    Route::get('/notification', 'getNotifications')->name('notification.get')->middleware('auth');
 
-    Route::delete('/notification/{id}', 'deleteNotification')->name('notification.id.delete')->middleware('auth');
-});
 
 Route::controller(AddressController::class)->group(function () {
     Route::get('/address', 'getAddresses')->name('address.get')->middleware('auth');

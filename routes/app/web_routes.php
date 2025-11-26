@@ -1,5 +1,6 @@
 <?php
 
+use App\Auth\Controllers\NotificationController;
 use App\Auth\Controllers\WishlistController;
 use App\Cart\Controllers\CartController;
 use App\Inventory\Controllers\CouponController;
@@ -23,6 +24,20 @@ Route::view('/privacy', 'pages.user.core.privacy')->name('privacy.get');
 Route::view('/terms', 'pages.user.core.terms')->name('terms.get');
 Route::view('/about', 'pages.user.core.about_us')->name('about_us.get');
 Route::view('/contact', 'pages.user.core.contact')->name('contact.get');
+
+Route::controller(NotificationController::class)->group(function () {
+    Route::get('/notification', 'getNotifications')->name('notification.get')->middleware('auth');
+
+    Route::delete('/notification/{id}', 'deleteNotification')->name('notification.id.delete')->middleware('auth');
+
+    Route::post('/notification/mark-read', 'markReadNotifications')
+        ->name('notification.mark_read')
+        ->middleware('auth');
+
+    Route::get('/notification/unread-count', 'getUnreadCount')
+        ->name('notification.unread_count')
+        ->middleware('auth');
+});
 
 Route::controller(CartController::class)->group(function () {
     Route::get('/cart/items', 'getCartItems')->name('cart.items.get')->middleware('auth');

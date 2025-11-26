@@ -78,7 +78,7 @@
                                                     <img src="{{ $item->product->image ? getDownloadableLink($item->product->image) : 'https://via.placeholder.com/60' }}"
                                                         width="60" height="60"
                                                         style="border-radius:6px; object-fit:cover;" alt="product">
-                                                    <span style="font-size:14px; color:#333; font-weight:600;">
+                                                    <span style="font-size:14px; color:#333; font-weight:600; margin-left:10px;">
                                                         {{ $item->name }}
                                                     </span>
                                                 </div>

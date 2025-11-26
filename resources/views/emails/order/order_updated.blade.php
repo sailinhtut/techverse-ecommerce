@@ -90,9 +90,9 @@
                                                         width="60" height="60"
                                                         style="border-radius:6px; object-fit:cover;" alt="product">
 
-                                                    <span style="font-size:14px; color:#333; font-weight:600; margin-left:10px;">
+                                                    <div style="font-size:14px; color:#333; font-weight:600; margin-left:10px;">
                                                         {{ $item->name }}
-                                                    </span>
+                                                    </div>
                                                 </div>
                                             </td>
 

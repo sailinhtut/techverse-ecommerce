@@ -124,7 +124,7 @@ Route::controller(OrderController::class)->group(function () {
     Route::get('/order-history', 'viewUserOrderHistory')->name('order_history.get')->middleware('auth');
 
     Route::get('/order/{order_id}/invoice/{invoice_id}/view', 'viewOrderInvoice')
-        ->name('order.id.invoice.id.download.get')->middleware('auth');
+        ->name('order.id.invoice.id.view.get')->middleware('auth');
 
     Route::get('/order/{order_id}/invoice/{invoice_id}/download', 'downloadOrderInvoice')
         ->name('order.id.invoice.id.download.get')->middleware('auth');

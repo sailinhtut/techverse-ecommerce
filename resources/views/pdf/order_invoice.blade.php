@@ -108,7 +108,7 @@
         </tr>
 
         <tr>
-            <td style="padding:0 30px;font-size:14px;">
+            <td style="padding:15px 30px;font-size:14px;">
                 <table width="100%" style="border-collapse:collapse;">
                     <thead class="">
                         <tr style="border:1px solid #e5e7eb;background-color:#f9fafb;">

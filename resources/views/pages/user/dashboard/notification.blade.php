@@ -14,19 +14,19 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="w-[50px]">No.</th>
+                            <th class="w-[50px] hidden md:block">No.</th>
                             <th class="">Notification</th>
-                            <th style="width:180px;"></th>
+                            <th style=""></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($notifications as $notification)
                             <tr>
-                                <td style="" class="">
+                                <td style="" class="hidden md:block">
                                     {{ $loop->iteration + ($notifications->currentPage() - 1) * $notifications->perPage() }}.
                                 </td>
 
-                                <td class="">
+                                <td class="min-w-[300px]">
                                     <div class="flex flex-row gap-3">
                                         <div class="w-[45px] h-full flex-shrink-0">
                                             @if ($notification['image'])
@@ -40,7 +40,7 @@
 
                                         <a href="{{ $notification['link'] }}" class="flex flex-col">
                                             <span
-                                                class="font-semibold cursor-default hover:underline">{{ $notification['title'] }}</span>
+                                                class="font-semibold cursor-default hover:underline line-clamp-1">{{ $notification['title'] }}</span>
                                             <span class="line-clamp-2">{{ $notification['message'] ?? 'No Message' }}</span>
                                             <span
                                                 class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($notification['created_at'])->diffForHumans() }}
@@ -91,7 +91,7 @@
                                                 @endif
                                                 <p class="text-sm text-gray-500">
                                                     Sent:
-                                                    {{ $notification['created_at'] ? \Carbon\Carbon::parse($notification['updated_at'])->format('Y-m-d h:i A') : '-' }} 
+                                                    {{ $notification['created_at'] ? \Carbon\Carbon::parse($notification['updated_at'])->format('Y-m-d h:i A') : '-' }}
                                                     ({{ \Carbon\Carbon::parse($notification['created_at'])->diffForHumans() }})
                                                 </p>
                                                 <p class="white-space-pre-wrap"><strong>

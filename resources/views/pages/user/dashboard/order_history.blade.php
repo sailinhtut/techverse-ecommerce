@@ -49,7 +49,10 @@
                                     </div>
                                 </td>
 
+
+
                                 <td>${{ number_format($order['grand_total'], 2) }}</td>
+
 
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">

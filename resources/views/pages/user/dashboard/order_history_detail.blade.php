@@ -14,7 +14,7 @@
         </button>
 
         {{-- 🧾 Header --}}
-        <div class="flex flex-col lg:flex-row justify-between lg:items-center mb-8 border-b pb-4">
+        <div class="flex flex-col lg:flex-row justify-between lg:items-center pb-4">
             <div>
                 <h1 class="text-box font-semibold">Order {{ $order['order_number'] }}</h1>
                 <p class="text-gray-500 text-sm mt-1">
@@ -37,8 +37,16 @@
             </div>
         </div>
 
+        <div class="flex flex-row flex-wrap gap-3">
+            @foreach ($invoices as $invoice)
+                <a href="{{ route('payment.id.get', $invoice['id']) }}" class="btn btn-sm w-fit">
+                    See {{ $invoice['invoice_number'] }}
+                </a>
+            @endforeach
+        </div>
+
         {{-- 🛍️ Ordered Items --}}
-        <div class="space-y-4 mb-8">
+        <div class="mt-5 space-y-4 mb-8">
             @foreach ($order['products'] as $item)
                 <div
                     class="flex flex-col sm:flex-row gap-4 p-4 rounded-box border border-base-300 hover:shadow-sm transition">
@@ -113,7 +121,7 @@
         </div>
 
         {{-- 🏠 Shipping & Billing --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div class="flex flex-col gap-6 mb-12">
             <div class="bg-base-200 rounded-box p-5">
                 <h2 class="font-semibold mb-2">Shipping Address</h2>
                 @php $s = $order['shipping_address'] ?? []; @endphp

@@ -34,6 +34,28 @@ class PaymentController
         }
     }
 
+    public function viewUserInvoicePage($invoiceId)
+    {
+        try {
+            if (!auth()->check()) abort(403, 'Please log in to continue');
+
+            $invoice = Invoice::where('id', $invoiceId)
+                ->first();
+
+            if (!$invoice) abort(404, 'No invoice found');
+
+            if ($invoice->order->user_id !== auth()->id()) {
+                abort(403, 'You are not authorized to view this invoice');
+            }
+
+            return view('pages.user.dashboard.payment_invoice_detail', [
+                'invoice' => $invoice->jsonResponse(['order', 'payment'])
+            ]);
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
     public function viewAdminPaymentListPage(Request $request)
     {
         try {

@@ -13,23 +13,23 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="w-[50px]">No.</th>
+                            <th class="w-[50px] hidden md:block">No.</th>
                             {{-- <th class="w-[50px]">Image</th> --}}
                             <th class="">Name</th>
                             {{-- <th class="w-[200px]">Description</th> --}}
                             {{-- <th class="">Note</th>
                             <th class="">Added At</th> --}}
-                            <th class="w-[200px]"></th>
+                            <th class=""></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($wishlists as $wishlist)
                             <tr>
-                                <td style="" class="w-[50px]">
+                                <td style="" class="w-[50px] hidden md:block">
                                     {{ $loop->iteration + ($wishlists->currentPage() - 1) * $wishlists->perPage() }}.
                                 </td>
 
-                                <td class="">
+                                <td class="min-w-[200px]">
                                     <div class="flex flex-row flex-nowrap items-start gap-3">
                                         <div class="w-[50px] shrink-0">
                                             @if ($wishlist['product']['image'])
@@ -57,7 +57,7 @@
                                 </td> --}}
                                 {{-- <td>{{ $wishlist['note'] ?? '-' }}</td> --}}
                                 {{-- <td>{{ $wishlist['created_at'] ?? '-' }}</td> --}}
-                                <td class="w-[200px]">
+                                <td class="">
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">
                                             <i data-lucide="ellipsis-vertical" class="size-5"></i>

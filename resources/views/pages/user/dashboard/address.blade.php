@@ -13,20 +13,19 @@
                     <thead>
                         <tr>
                             <th class="w-[50px]">No.</th>
-                            <th class="w-[50px]">Address</th>
-                            {{-- <th class="w-[200px]">Recipient</th> --}}
-                            <th class="w-[200px]">Type</th>
-                            <th style="width:180px;">Actions</th>
+                            <th class="">Address</th>
+                            <th class="">Type</th>
+                            <th style="">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($addresses as $address)
                             <tr>
-                                <td style="" class="">
+                                <td style="" class="w-[50px]">
                                     {{ $loop->iteration + ($addresses->currentPage() - 1) * $addresses->perPage() }}.
                                 </td>
 
-                                <td class="w-[50px]">
+                                <td class="cursor-pointer">
                                     <div onclick="document.getElementById('detailModal{{ $address['id'] }}').showModal()"
                                         class="cursor-default hover:underline">{{ $address['label'] }}</div>
                                 </td>
@@ -35,7 +34,7 @@
                                     <div>{{ $address['recipient_name'] ?? 'Not Set' }}</div>
                                 </td> --}}
 
-                                <td>
+                                <td class="min-w-[100px]">
                                     @if ($address['is_default_shipping'])
                                         <div class="badge bg-primary/80 text-sm text-white">Default Shipping
                                         </div>

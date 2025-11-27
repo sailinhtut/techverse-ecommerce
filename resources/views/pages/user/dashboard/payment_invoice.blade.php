@@ -2,7 +2,7 @@
 
 @section('user_dashboard_content')
     <div class="p-3 lg:p-5">
-        <p class="lg:text-lg font-semibold">Payment Transaction</p>
+        <p class="lg:text-lg font-semibold">Payment Invoice</p>
         <div class="mt-3 card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
@@ -13,6 +13,7 @@
                             <th class="w-[150px]">Order Number</th>
                             <th class="w-[150px]">Status</th>
                             <th class="w-[150px]">Total</th>
+                            <th class="w-[150px]">Download</th>
                             <th class="w-[150px]">Actions</th>
                         </tr>
                     </thead>
@@ -20,12 +21,24 @@
                         @foreach ($invoices as $invoice)
                             <tr>
                                 <td>{{ $loop->iteration + ($invoices->currentPage() - 1) * $invoices->perPage() }}.</td>
-                                <td>
+                                {{-- <td>
                                     <p onclick="document.getElementById('detail_modal_{{ $invoice['id'] }}').showModal()"
                                         class="cursor-pointer hover:underline">
                                         {{ $invoice['invoice_number'] }}</p>
+                                </td> --}}
+
+                                <td>
+                                    <a href="{{ route('payment.id.get', $invoice['id']) }}"
+                                        class="cursor-pointer hover:underline">
+                                        {{ $invoice['invoice_number'] }}
+                                    </a>
                                 </td>
-                                <td>{{ $invoice['order']['order_number'] ?? '-' }}</td>
+                                <td>
+                                    <a href="{{ route('order_detail.id.get', $invoice['order_id']) }}"
+                                        class="cursor-pointer hover:underline">
+                                        {{ $invoice['order']['order_number'] }}
+                                    </a>
+                                </td>
                                 <td>
                                     @php
                                         $color = match ($invoice['status']) {
@@ -40,6 +53,15 @@
                                     </div>
                                 </td>
                                 <td>${{ number_format($invoice['grand_total'], 2) }}</td>
+                                <td>
+                                    <a href="{{ route('order.id.invoice.id.download.get', [
+                                        'order_id' => $invoice['order_id'],
+                                        'invoice_id' => $invoice['id'],
+                                    ]) }}"
+                                        class="btn btn-sm">
+                                        Download Invoice
+                                    </a>
+                                </td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">

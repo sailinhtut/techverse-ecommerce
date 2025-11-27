@@ -123,6 +123,12 @@ Route::controller(OrderController::class)->group(function () {
 
     Route::get('/order-history', 'viewUserOrderHistory')->name('order_history.get')->middleware('auth');
 
+    Route::get('/order/{order_id}/invoice/{invoice_id}/view', 'viewOrderInvoice')
+        ->name('order.id.invoice.id.download.get')->middleware('auth');
+
+    Route::get('/order/{order_id}/invoice/{invoice_id}/download', 'downloadOrderInvoice')
+        ->name('order.id.invoice.id.download.get')->middleware('auth');
+
     Route::get('/order/{id}', 'viewUserOrderHistoryDetail')->name('order_detail.id.get')->middleware('auth');
 
     Route::delete('/order-history/{id}', 'deleteOrder')->name('order_history.delete')->middleware('auth');
@@ -130,5 +136,7 @@ Route::controller(OrderController::class)->group(function () {
 
 
 Route::controller(PaymentController::class)->group(function () {
+    Route::get('/payment/{invoice_id}', 'viewUserInvoicePage')
+        ->name('payment.id.get')->middleware('auth');
     Route::get('/payment', 'viewUserInvoiceListPage')->name('payment.get');
 });

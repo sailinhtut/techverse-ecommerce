@@ -15,9 +15,11 @@ use App\Order\Services\OrderService;
 use App\Payment\Models\Invoice;
 use App\Shipping\Services\ShippingMethodService;
 use App\Tax\Services\TaxRateService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderController
 {
@@ -57,6 +59,7 @@ class OrderController
 
             $orders = OrderService::getOrdersByUserId(auth()->id());
 
+
             return view('pages.user.dashboard.order_history', [
                 'orders' => $orders
             ]);
@@ -76,9 +79,17 @@ class OrderController
 
             if (!$order) abort(404, 'No Order Found');
 
+            $invoices = Invoice::where('order_id', $order->id)->get();
+            $invoices = $invoices->map(function ($invoice) {
+                return $invoice->jsonResponse(['payment']);
+            });
+
 
             return view('pages.user.dashboard.order_history_detail', [
-                'order' => $order->jsonResponse(['products', 'shippingMethod', 'paymentMethod'])
+                'order' => $order->jsonResponse(
+                    ['products', 'shippingMethod', 'paymentMethod'],
+                ),
+                'invoices' => $invoices
             ]);
         } catch (Exception $e) {
             return handleErrors($e);
@@ -409,6 +420,46 @@ class OrderController
             return handleErrors($e);
         }
     }
+
+    public function viewOrderInvoice(Request $request, int $order_id, int $invoice_id)
+    {
+        try {
+            $order = Order::with(['products', 'user'])->findOrFail($order_id);
+            $invoice = Invoice::findOrFail($invoice_id);
+            $user = auth()->user();
+
+            return view('pdf.order_invoice', [
+                'order' => $order,
+                'invoice' => $invoice,
+                'user' => $user,
+            ]);
+        } catch (\Throwable $e) {
+            return handleErrors($e);
+        }
+    }
+
+
+    public function downloadOrderInvoice(Request $request, int $order_id, int $invoice_id)
+    {
+        try {
+            $order = Order::with(['products', 'user'])->findOrFail($order_id);
+            $invoice = Invoice::findOrFail($invoice_id);
+            $user = auth()->user();
+
+            $pdf = Pdf::loadView('pdf.order_invoice', [
+                'order' => $order,
+                'invoice' => $invoice,
+                'user' => $user,
+            ]);
+
+            $fileName = 'invoice-' . $order->order_number . '-' . $invoice->id . '.pdf';
+
+            return $pdf->download($fileName);
+        } catch (\Throwable $e) {
+            return handleErrors($e);
+        }
+    }
+
 
     public function deleteOrder(Request $request, $id)
     {

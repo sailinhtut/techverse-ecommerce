@@ -36,7 +36,14 @@
         <p class="text-lg font-semibold mt-5">Order Detail</p>
 
         <div class="flex flex-wrap gap-3 mt-2">
-            <button class="btn btn-sm">See {{ $order['order_number'] }} Invoice</button>
+            {{-- <button class="btn btn-sm">See {{ $order['order_number'] }} Invoice</button> --}}
+
+            @foreach ($invoices as $invoice)
+                <a href="{{ route('admin.dashboard.payment.invoice.id.get', ['id' => $invoice['id']]) }}"
+                    class="btn btn-sm w-fit">
+                    See {{ $invoice['invoice_number'] }}
+                </a>
+            @endforeach
 
             <div class="tooltip" data-tip="Mark Invoice Paid,Create Payment Record,Create Successful Payment Transaction">
                 <button onclick="complete_payment_dialog.showModal()" type="submit" class="btn btn-sm text-success"><svg
@@ -51,7 +58,7 @@
         </div>
 
         <form method="POST" action="{{ route('admin.dashboard.order.id.post', $order['id']) }}"
-            class="border border-base-300 rounded-box p-5 mt-10">
+            class="border border-base-300 rounded-box p-5 mt-5">
             @csrf
             @method('POST')
             <p class="font-semibold mb-2">Order Infomation</p>

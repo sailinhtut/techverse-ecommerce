@@ -56,6 +56,20 @@ class InvoiceController
         }
     }
 
+    public function viewAdminInvoiceDetailPage(Request $request, $id)
+    {
+        try {
+            $invoice = Invoice::findOrFail($id);
+            $invoice = $invoice->jsonResponse(['order']);
+            
+            return view('pages.admin.dashboard.payment.invoice_detail', [
+                'invoice' => $invoice
+            ]);
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
     public function deleteAdminInvoice(Request $request, $id)
     {
         try {

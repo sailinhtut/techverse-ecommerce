@@ -148,8 +148,16 @@ class OrderController
         try {
             $order = OrderService::getOrder(intval($id));
 
+            if (!$order) abort(404, 'No Order Found');
+
+            $invoices = Invoice::where('order_id', $id)->get();
+            $invoices = $invoices->map(function ($invoice) {
+                return $invoice->jsonResponse();
+            });
+
             return view('pages.admin.dashboard.order.order_detail', [
-                'order' => $order
+                'order' => $order,
+                'invoices' => $invoices,
             ]);
         } catch (Exception $e) {
             return handleErrors($e);

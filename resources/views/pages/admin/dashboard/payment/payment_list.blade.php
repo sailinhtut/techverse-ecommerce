@@ -309,7 +309,13 @@
                                         class="cursor-pointer hover:underline">
                                         Payment #{{ $payment['id'] }}</p>
                                 </td>
-                                <td>{{ $payment['invoice']['invoice_number'] ?? '-' }}</td>
+                                {{-- <td>{{ $payment['invoice']['invoice_number'] ?? '-' }}</td> --}}
+                                <td>
+                                    <a href="{{ route('admin.dashboard.payment.invoice.id.get', ['id' => $payment['invoice']['id']]) }}"
+                                        class="cursor-pointer hover:underline">
+                                        {{ $payment['invoice']['invoice_number'] }}
+                                    </a>
+                                </td>
                                 <td>${{ number_format($payment['amount'], 2) }}</td>
                                 <td>
 

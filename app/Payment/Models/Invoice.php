@@ -68,7 +68,7 @@ class Invoice extends Model
 
 
         if (in_array('order', $eager_list) && $this->order_id) {
-            $response['order'] = $this->order ? $this->order->jsonResponse(['products']) : null;
+            $response['order'] = $this->order ? $this->order->jsonResponse(['products','user','paymentMethod']) : null;
         }
 
         if (in_array('payments', $eager_list)) {

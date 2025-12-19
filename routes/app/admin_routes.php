@@ -331,6 +331,7 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::delete('/payment/invoice/bulk/delete-selected', 'deleteSelectedInvoices')->name('admin.dashboard.payment.invoice.bulk.delete-selected');
             Route::delete('/payment/invoice/bulk/delete-all', 'deleteAllInvoices')->name('admin.dashboard.payment.invoice.bulk.delete-all');
 
+            Route::get('/payment/invoice/{id}', 'viewAdminInvoiceDetailPage')->name('admin.dashboard.payment.invoice.id.get');
 
             Route::get('/payment/invoice', 'viewAdminInvoiceListPage')->name('admin.dashboard.payment.invoice.get');
 

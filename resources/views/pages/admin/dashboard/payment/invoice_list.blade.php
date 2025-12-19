@@ -304,9 +304,13 @@
                                     {{ $invoice['id'] }}
                                 </td>
                                 <td>
-                                    <p onclick="document.getElementById('detail_modal_{{ $invoice['id'] }}').showModal()"
+                                    {{-- <p onclick="document.getElementById('detail_modal_{{ $invoice['id'] }}').showModal()"
                                         class="cursor-pointer hover:underline">
-                                        {{ $invoice['invoice_number'] }}</p>
+                                        {{ $invoice['invoice_number'] }}</p> --}}
+                                    <a href="{{ route('admin.dashboard.payment.invoice.id.get', ['id' => $invoice['id']]) }}"
+                                        class="cursor-pointer hover:underline">
+                                        {{ $invoice['invoice_number'] }}
+                                    </a>
                                 </td>
                                 <td>
                                     <a href="{{ route('admin.dashboard.order.id.get', ['id' => $invoice['order']['id']]) }}"

@@ -82,7 +82,7 @@
                     <span class="loading loading-spinner loading-lg text-primary"></span>
                 </div>
 
-                <div class="h-[300px]" x-ref="chartContainer"></div>
+                <div class="w-full min-h-[320px] sm:min-h-[300px]" x-ref="chartContainer"></div>
 
                 <p x-show="error" class="text-red-500 mt-3">Failed to load chart.</p>
             </div>
@@ -101,7 +101,7 @@
                     <span class="loading loading-spinner loading-lg text-primary"></span>
                 </div>
 
-                <div class="h-[300px]" x-ref="chartContainer"></div>
+                <div class="w-full min-h-[320px] sm:min-h-[300px]" x-ref="chartContainer"></div>
 
                 <p x-show="error" class="text-red-500 mt-3">Failed to load chart.</p>
             </div>
@@ -120,13 +120,10 @@
                     <span class="loading loading-spinner loading-lg text-primary"></span>
                 </div>
 
-                <div class="h-[300px]" x-ref="chartContainer"></div>
+                <div class="w-full min-h-[320px] sm:min-h-[300px]" x-ref="chartContainer"></div>
 
                 <p x-show="error" class="text-red-500 mt-3">Failed to load chart.</p>
             </div>
-
-
-
         </div>
     </div>
 @endsection
@@ -163,7 +160,13 @@
                             this.chart = new ApexCharts(this.$refs.chartContainer, {
                                 chart: {
                                     type: "line",
-                                    height: 280
+                                    height: 280,
+                                    zoom: {
+                                        enabled: false
+                                    },
+                                    selection: {
+                                        enabled: false
+                                    }
                                 },
                                 stroke: {
                                     curve: 'smooth'
@@ -252,7 +255,13 @@
                             this.chart = new ApexCharts(this.$refs.chartContainer, {
                                 chart: {
                                     type: "line",
-                                    height: 280
+                                    height: 280,
+                                    zoom: {
+                                        enabled: false
+                                    },
+                                    selection: {
+                                        enabled: false
+                                    }
                                 },
                                 stroke: {
                                     curve: 'smooth'
@@ -341,7 +350,13 @@
                             this.chart = new ApexCharts(this.$refs.chartContainer, {
                                 chart: {
                                     type: "line",
-                                    height: 280
+                                    height: 280,
+                                    zoom: {
+                                        enabled: false
+                                    },
+                                    selection: {
+                                        enabled: false
+                                    }
                                 },
                                 stroke: {
                                     curve: 'smooth'
@@ -432,7 +447,13 @@
                         this.chart = new ApexCharts(this.$refs.chartContainer, {
                             chart: {
                                 type: 'pie',
-                                height: 300
+                                height: 300,
+                                zoom: {
+                                    enabled: false
+                                },
+                                selection: {
+                                    enabled: false
+                                }
                             },
                             labels: data.labels,
                             series: data.series,
@@ -451,7 +472,27 @@
                                     const val = w.config.series[seriesIndex];
                                     return val.toFixed(2);
                                 }
-                            }
+                            },
+                            legend: {
+                                position: 'right'
+                            },
+                            responsive: [{
+                                breakpoint: 640,
+                                options: {
+                                    chart: {
+                                        height: 280
+                                    },
+                                    legend: {
+                                        position: 'bottom',
+                                        fontSize: '12px'
+                                    },
+                                    dataLabels: {
+                                        style: {
+                                            fontSize: '11px'
+                                        }
+                                    }
+                                }
+                            }],
                         });
                         this.chart.render();
                         this.error = false;
@@ -483,7 +524,13 @@
                         this.chart = new ApexCharts(this.$refs.chartContainer, {
                             chart: {
                                 type: 'pie',
-                                height: 300
+                                height: 300,
+                                zoom: {
+                                    enabled: false
+                                },
+                                selection: {
+                                    enabled: false
+                                }
                             },
                             labels: data.labels,
                             series: data.series,
@@ -502,7 +549,27 @@
                                     const val = w.config.series[seriesIndex];
                                     return val.toFixed(2);
                                 }
-                            }
+                            },
+                            legend: {
+                                position: 'right'
+                            },
+                            responsive: [{
+                                breakpoint: 640,
+                                options: {
+                                    chart: {
+                                        height: 280
+                                    },
+                                    legend: {
+                                        position: 'bottom',
+                                        fontSize: '12px'
+                                    },
+                                    dataLabels: {
+                                        style: {
+                                            fontSize: '11px'
+                                        }
+                                    }
+                                }
+                            }],
                         });
                         this.chart.render();
                     } catch (e) {
@@ -533,10 +600,36 @@
                         this.chart = new ApexCharts(this.$refs.chartContainer, {
                             chart: {
                                 type: 'pie',
-                                height: 300
+                                height: 300,
+                                zoom: {
+                                    enabled: false
+                                },
+                                selection: {
+                                    enabled: false
+                                }
                             },
                             labels: data.labels,
-                            series: data.series
+                            series: data.series,
+                            legend: {
+                                position: 'right'
+                            },
+                            responsive: [{
+                                breakpoint: 640,
+                                options: {
+                                    chart: {
+                                        height: 280
+                                    },
+                                    legend: {
+                                        position: 'bottom',
+                                        fontSize: '12px'
+                                    },
+                                    dataLabels: {
+                                        style: {
+                                            fontSize: '11px'
+                                        }
+                                    }
+                                }
+                            }],
                         });
                         this.chart.render();
                     } catch (e) {
@@ -577,10 +670,36 @@
                         this.chart = new ApexCharts(this.$refs.chartContainer, {
                             chart: {
                                 type: 'pie',
-                                height: 300
+                                height: 300,
+                                zoom: {
+                                    enabled: false
+                                },
+                                selection: {
+                                    enabled: false
+                                }
                             },
                             labels: data.labels,
-                            series: data.series
+                            series: data.series,
+                            legend: {
+                                position: 'right'
+                            },
+                            responsive: [{
+                                breakpoint: 640,
+                                options: {
+                                    chart: {
+                                        height: 280
+                                    },
+                                    legend: {
+                                        position: 'bottom',
+                                        fontSize: '12px'
+                                    },
+                                    dataLabels: {
+                                        style: {
+                                            fontSize: '11px'
+                                        }
+                                    }
+                                }
+                            }],
                         });
                         this.chart.render();
                         this.error = false;
@@ -622,10 +741,36 @@
                         this.chart = new ApexCharts(this.$refs.chartContainer, {
                             chart: {
                                 type: 'pie',
-                                height: 300
+                                height: 300,
+                                zoom: {
+                                    enabled: false
+                                },
+                                selection: {
+                                    enabled: false
+                                }
                             },
                             labels: data.labels,
-                            series: data.series
+                            series: data.series,
+                            legend: {
+                                position: 'right'
+                            },
+                            responsive: [{
+                                breakpoint: 640,
+                                options: {
+                                    chart: {
+                                        height: 280
+                                    },
+                                    legend: {
+                                        position: 'bottom',
+                                        fontSize: '12px'
+                                    },
+                                    dataLabels: {
+                                        style: {
+                                            fontSize: '11px'
+                                        }
+                                    }
+                                }
+                            }],
                         });
                         this.chart.render();
                         this.error = false;

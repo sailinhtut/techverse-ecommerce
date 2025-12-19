@@ -85,6 +85,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('contact_messages', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email');
+            $table->text('message');
+            $table->enum('status', ['new', 'read', 'responded'])->default('new');
+            $table->timestamps();
+        });
+
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->onDelete('cascade')->index();
@@ -111,6 +120,7 @@ return new class extends Migration
 
     public function down(): void
     {
+        Schema::dropIfExists('contact_messages');
         Schema::dropIfExists('cache');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');

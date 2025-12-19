@@ -1,3 +1,7 @@
+@php
+    $site_currency = getParsedTemplate('site_currency');
+@endphp
+
 @extends('layouts.user.user_dashboard')
 
 @section('user_dashboard_content')
@@ -51,7 +55,7 @@
 
 
 
-                                <td>${{ number_format($order['grand_total'], 2) }}</td>
+                                <td>{{ number_format($order['grand_total'], 2) }} {{ $site_currency }}</td>
 
 
                                 <td>

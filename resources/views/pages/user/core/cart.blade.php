@@ -1,5 +1,6 @@
 @php
     $site_name = getParsedTemplate('site_name');
+    $site_currency = getParsedTemplate('site_currency');
     $site_logo = getSiteLogoURL();
 @endphp
 
@@ -116,7 +117,7 @@
                 <div class="table-row">
                     <div class="table-cell py-2">Total Cost</div>
                     <div class="table-cell text-right font-medium">
-                        $<span x-text="$store.cart.totalCost().toFixed(2)"></span>
+                        <span x-text="$store.cart.totalCost().toFixed(2)"></span> {{ $site_currency }}
                     </div>
                 </div>
             </div>

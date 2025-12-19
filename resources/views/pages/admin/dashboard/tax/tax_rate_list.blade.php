@@ -414,7 +414,7 @@
                                                     required>
                                             </div>
                                             <div>
-                                                <label class="text-sm">Zone</label>
+                                                <label class="text-sm">Zone (* for All)</label>
                                                 <select name="tax_zone_id" class="select w-full">
                                                     <option value="">*</option>
                                                     @foreach ($tax_zones as $zone)
@@ -426,7 +426,7 @@
                                                 </select>
                                             </div>
                                             <div>
-                                                <label class="text-sm">Class</label>
+                                                <label class="text-sm">Class (* for All)</label>
                                                 <select name="tax_class_id" class="select w-full">
                                                     <option value="">*</option>
                                                     @foreach ($tax_classes as $class)
@@ -529,22 +529,47 @@
                 </table>
 
                 {{-- Pagination --}}
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $tax_rates->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $tax_rates->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $tax_rates->total() }}</span> results
+                        <span class="font-semibold">{{ $tax_rates->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $tax_rates->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $tax_rates->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($tax_rates->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $tax_rates->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $tax_rates->lastPage(); $i++)
+
+                        <a href="{{ $tax_rates->url(1) }}"
+                            class="join-item btn btn-sm {{ $tax_rates->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $tax_rates->currentPage() - 1);
+                            $end = min($tax_rates->lastPage() - 1, $tax_rates->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $tax_rates->url($i) }}"
-                                class="join-item btn btn-sm {{ $tax_rates->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $tax_rates->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($tax_rates->lastPage() > 1)
+                            <a href="{{ $tax_rates->url($tax_rates->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $tax_rates->currentPage() === $tax_rates->lastPage() ? 'btn-active' : '' }}">
+                                {{ $tax_rates->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($tax_rates->hasMorePages())
                             <a href="{{ $tax_rates->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -552,6 +577,7 @@
                         @endif
                     </div>
                 </div>
+                
             </div>
         </div>
 
@@ -569,7 +595,7 @@
                             <input name="name" class="input w-full" placeholder="Tax Rate Name" required>
                         </div>
                         <div>
-                            <label class="text-sm">Zone</label>
+                            <label class="text-sm">Zone (* for All)</label>
                             <select name="tax_zone_id" class="select w-full">
                                 <option value="">*</option>
                                 @foreach ($tax_zones as $zone)
@@ -578,7 +604,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm">Class</label>
+                            <label class="text-sm">Class (* for All)</label>
                             <select name="tax_class_id" class="select w-full">
                                 <option value="">*</option>
                                 @foreach ($tax_classes as $class)

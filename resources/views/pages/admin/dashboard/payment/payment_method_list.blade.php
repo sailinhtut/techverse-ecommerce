@@ -658,22 +658,47 @@
                     </tbody>
                 </table>
 
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $paymentmethods->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $paymentmethods->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $paymentmethods->total() }}</span> results
+                        <span class="font-semibold">{{ $paymentmethods->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $paymentmethods->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $paymentmethods->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($paymentmethods->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $paymentmethods->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $paymentmethods->lastPage(); $i++)
+
+                        <a href="{{ $paymentmethods->url(1) }}"
+                            class="join-item btn btn-sm {{ $paymentmethods->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $paymentmethods->currentPage() - 1);
+                            $end = min($paymentmethods->lastPage() - 1, $paymentmethods->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $paymentmethods->url($i) }}"
-                                class="join-item btn btn-sm {{ $paymentmethods->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $paymentmethods->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($paymentmethods->lastPage() > 1)
+                            <a href="{{ $paymentmethods->url($paymentmethods->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $paymentmethods->currentPage() === $paymentmethods->lastPage() ? 'btn-active' : '' }}">
+                                {{ $paymentmethods->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($paymentmethods->hasMorePages())
                             <a href="{{ $paymentmethods->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -681,6 +706,7 @@
                         @endif
                     </div>
                 </div>
+               
             </div>
         </div>
 

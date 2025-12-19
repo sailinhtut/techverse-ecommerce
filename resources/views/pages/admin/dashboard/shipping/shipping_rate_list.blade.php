@@ -452,7 +452,7 @@
                                             </div>
 
                                             <div>
-                                                <label class="text-sm">Shipping Zone</label>
+                                                <label class="text-sm">Shipping Zone (* for All)</label>
                                                 <select name="shipping_zone_id" class="select w-full border-base-300"
                                                     required>
                                                     <option disabled>Select Zone</option>
@@ -466,7 +466,7 @@
                                             </div>
 
                                             <div>
-                                                <label class="text-sm">Shipping Method</label>
+                                                <label class="text-sm">Shipping Method (* for All)</label>
                                                 <select name="shipping_method_id" class="select w-full border-base-300"
                                                     required>
                                                     <option disabled>Select Method</option>
@@ -480,7 +480,7 @@
                                             </div>
 
                                             <div class="md:col-span-2">
-                                                <label class="text-sm">Shipping Class</label>
+                                                <label class="text-sm">Shipping Class (* for All)</label>
                                                 <select name="shipping_class_id" class="select w-full border-base-300">
                                                     <option value="">*</option>
                                                     @foreach ($shipping_classes as $class)
@@ -582,22 +582,47 @@
                     </tbody>
                 </table>
 
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $shipping_rates->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $shipping_rates->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $shipping_rates->total() }}</span> results
+                        <span class="font-semibold">{{ $shipping_rates->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $shipping_rates->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $shipping_rates->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($shipping_rates->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $shipping_rates->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $shipping_rates->lastPage(); $i++)
+
+                        <a href="{{ $shipping_rates->url(1) }}"
+                            class="join-item btn btn-sm {{ $shipping_rates->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $shipping_rates->currentPage() - 1);
+                            $end = min($shipping_rates->lastPage() - 1, $shipping_rates->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $shipping_rates->url($i) }}"
-                                class="join-item btn btn-sm {{ $shipping_rates->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $shipping_rates->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($shipping_rates->lastPage() > 1)
+                            <a href="{{ $shipping_rates->url($shipping_rates->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $shipping_rates->currentPage() === $shipping_rates->lastPage() ? 'btn-active' : '' }}">
+                                {{ $shipping_rates->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($shipping_rates->hasMorePages())
                             <a href="{{ $shipping_rates->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -605,6 +630,7 @@
                         @endif
                     </div>
                 </div>
+                
             </div>
         </div>
 
@@ -627,7 +653,7 @@
                         </div>
 
                         <div>
-                            <label class="text-sm">Shipping Zone</label>
+                            <label class="text-sm">Shipping Zone (* for All)</label>
                             <select name="shipping_zone_id" class="select w-full border-base-300" required>
                                 <option disabled>Select Zone</option>
                                 <option value="">*</option>
@@ -640,7 +666,7 @@
                         </div>
 
                         <div>
-                            <label class="text-sm">Shipping Method</label>
+                            <label class="text-sm">Shipping Method (* for All)</label>
                             <select name="shipping_method_id" class="select w-full border-base-300" required>
                                 <option disabled>Select Method</option>
                                 <option value="">*</option>
@@ -653,7 +679,7 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="text-sm">Shipping Class</label>
+                            <label class="text-sm">Shipping Class (* for All)</label>
                             <select name="shipping_class_id" class="select w-full border-base-300">
                                 <option disabled>Select Class</option>
                                 <option value="">*</option>

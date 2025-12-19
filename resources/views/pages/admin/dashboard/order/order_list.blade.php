@@ -1,3 +1,7 @@
+@php
+    $site_currency = getParsedTemplate('site_currency');
+@endphp
+
 @extends('layouts.admin.admin_dashboard')
 @section('admin_dashboard_content')
     <div class="p-5 min-h-screen">
@@ -329,7 +333,7 @@
                                     </div>
                                 </td>
 
-                                <td>${{ number_format($order['grand_total'], 2) }}</td>
+                                <td>{{ number_format($order['grand_total'], 2) }} {{ $site_currency }}</td>
 
                                 <td x-cloak x-data
                                     x-show="$store.order_search_setting.showUpdatedTimeColumn || $store.order_search_setting.is_last_updated_filter">
@@ -396,13 +400,13 @@
                                                 <div>
                                                     <label class="text-sm">Subtotal</label>
                                                     <input type="text"
-                                                        value="${{ number_format($order['subtotal'], 2) }}" readonly
+                                                        value="{{ number_format($order['subtotal'], 2) }} {{ $site_currency }}" readonly
                                                         class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                                 <div>
                                                     <label class="text-sm">Discount</label>
                                                     <input type="text"
-                                                        value="- ${{ number_format($order['discount_total'], 2) }}"
+                                                        value="- {{ number_format($order['discount_total'], 2) }} {{ $site_currency }}"
                                                         readonly
                                                         class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
@@ -415,20 +419,20 @@
                                                 <div>
                                                     <label class="text-sm">Tax</label>
                                                     <input type="text"
-                                                        value="+ ${{ number_format($order['tax_total'], 2) }}" readonly
+                                                        value="+ {{ number_format($order['tax_total'], 2) }} {{ $site_currency }}" readonly
                                                         class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                                 <div>
                                                     <label class="text-sm">Shipping</label>
                                                     <input type="text"
-                                                        value="+ ${{ number_format($order['shipping_total'], 2) }}"
+                                                        value="+ {{ number_format($order['shipping_total'], 2) }} {{ $site_currency }}"
                                                         readonly
                                                         class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                                 <div>
                                                     <label class="text-sm">Grand Total</label>
                                                     <input type="text"
-                                                        value="${{ number_format($order['grand_total'], 2) }}" readonly
+                                                        value="{{ number_format($order['grand_total'], 2) }} {{ $site_currency }}" readonly
                                                         class="input w-full font-semibold cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                             </div>
@@ -457,8 +461,8 @@
                                                                 <td>{{ $item['sku'] }}</td>
                                                                 <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}
                                                                 </td>
-                                                                <td>${{ number_format($item['unit_price'], 2) }}</td>
-                                                                <td>${{ number_format($item['subtotal'], 2) }}</td>
+                                                                <td>{{ number_format($item['unit_price'], 2) }} {{ $site_currency }}</td>
+                                                                <td>{{ number_format($item['subtotal'], 2) }} {{ $site_currency }}</td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>

@@ -1,3 +1,6 @@
+@php
+    $site_currency = getParsedTemplate('site_currency');
+@endphp
 @extends('layouts.admin.admin_dashboard')
 @section('admin_dashboard_content')
     <div class="p-5 min-h-screen">
@@ -58,7 +61,7 @@
         </div>
 
         <form method="POST" action="{{ route('admin.dashboard.order.id.post', $order['id']) }}"
-            class="border border-base-300 rounded-box p-5 mt-5">
+            class="border border-base-300 rounded-box p-5 mt-5" x-data="{ submitting: false }" @submit="submitting=true">
             @csrf
             @method('POST')
             <p class="font-semibold mb-2">Order Infomation</p>
@@ -79,7 +82,7 @@
                     <label class="text-sm">Currency</label>
                     <input type="text" name="currency"
                         class="input w-full focus:outline-none focus:ring-0 focus:border-base-300 cursor-default select-none"
-                        value="{{ $order['currency'] }}" required>
+                        value="{{ $site_currency }}" required>
                 </div>
                 <div>
                     <label class="text-sm">Created At</label>
@@ -97,7 +100,13 @@
                     </select>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary mt-5">Update Order</button>
+            <button type="submit" class="btn btn-primary mt-5" :disabled="submitting">
+                <span x-show="submitting" class="loading loading-spinner loading-sm mr-2"></span>
+                <span x-show="submitting">Updating Order</span>
+                <span x-show="!submitting">
+                    Update Order
+                </span>
+            </button>
         </form>
 
 
@@ -386,8 +395,8 @@
                                 <td>{{ $item['sku'] }}</td>
                                 <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}</td>
                                 <td>{{ $item['quantity'] }}</td>
-                                <td>${{ number_format($item['unit_price'], 2) }}</td>
-                                <td>${{ number_format($item['subtotal'], 2) }}</td>
+                                <td>{{ number_format($item['unit_price'], 2) }} {{ $site_currency }}</td>
+                                <td>{{ number_format($item['subtotal'], 2) }} {{ $site_currency }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -426,15 +435,19 @@
                         <button class="btn">Cancel</button>
                     </form>
                     <form action="{{ route('admin.dashboard.order.id.pay.post', ['id' => $order['id']]) }}"
-                        method="POST">
+                        method="POST" x-data="{ submitting: false }"
+                        @submit="submitting=true">
                         @csrf
-                        <button type="submit" class="btn btn-success"><svg xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                class="size-4">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                            </svg>
-                            Complete Payment</button>
+                        <button type="submit" class="btn btn-success" :disabled="submitting">
+                            <span x-show="submitting" class="loading loading-spinner loading-sm mr-2"></span>
+                            <span x-show="submitting">Updating</span>
+                            <span x-show="!submitting">
+                                 <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                                </svg>
+                                Complete Payment
+                            </span>
+                        </button>
                     </form>
                 </div>
             </div>

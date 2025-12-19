@@ -1,3 +1,7 @@
+@php
+    $site_currency = getParsedTemplate('site_currency');
+@endphp
+
 @extends('layouts.user.user_dashboard')
 
 @section('user_dashboard_content')
@@ -52,15 +56,30 @@
                                         {{ $invoice['status'] }}
                                     </div>
                                 </td>
-                                <td>${{ number_format($invoice['grand_total'], 2) }}</td>
+                                <td>{{ number_format($invoice['grand_total'], 2) }} {{ $site_currency }}</td>
                                 <td>
-                                    <a href="{{ route('order.id.invoice.id.download.get', [
+                                    <form
+                                        action="{{ route('order.id.invoice.id.download.get', [
+                                            'order_id' => $invoice['order_id'],
+                                            'invoice_id' => $invoice['id'],
+                                        ]) }}"
+                                        method="GET" x-data="{ submitting: false }" @submit="submitting=true">
+                                        <button type="submit" class="btn btn-sm w-fit" :disabled="submitting">
+                                            <span x-show="submitting"
+                                                class="loading loading-spinner loading-sm mr-2"></span>
+                                            <span x-show="submitting">Downloading</span>
+                                            <span x-show="!submitting">
+                                                Download Invoice
+                                            </span>
+                                        </button>
+                                    </form>
+                                    {{-- <a href="{{ route('order.id.invoice.id.download.get', [
                                         'order_id' => $invoice['order_id'],
                                         'invoice_id' => $invoice['id'],
                                     ]) }}"
                                         class="btn btn-sm">
                                         Download Invoice
-                                    </a>
+                                    </a> --}}
                                 </td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
@@ -104,14 +123,14 @@
                                             <span
                                                 class="badge {{ $color }} badge-outline">{{ ucfirst($invoice['status']) }}</span>
                                         </p>
-                                        <p><strong>Subtotal:</strong> ${{ number_format($invoice['subtotal'], 2) }}</p>
-                                        <p><strong>Discount:</strong> -${{ number_format($invoice['discount_total'], 2) }}
+                                        <p><strong>Subtotal:</strong>{{ number_format($invoice['subtotal'], 2) }} {{ $site_currency }}</p>
+                                        <p><strong>Discount:</strong> -{{ number_format($invoice['discount_total'], 2) }} {{ $site_currency }}
                                         </p>
-                                        <p><strong>Tax:</strong> +${{ number_format($invoice['tax_total'], 2) }}</p>
-                                        <p><strong>Shipping:</strong> +${{ number_format($invoice['shipping_total'], 2) }}
+                                        <p><strong>Tax:</strong> +{{ number_format($invoice['tax_total'], 2) }} {{ $site_currency }}</p>
+                                        <p><strong>Shipping:</strong> +{{ number_format($invoice['shipping_total'], 2) }} {{ $site_currency }}
                                         </p>
                                         <p><strong>Grand Total:</strong> <span
-                                                class="font-semibold">${{ number_format($invoice['grand_total'], 2) }}</span>
+                                                class="font-semibold">{{ number_format($invoice['grand_total'], 2) }} {{ $site_currency }}</span>
                                         </p>
                                         <p><strong>Issued At:</strong> {{ $invoice['issued_at'] }}</p>
                                         <p><strong>Due At:</strong> {{ $invoice['due_at'] ?? '-' }}</p>

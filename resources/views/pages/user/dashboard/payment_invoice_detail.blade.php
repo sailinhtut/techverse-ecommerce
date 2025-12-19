@@ -1,3 +1,6 @@
+@php
+    $site_currency = getParsedTemplate('site_currency');
+@endphp
 @extends('layouts.web')
 
 @section('web_content')
@@ -43,13 +46,20 @@
                 See Order
             </a>
 
-            <a href="{{ route('order.id.invoice.id.download.get', [
-                'order_id' => $invoice['order_id'],
-                'invoice_id' => $invoice['id'],
-            ]) }}"
-                class="btn btn-sm w-fit">
-                Download Invoice
-            </a>
+            <form
+                action="{{ route('order.id.invoice.id.download.get', [
+                    'order_id' => $invoice['order_id'],
+                    'invoice_id' => $invoice['id'],
+                ]) }}"
+                method="GET" x-data="{ submitting: false }" @submit="submitting=true">
+                <button type="submit" class="btn btn-sm w-fit" :disabled="submitting">
+                    <span x-show="submitting" class="loading loading-spinner loading-sm mr-2"></span>
+                    <span x-show="submitting">Downloading</span>
+                    <span x-show="!submitting">
+                        Download Invoice
+                    </span>
+                </button>
+            </form>
         </div>
 
         {{-- 🛍 Order Summary / Details --}}
@@ -59,29 +69,29 @@
             <div class="space-y-1 text-sm">
                 <div class="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${{ number_format($invoice['subtotal'], 2) }}</span>
+                    <span>{{ number_format($invoice['subtotal'], 2) }} {{ $site_currency }}</span>
                 </div>
 
                 @if ($invoice['discount_total'] > 0)
                     <div class="flex justify-between">
                         <span>Discount</span>
-                        <span>- ${{ number_format($invoice['discount_total'], 2) }}</span>
+                        <span>- {{ number_format($invoice['discount_total'], 2) }} {{ $site_currency }}</span>
                     </div>
                 @endif
 
                 <div class="flex justify-between">
                     <span>Tax</span>
-                    <span>+ ${{ number_format($invoice['tax_total'], 2) }}</span>
+                    <span>+ {{ number_format($invoice['tax_total'], 2) }} {{ $site_currency }}</span>
                 </div>
 
                 <div class="flex justify-between">
                     <span>Shipping</span>
-                    <span>+ ${{ number_format($invoice['shipping_total'], 2) }}</span>
+                    <span>+ {{ number_format($invoice['shipping_total'], 2) }} {{ $site_currency }}</span>
                 </div>
 
                 <div class="flex justify-between font-semibold border-t border-base-300 pt-2 mt-2">
                     <span>Total</span>
-                    <span class="text-lg">${{ number_format($invoice['grand_total'], 2) }}</span>
+                    <span class="text-lg">{{ number_format($invoice['grand_total'], 2) }} {{ $site_currency }}</span>
                 </div>
             </div>
         </div>

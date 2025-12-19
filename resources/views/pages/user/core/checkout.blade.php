@@ -1,12 +1,21 @@
+@php
+    $site_name = getParsedTemplate('site_name');
+    $site_currency = getParsedTemplate('site_currency');
+    $site_logo = getSiteLogoURL();
+@endphp
+
+
 @extends('layouts.web')
 
 @section('web_content')
+   
+
     @include('components.shop_navbar')
 
     <div class="max-w-6xl mx-auto p-6" x-data="checkoutData()" x-init="calculateTotals()">
         <h1 class="text-2xl font-semibold mb-6">Checkout</h1>
 
-        <form method="POST" action="{{ route('checkout.post') }}">
+        <form method="POST" action="{{ route('checkout.post') }}" x-data="{ submitting: false }" @submit="submitting=true">
             @csrf
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -135,11 +144,11 @@
                         </div>
                     </section>
 
-                    <section>
+                    {{-- <section>
                         <label class="block mb-1 font-medium">Order Note</label>
                         <textarea x-model="order_note" name="order_note" class="textarea textarea-bordered w-full" rows="3"
                             placeholder="Write any notes for your order..."></textarea>
-                    </section>
+                    </section> --}}
                 </div>
 
 
@@ -151,14 +160,17 @@
 
                         <template x-for="(item, index) in cartItems" :key="item.id">
                             <div class="flex justify-between items-center py-2">
-                                <div>
-                                    <p class="font-medium" x-text="item.name"></p>
-                                    <p class="font-medium" x-text="item.variant_id"></p>
-                                    <p class="text-sm text-gray-500">Price: <span x-text="item.price"></span>, Qty: <span
-                                            x-text="item.quantity"></span></p>
+                                <div class="flex flex-row gap-3">
+                                    <img :src="item.image" :alt="item.name" class="w-10 object-cover">
+                                    <div>
+                                        <p class="font-medium" x-text="item.name"></p>
+                                        <p class="font-medium" x-text="item.variant_id"></p>
+                                        <p class="text-sm text-gray-500">Price: <span x-text="item.price"></span>, Qty: <span
+                                                x-text="item.quantity"></span></p>
+                                    </div>
                                 </div>
                                 <div class="text-right">
-                                    <p>$<span x-text="(item.price * item.quantity).toFixed(2)"></span></p>
+                                    <p><span x-text="(item.price * item.quantity).toFixed(2)"></span> {{ $site_currency }}</p>
                                 </div>
                             </div>
                         </template>
@@ -169,18 +181,18 @@
 
                         <div class="flex justify-between">
                             <span>Subtotal</span>
-                            <span>$<span x-text="subtotal.toFixed(2)"></span></span>
+                            <span><span x-text="subtotal.toFixed(2)"></span> {{ $site_currency }}</span>
                         </div>
                         <div x-show="discount > 0" class="flex justify-between">
                             <span>Discount</span>
                             <input type="hidden" name="discount_total" :value="discount">
                             <input type="hidden" x-show="applied_coupon" name="coupon_code"
                                 :value="applied_coupon?.code ?? ''">
-                            <span>− $<span x-text="discount.toFixed(2)"></span></span>
+                            <span>− <span x-text="discount.toFixed(2)"></span> {{ $site_currency }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span>Shipping</span>
-                            <span>$<span x-text="shipping_cost?.toFixed(2) ?? 0"></span></span>
+                            <span><span x-text="shipping_cost?.toFixed(2) ?? 0"></span> {{ $site_currency }}</span>
                         </div>
                         <div class="">
                             <span x-show="tax_calculation_error" x-text="`Tax Error: ${tax_calculation_error}`"
@@ -189,11 +201,11 @@
                         <div x-show="!tax_calculation_error" class="flex justify-between">
                             <span>Tax</span>
                             <div x-show="loadingTaxTotalCost" class="loading loading-spinner-sm"></div>
-                            <span x-show="!loadingTaxTotalCost">$<span x-text="tax_total_cost.toFixed(2)"></span></span>
+                            <span x-show="!loadingTaxTotalCost"><span x-text="tax_total_cost.toFixed(2)"></span> {{ $site_currency }}</span>
                         </div>
                         <div class="flex justify-between font-semibold text-lg">
                             <span>Total</span>
-                            <span>$<span x-text="grand_total.toFixed(2)"></span></span>
+                            <span><span x-text="grand_total.toFixed(2)"></span> {{ $site_currency }}</span>
                         </div>
                     </section>
 
@@ -218,8 +230,14 @@
                     </section>
 
                     <div class="mt-6">
-                        <button type="submit" class="btn btn-primary w-full" :disabled="!can_place_order">Place
-                            Order</button>
+                        <button type="submit" class="btn btn-primary w-full" :disabled="!can_place_order || submitting">
+                            <span x-show="submitting" class="loading loading-spinner loading-sm mr-2"></span>
+                            <span x-show="submitting">Placing Order</span>
+                            <span x-show="!submitting">
+                                Place Order
+                            </span>
+                        </button>
+
                     </div>
 
                 </div>

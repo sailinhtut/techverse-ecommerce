@@ -1,3 +1,8 @@
+@php
+    $site_currency = getParsedTemplate('site_currency');
+@endphp
+
+
 @extends('layouts.web')
 
 @section('web_content')
@@ -65,7 +70,7 @@
                                     class="font-medium text-base hover:underline">
                                     {{ $item['product']['name'] ?? 'Unnamed Product' }}
                                 </a>
-                                <p class="text-sm font-semibold">${{ number_format($item['unit_price'], 2) }}</p>
+                                <p class="text-sm font-semibold">{{ number_format($item['unit_price'], 2) }} {{ $site_currency }}</p>
                             </div>
 
                             <p class="text-xs text-gray-500 mt-1">
@@ -76,7 +81,7 @@
                         <div class="flex justify-between items-center">
                             <p class="text-sm text-gray-600">Qty: {{ $item['quantity'] }}</p>
                             <p class="font-medium text-sm">
-                                Subtotal: ${{ number_format($item['subtotal'], 2) }}
+                                Subtotal: {{ number_format($item['subtotal'], 2) }} {{ $site_currency }}
                             </p>
                         </div>
                     </div>
@@ -90,24 +95,24 @@
             <div class="space-y-1 text-sm">
                 <div class="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${{ number_format($order['subtotal'], 2) }}</span>
+                    <span>{{ number_format($order['subtotal'], 2) }} {{ $site_currency }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span>Discount</span>
-                    <span>- ${{ number_format($order['discount_total'], 2) }}</span>
+                    <span>- {{ number_format($order['discount_total'], 2) }} {{ $site_currency }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span>Tax</span>
-                    <span>+ ${{ number_format($order['tax_total'], 2) }}</span>
+                    <span>+ {{ number_format($order['tax_total'], 2) }} {{ $site_currency }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span>Shipping</span>
-                    <span>+ ${{ number_format($order['shipping_total'], 2) }}</span>
+                    <span>+ {{ number_format($order['shipping_total'], 2) }} {{ $site_currency }}</span>
                 </div>
 
                 <div class="flex justify-between font-semibold border-t border-base-300 pt-2 mt-2">
                     <span>Total</span>
-                    <span class="text-lg">${{ number_format($order['grand_total'], 2) }}</span>
+                    <span class="text-lg">{{ number_format($order['grand_total'], 2) }} {{ $site_currency }}</span>
                 </div>
             </div>
 
@@ -120,8 +125,67 @@
             </div>
         </div>
 
+        {{-- 💰 Payment Instruction --}}
+        @if (!empty($order['payment_method']))
+            @php
+                $payment = $order['payment_method'];
+                $attributes = $payment['payment_attributes'] ?? [];
+            @endphp
+
+            <div class="bg-base-200 rounded-box p-5">
+                <h2 class="font-semibold mb-2 flex flex-row gap-3"> <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+                    </svg>
+                    Payment Instruction</h2>
+
+                @if ($payment['code'] === 'direct_bank_transfer' && !empty($attributes['bank_accounts']))
+                    <p class="text-sm text-gray-600 mb-3">
+                        Please transfer the total amount to one of the following bank accounts.
+                        Use your <span class="font-medium">Order Number</span> as the payment reference.
+                    </p>
+
+                    <div class="space-y-3">
+                        @foreach ($attributes['bank_accounts'] as $bank)
+                            <div class="border border-base-300 rounded-box py-2 px-3 ">
+                                <p class="text-sm font-semibold">{{ $bank['bank_name'] ?? 'Bank' }}</p>
+                                <p class="text-sm text-gray-600">
+                                    Account Name: {{ $bank['account_name'] ?? '-' }}
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    Account Number: {{ $bank['account_id'] ?? '-' }}
+                                </p>
+                                @if (!empty($bank['branch_name']))
+                                    <p class="text-sm text-gray-600">
+                                        Branch: {{ $bank['branch_name'] }}
+                                    </p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @elseif (in_array($payment['type'], ['online', 'manual']))
+                    <p class="text-sm text-gray-600">
+                        Your payment will be processed securely via
+                        <span class="font-medium">{{ $payment['name'] }}</span>.
+                        Please complete the payment when prompted.
+                    </p>
+                @else
+                    ($payment['code'] === 'cod')
+                    <p class="text-sm text-gray-600">
+                        You can pay in cash upon receiving your order.
+                        Please prepare the exact amount for the delivery staff.
+                    </p>
+                @endif
+                <p class="text-sm text-gray-600 mt-2">
+                    {{ $payment['description'] ?? 'Please follow the payment instructions provided by our staff.' }}
+                </p>
+            </div>
+        @endif
+
+
         {{-- 🏠 Shipping & Billing --}}
-        <div class="flex flex-col gap-6 mb-12">
+        <div class="flex flex-col gap-6 mb-12 mt-10">
             <div class="bg-base-200 rounded-box p-5">
                 <h2 class="font-semibold mb-2">Shipping Address</h2>
                 @php $s = $order['shipping_address'] ?? []; @endphp

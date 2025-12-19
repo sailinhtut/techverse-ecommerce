@@ -298,11 +298,20 @@
                             </div>
                         @endif
 
-                        @if (auth()->user()->hasPermissions(['manage_storage']))
-                            <li><a href="{{ route('admin.media_storage.get') }}"
-                                    class="{{ request()->is('admin/media-storage') ? 'active' : '' }}">Media Storage</a>
+                        @if (auth()->user()->hasPermissions(['manage_contact_message']))
+                            <li><a href="{{ route('admin.dashboard.contact_message.get') }}"
+                                    class="{{ request()->is('admin/dashboard/contact_message') ? 'active' : '' }}">Contact
+                                    Messages</a>
                             </li>
                         @endif
+
+                        @if (auth()->user()->hasPermissions(['manage_storage']))
+                            <li><a href="{{ route('admin.media_storage.get') }}"
+                                    class="{{ request()->is('admin/dashboard/media-storage') ? 'active' : '' }}">Media Storage</a>
+                            </li>
+                        @endif
+
+
 
                         <li>
                             <a href="{{ route('admin.dashboard.setting.get') }}"
@@ -565,9 +574,15 @@
                         </div>
                     @endif
 
+                    @if (auth()->user()->hasPermissions(['manage_contact_message']))
+                        <li><a href="{{ route('admin.dashboard.contact_message.get') }}"
+                                class="{{ request()->is('admin/dashboard/contact_message') ? 'bg-primary text-primary-content' : '' }}">Contact Messages</a>
+                        </li>
+                    @endif
+
                     @if (auth()->user()->hasPermissions(['manage_storage']))
                         <li><a href="{{ route('admin.media_storage.get') }}"
-                                class="{{ request()->is('admin/media-storage') ? 'bg-primary text-primary-content' : '' }}">Media
+                                class="{{ request()->is('admin/dashboard/media-storage') ? 'bg-primary text-primary-content' : '' }}">Media
                                 Storage</a>
                         </li>
                     @endif

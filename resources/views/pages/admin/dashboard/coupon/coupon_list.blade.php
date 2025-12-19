@@ -688,22 +688,47 @@
                 </table>
 
                 {{-- Pagination --}}
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $coupons->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $coupons->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $coupons->total() }}</span> results
+                        <span class="font-semibold">{{ $coupons->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $coupons->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $coupons->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($coupons->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $coupons->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $coupons->lastPage(); $i++)
+
+                        <a href="{{ $coupons->url(1) }}"
+                            class="join-item btn btn-sm {{ $coupons->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $coupons->currentPage() - 1);
+                            $end = min($coupons->lastPage() - 1, $coupons->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $coupons->url($i) }}"
-                                class="join-item btn btn-sm {{ $coupons->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $coupons->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+                            
+                        @if ($coupons->lastPage() > 1)
+                            <a href="{{ $coupons->url($coupons->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $coupons->currentPage() === $coupons->lastPage() ? 'btn-active' : '' }}">
+                                {{ $coupons->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($coupons->hasMorePages())
                             <a href="{{ $coupons->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else

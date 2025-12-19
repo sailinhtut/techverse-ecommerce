@@ -24,7 +24,8 @@
         </div>
 
         <p class="text-lg font-semibold text-gray-800 mb-3">Get in Touch</p>
-        <form method="POST" action="" class="space-y-3">
+        <form method="POST" action="{{ route('contact.post') }}" class="space-y-3" x-data="{ submitting: false }"
+            @submit="submitting=true">
             @csrf
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
@@ -42,8 +43,12 @@
                     class="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm focus:border-green-500 focus:ring focus:ring-green-200 text-gray-700"></textarea>
             </div>
             <div class="pt-2">
-                <button type="submit" class="w-full md:w-fit btn btn-primary">
-                    Send Message
+                <button type="submit" class="w-fit mt-32 btn btn-primary" :disabled="submitting">
+                    <span x-show="submitting" class="loading loading-spinner loading-sm mr-2"></span>
+                    <span x-show="submitting">Submitting</span>
+                    <span x-show="!submitting">
+                        Send Message
+                    </span>
                 </button>
             </div>
         </form>

@@ -126,7 +126,7 @@ class Order extends Model
         }
 
         if (in_array('paymentMethod', $eager_list) && $this->payment_method_id) {
-            $response['payment_method'] = $this->paymentMethod->jsonResponse();
+            $response['payment_method'] = $this->paymentMethod->jsonResponse(['paymentAttributes']);
         }
 
         if (in_array('products', $eager_list)) {

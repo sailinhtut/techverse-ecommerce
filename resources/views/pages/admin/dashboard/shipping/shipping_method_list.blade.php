@@ -470,22 +470,47 @@
                 </table>
 
                 {{-- Pagination --}}
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $shipping_methods->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $shipping_methods->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $shipping_methods->total() }}</span> results
+                        <span class="font-semibold">{{ $shipping_methods->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $shipping_methods->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $shipping_methods->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($shipping_methods->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $shipping_methods->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $shipping_methods->lastPage(); $i++)
+
+                        <a href="{{ $shipping_methods->url(1) }}"
+                            class="join-item btn btn-sm {{ $shipping_methods->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $shipping_methods->currentPage() - 1);
+                            $end = min($shipping_methods->lastPage() - 1, $shipping_methods->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $shipping_methods->url($i) }}"
-                                class="join-item btn btn-sm {{ $shipping_methods->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $shipping_methods->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($shipping_methods->lastPage() > 1)
+                            <a href="{{ $shipping_methods->url($shipping_methods->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $shipping_methods->currentPage() === $shipping_methods->lastPage() ? 'btn-active' : '' }}">
+                                {{ $shipping_methods->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($shipping_methods->hasMorePages())
                             <a href="{{ $shipping_methods->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -493,6 +518,7 @@
                         @endif
                     </div>
                 </div>
+                
             </div>
         </div>
 

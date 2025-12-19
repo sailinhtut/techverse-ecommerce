@@ -45,7 +45,8 @@ if (!function_exists('getParsedTemplate')) {
             'site_address',
             'site_map_location_link',
             'site_primary_color',
-            'site_primary_content_color'
+            'site_primary_content_color',
+            'site_currency',
         ])->pluck('value', 'key')->toArray();
 
         if ($templateKey === 'site_logo' && isset($siteSettings['site_logo']) && $siteSettings['site_logo']) {
@@ -64,6 +65,7 @@ if (!function_exists('getParsedTemplate')) {
             'site_map_location_link' => config('app.map_location_link'),
             'site_primary_color' => config('app.site_primary_color'),
             'site_primary_content_color' => config('app.site_primary_content_color'),
+            'site_currency' => config('app.currency_code'),
         ], $siteSettings);
 
         foreach ($siteSettings as $key => $value) {

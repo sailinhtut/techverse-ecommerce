@@ -2,6 +2,7 @@
 
 use App\Auth\Controllers\UserController;
 use App\Auth\Middlewares\AdminMiddleware;
+use App\ContactMessage\Controllers\ContactMessageController;
 use App\Dashboard\Controllers\DashboardController;
 use App\Inventory\Controllers\BrandController;
 use App\Inventory\Controllers\CategoryController;
@@ -53,6 +54,16 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::get('/api/sale-product-pie', 'getSaleProductPieAPI');
             Route::get('/api/sale-category-pie', 'getSaleCategoryPieAPI');
             Route::get('/api/sale-brand-pie', 'getSaleBrandPieAPI');
+        });
+
+        // contact message routes
+        Route::controller(ContactMessageController::class)->group(function () {
+            Route::middleware('admin:manage_contact_message')->delete('/contact_message/bulk/delete-selected', 'deleteSelectedMessages')->name('admin.dashboard.contact_message.bulk.delete-selected');
+            Route::middleware('admin:manage_contact_message')->delete('/contact_message/bulk/delete-all', 'deleteAllMessages')->name('admin.dashboard.contact_message.bulk.delete-all');
+
+            Route::middleware('admin:manage_contact_message')->get('/contact_message', 'viewAdminContactMessageListPage')->name('admin.dashboard.contact_message.get');
+            Route::middleware('admin:manage_contact_message')->post('/contact_message/{id}', 'updateMessage')->name('admin.dashboard.contact_message.id.post');
+            Route::middleware('admin:manage_contact_message')->delete('/contact_message/{id}', 'deleteMessage')->name('admin.dashboard.contact_message.id.delete');
         });
 
         // user routes

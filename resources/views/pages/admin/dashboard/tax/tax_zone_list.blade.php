@@ -413,20 +413,20 @@
                                                     required>
                                             </div>
                                             <div>
-                                                <label class="text-sm">Country</label>
+                                                <label class="text-sm">Country (* for All)</label>
                                                 <input name="country" class="input w-full"
                                                     value="{{ $zone['country'] }}">
                                             </div>
                                             <div>
-                                                <label class="text-sm">State</label>
+                                                <label class="text-sm">State (* for All)</label>
                                                 <input name="state" class="input w-full" value="{{ $zone['state'] }}">
                                             </div>
                                             <div>
-                                                <label class="text-sm">City</label>
+                                                <label class="text-sm">City (* for All)</label>
                                                 <input name="city" class="input w-full" value="{{ $zone['city'] }}">
                                             </div>
                                             <div>
-                                                <label class="text-sm">Postal Code</label>
+                                                <label class="text-sm">Postal Code (* for All)</label>
                                                 <input name="postal_code" class="input w-full"
                                                     value="{{ $zone['postal_code'] }}">
                                             </div>
@@ -469,22 +469,47 @@
                     </tbody>
                 </table>
 
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $tax_zones->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $tax_zones->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $tax_zones->total() }}</span> results
+                        <span class="font-semibold">{{ $tax_zones->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $tax_zones->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $tax_zones->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($tax_zones->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $tax_zones->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $tax_zones->lastPage(); $i++)
+
+                        <a href="{{ $tax_zones->url(1) }}"
+                            class="join-item btn btn-sm {{ $tax_zones->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $tax_zones->currentPage() - 1);
+                            $end = min($tax_zones->lastPage() - 1, $tax_zones->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $tax_zones->url($i) }}"
-                                class="join-item btn btn-sm {{ $tax_zones->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $tax_zones->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($tax_zones->lastPage() > 1)
+                            <a href="{{ $tax_zones->url($tax_zones->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $tax_zones->currentPage() === $tax_zones->lastPage() ? 'btn-active' : '' }}">
+                                {{ $tax_zones->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($tax_zones->hasMorePages())
                             <a href="{{ $tax_zones->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -492,6 +517,7 @@
                         @endif
                     </div>
                 </div>
+               
             </div>
         </div>
 
@@ -510,19 +536,19 @@
                             <input name="name" class="input w-full" placeholder="Zone Name" required>
                         </div>
                         <div>
-                            <label class="text-sm">Country</label>
+                            <label class="text-sm">Country (* for All)</label>
                             <input name="country" class="input w-full" placeholder="Country">
                         </div>
                         <div>
-                            <label class="text-sm">State</label>
+                            <label class="text-sm">State (* for All)</label>
                             <input name="state" class="input w-full" placeholder="State">
                         </div>
                         <div>
-                            <label class="text-sm">City</label>
+                            <label class="text-sm">City (* for All)</label>
                             <input name="city" class="input w-full" placeholder="City">
                         </div>
                         <div>
-                            <label class="text-sm">Postal Code</label>
+                            <label class="text-sm">Postal Code (* for All)</label>
                             <input name="postal_code" class="input w-full" placeholder="Postal Code">
                         </div>
                         <div class="md:col-span-2">

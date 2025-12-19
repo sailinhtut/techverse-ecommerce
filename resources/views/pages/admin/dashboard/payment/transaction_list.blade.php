@@ -424,22 +424,47 @@
                 </table>
 
                 {{-- Pagination --}}
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $transactions->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $transactions->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $transactions->total() }}</span> results
+                        <span class="font-semibold">{{ $transactions->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $transactions->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $transactions->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($transactions->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $transactions->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $transactions->lastPage(); $i++)
+
+                        <a href="{{ $transactions->url(1) }}"
+                            class="join-item btn btn-sm {{ $transactions->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $transactions->currentPage() - 1);
+                            $end = min($transactions->lastPage() - 1, $transactions->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $transactions->url($i) }}"
-                                class="join-item btn btn-sm {{ $transactions->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $transactions->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($transactions->lastPage() > 1)
+                            <a href="{{ $transactions->url($transactions->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $transactions->currentPage() === $transactions->lastPage() ? 'btn-active' : '' }}">
+                                {{ $transactions->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($transactions->hasMorePages())
                             <a href="{{ $transactions->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -447,7 +472,7 @@
                         @endif
                     </div>
                 </div>
-
+               
             </div>
         </div>
     </div>

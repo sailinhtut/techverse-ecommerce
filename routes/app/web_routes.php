@@ -3,6 +3,7 @@
 use App\Auth\Controllers\NotificationController;
 use App\Auth\Controllers\WishlistController;
 use App\Cart\Controllers\CartController;
+use App\ContactMessage\Controllers\ContactMessageController;
 use App\Inventory\Controllers\CouponController;
 use App\Inventory\Controllers\ProductController;
 use App\Inventory\Controllers\ProductVariantController;
@@ -24,6 +25,8 @@ Route::view('/privacy', 'pages.user.core.privacy')->name('privacy.get');
 Route::view('/terms', 'pages.user.core.terms')->name('terms.get');
 Route::view('/about', 'pages.user.core.about_us')->name('about_us.get');
 Route::view('/contact', 'pages.user.core.contact')->name('contact.get');
+Route::post('/contact', [ContactMessageController::class, 'createMessage'])->name('contact.post');
+
 
 Route::controller(NotificationController::class)->group(function () {
     Route::get('/notification', 'getNotifications')->name('notification.get')->middleware('auth');

@@ -36,6 +36,7 @@ return [
                 'manage_payments',
                 'manage_transactions',
                 'manage_storage',
+                'manage_contact_message',
             ])
         ],
         [
@@ -78,6 +79,7 @@ return [
                 'manage_site_setting',
                 'manage_theme_setting',
                 'manage_legal_setting',
+                'manage_contact_message',
             ])
         ],
     ],
@@ -116,6 +118,7 @@ return [
         ['name' => 'manage_site_setting', 'display_name' => 'Manage Site Setting'],
         ['name' => 'manage_theme_setting', 'display_name' => 'Manage Theme Setting'],
         ['name' => 'manage_legal_setting', 'display_name' => 'Manage Legal Setting'],
+        ['name' => 'manage_contact_message', 'display_name' => 'Manage Contact Message'],
     ],
     'app_settings' => [
         ['key' => 'site_name', 'value' => config('app.name')],
@@ -135,6 +138,9 @@ return [
 
         ['key' => 'site_privacy_policy', 'value' => config('app.site_privacy_policy')],
 
-        ['key' => 'site_terms_conditions', 'value' => config('app.site_terms_conditions')]
+        ['key' => 'site_terms_conditions', 'value' => config('app.site_terms_conditions')],
+
+
+        ['key' => 'site_currency', 'value' => config('app.currency_code')]
     ],
 ];

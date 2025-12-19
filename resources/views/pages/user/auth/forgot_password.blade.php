@@ -2,7 +2,7 @@
 
 @section('web_content')
     <div class="min-h-[70vh] flex items-center justify-center px-4">
-        <div class="w-full max-w-md bg-base-100 border border-base-300 rounded-xl p-6 md:p-8 shadow-sm">
+        <div class="w-full max-w-md bg-base-100 border border-base-300 rounded-none p-6 md:p-8 shadow-sm">
 
             <div class="mb-6 text-center">
                 <h1 class="text-xl font-bold">Forgot Password</h1>
@@ -11,7 +11,8 @@
                 </p>
             </div>
 
-            <form action="{{ route('forgot-password.post') }}" method="POST" class="flex flex-col gap-4">
+            <form action="{{ route('forgot-password.post') }}" method="POST" class="flex flex-col gap-4" x-data="{ submitting: false }"
+                @submit="submitting=true">
                 @csrf
 
                 <div>
@@ -20,9 +21,15 @@
                         required>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-full">
-                    Send Reset Link
+                 <button type="submit" class="btn btn-primary w-full" :disabled="submitting">
+                    <span x-show="submitting" class="loading loading-spinner loading-sm mr-2"></span>
+                    <span x-show="submitting">Sending Reset Email</span>
+                    <span x-show="!submitting">
+                        Send Reset Link
+                    </span>
                 </button>
+
+
             </form>
 
             <div class="mt-6 text-center">

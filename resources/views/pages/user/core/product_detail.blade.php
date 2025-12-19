@@ -1,7 +1,9 @@
 @php
     $site_name = getParsedTemplate('site_name');
+    $site_currency = getParsedTemplate('site_currency');
     $site_logo = getSiteLogoURL();
 @endphp
+
 @extends('layouts.web')
 
 @section('head')
@@ -111,14 +113,16 @@
                 @endif
 
                 <p class="font-semibold" x-show="productType=='simple'" x-cloak>
-                    Price -
+                    Price 
                     @if ($product['sale_price'])
                         <span
-                            class="text-gray-500 line-through ms-2">${{ number_format($product['regular_price'], 2) }}</span>
+                            class="text-gray-500 line-through">{{ number_format($product['regular_price'], 2) }}</span>
                         <span
-                            class="text-muted -decoration-line-through ms-2">${{ number_format($product['sale_price'], 2) }}</span>
+                            class="text-muted -decoration-line-through">{{ number_format($product['sale_price'], 2) }}</span>
+                        {{ $site_currency }}
                     @else
-                        <span>${{ number_format($product['sale_price'] ?? $product['regular_price'], 2) }}</span>
+                        <span>{{ number_format($product['sale_price'] ?? $product['regular_price'], 2) }}
+                            {{ $site_currency }}</span>
                     @endif
 
                     @if ($product['enable_stock'])
@@ -130,16 +134,16 @@
 
 
                 <p class="font-semibold" x-show="productType=='variable' && variantProduct" x-cloak>
-                    Price -
+                    Price 
                     <span x-show='variantProduct.sale_price'>
-                        <span class="text-gray-500 line-through ms-2" x-text='`$${variantProduct.regular_price}`'></span>
-                        <span class="text-muted -decoration-line-through ms-2"
-                            x-text='`$${variantProduct.sale_price}`'></span>
+                        <span class="text-gray-500 line-through" x-text='`${variantProduct.regular_price}`'></span>
+                        <span class="text-muted -decoration-line-through"
+                            x-text='`${variantProduct.sale_price}`'></span>
                     </span>
 
-                    <span x-show='!variantProduct.sale_price' x-text='`$${variantProduct.regular_price}`'></span>
+                    <span x-show='!variantProduct.sale_price' x-text='`${variantProduct.regular_price}`'></span>
+                    {{ $site_currency }}
                 </p>
-
 
 
                 <div x-init="init()" class="mt-3 space-y-2 w-full" x-show="productType=='variable'" x-cloak>

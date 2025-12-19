@@ -135,6 +135,13 @@
                                 value="{{ $settings['site_map_location_link'] ?? config('app.map_location_link') }}" />
                         </div>
 
+                        <div class="flex flex-col gap-2 text-sm">
+                            <label>Site Currency Value</label>
+                            <input type="hidden" name="settings[8][key]" value="site_currency" />
+                            <input type="text" class="input input-bordered w-full max-w-sm" name="settings[8][value]"
+                                value="{{ $settings['site_currency'] ?? config('app.currency_code') }}" />
+                        </div>
+
 
 
                         <button class="mt-5 btn btn-sm btn-primary w-fit">Save Settings</button>

@@ -5,12 +5,14 @@
 
     @php
         $site_name = getParsedTemplate('site_name');
+        $site_currency = getParsedTemplate('site_currency');
         $site_logo = getSiteLogoURL();
     @endphp
 
     {{-- Categories Bar --}}
     {{-- sticky top-[60px] --}}
-    <div x-cloak class="hidden lg:flex flex-row md:justify-between bg-white z-10 w-full text-sm border-b border-b-base-300 relative"
+    <div x-cloak
+        class="hidden lg:flex flex-row md:justify-between bg-white z-10 w-full text-sm border-b border-b-base-300 relative"
         x-data="{ showCategoryBoard: false }">
 
         <div class="px-3 py-2 flex flex-row items-center gap-1 cursor-default hover:text-primary select-none"
@@ -372,16 +374,16 @@
 
                                 @if (empty($product['sale_price']))
                                     <div class="text-xs flex items-center gap-2">
-                                        <span
-                                            class="font-semibold">${{ number_format($product['regular_price'], 2) }}</span>
+                                        <span class="font-semibold">{{ number_format($product['regular_price'], 2) }}
+                                            {{ $site_currency }}</span>
                                     </div>
                                 @else
                                     <div class="text-xs flex items-center gap-2">
                                         <span class="text-gray-400 line-through">
-                                            ${{ number_format($product['regular_price'], 2) }}
+                                            {{ number_format($product['regular_price'], 2) }} {{ $site_currency }}
                                         </span>
                                         <span class="font-semibold">
-                                            ${{ number_format($product['sale_price'], 2) }}
+                                            {{ number_format($product['sale_price'], 2) }} {{ $site_currency }}
                                         </span>
                                     </div>
 
@@ -554,17 +556,25 @@
                                             <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
                                                 <div class="flex text-sm font-semibold">
                                                     <template x-if="product.sale_price">
-                                                        <div>
-                                                            <span class="text-gray-500 line-through"><span>$<span
-                                                                        x-text="product.regular_price"></span></span></span>
-                                                            <span class=""><span>$<span
-                                                                        x-text="product.sale_price"></span></span></span>
-                                                            <span class="ml-1 text-[10px]"
+                                                        <div class="text-sm ">
+                                                            <span class="text-gray-500 line-through">
+                                                                <span>
+                                                                    <span x-text="product.regular_price"></span>
+                                                                </span>
+                                                            </span>
+                                                            <span class="">
+                                                                <span>
+                                                                    <span x-text="product.sale_price"></span>
+                                                                    {{ $site_currency }}
+                                                                </span>
+                                                            </span>
+                                                            <span class="text-[10px]"
                                                                 x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
                                                         </div>
                                                     </template>
                                                     <template x-if="!product.sale_price">
-                                                        <span>$<span x-text="product.regular_price"></span></span>
+                                                        <span><span x-text="product.regular_price"></span>
+                                                            {{ $site_currency }}</span>
                                                     </template>
                                                 </div>
                                                 <div>
@@ -653,17 +663,25 @@
                                         <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
                                             <div class="flex text-sm font-semibold">
                                                 <template x-if="product.sale_price">
-                                                    <div>
-                                                        <span class="text-gray-500 line-through"><span>$<span
-                                                                    x-text="product.regular_price"></span></span></span>
-                                                        <span class=""><span>$<span
-                                                                    x-text="product.sale_price"></span></span></span>
-                                                        <span class="ml-1 text-[10px]"
+                                                    <div class="text-sm ">
+                                                        <span class="text-gray-500 line-through">
+                                                            <span>
+                                                                <span x-text="product.regular_price"></span>
+                                                            </span>
+                                                        </span>
+                                                        <span class="">
+                                                            <span>
+                                                                <span x-text="product.sale_price"></span>
+                                                                {{ $site_currency }}
+                                                            </span>
+                                                        </span>
+                                                        <span class="text-[10px]"
                                                             x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="!product.sale_price">
-                                                    <span>$<span x-text="product.regular_price"></span></span>
+                                                    <span><span x-text="product.regular_price"></span>
+                                                        {{ $site_currency }}</span>
                                                 </template>
                                             </div>
                                             <div>
@@ -782,17 +800,25 @@
                                             <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
                                                 <div class="flex text-sm font-semibold">
                                                     <template x-if="product.sale_price">
-                                                        <div>
-                                                            <span class="text-gray-500 line-through"><span>$<span
-                                                                        x-text="product.regular_price"></span></span></span>
-                                                            <span class=""><span>$<span
-                                                                        x-text="product.sale_price"></span></span></span>
-                                                            <span class="ml-1 text-[10px]"
+                                                        <div class="text-sm ">
+                                                            <span class="text-gray-500 line-through">
+                                                                <span>
+                                                                    <span x-text="product.regular_price"></span>
+                                                                </span>
+                                                            </span>
+                                                            <span class="">
+                                                                <span>
+                                                                    <span x-text="product.sale_price"></span>
+                                                                    {{ $site_currency }}
+                                                                </span>
+                                                            </span>
+                                                            <span class="text-[10px]"
                                                                 x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
                                                         </div>
                                                     </template>
                                                     <template x-if="!product.sale_price">
-                                                        <span>$<span x-text="product.regular_price"></span></span>
+                                                        <span><span x-text="product.regular_price"></span>
+                                                            {{ $site_currency }}</span>
                                                     </template>
                                                 </div>
                                                 <div>
@@ -880,17 +906,25 @@
                                         <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
                                             <div class="flex text-sm font-semibold">
                                                 <template x-if="product.sale_price">
-                                                    <div>
-                                                        <span class="text-gray-500 line-through"><span>$<span
-                                                                    x-text="product.regular_price"></span></span></span>
-                                                        <span class=""><span>$<span
-                                                                    x-text="product.sale_price"></span></span></span>
-                                                        <span class="ml-1 text-[10px]"
+                                                    <div class="text-sm ">
+                                                        <span class="text-gray-500 line-through">
+                                                            <span>
+                                                                <span x-text="product.regular_price"></span>
+                                                            </span>
+                                                        </span>
+                                                        <span class="">
+                                                            <span>
+                                                                <span x-text="product.sale_price"></span>
+                                                                {{ $site_currency }}
+                                                            </span>
+                                                        </span>
+                                                        <span class="text-[10px]"
                                                             x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="!product.sale_price">
-                                                    <span>$<span x-text="product.regular_price"></span></span>
+                                                    <span><span x-text="product.regular_price"></span>
+                                                        {{ $site_currency }}</span>
                                                 </template>
                                             </div>
                                             <div>
@@ -1011,19 +1045,27 @@
                                                     x-text="product.short_description ?? 'No Description'"></p> --}}
                                             </div>
                                             <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
-                                                <div class="flex text-sm font-semibold">
+                                                 <div class="flex text-sm font-semibold">
                                                     <template x-if="product.sale_price">
-                                                        <div>
-                                                            <span class="text-gray-500 line-through"><span>$<span
-                                                                        x-text="product.regular_price"></span></span></span>
-                                                            <span class=""><span>$<span
-                                                                        x-text="product.sale_price"></span></span></span>
-                                                            <span class="ml-1 text-[10px]"
+                                                        <div class="text-sm ">
+                                                            <span class="text-gray-500 line-through">
+                                                                <span>
+                                                                    <span x-text="product.regular_price"></span>
+                                                                </span>
+                                                            </span>
+                                                            <span class="">
+                                                                <span>
+                                                                    <span x-text="product.sale_price"></span>
+                                                                    {{ $site_currency }}
+                                                                </span>
+                                                            </span>
+                                                            <span class="text-[10px]"
                                                                 x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
                                                         </div>
                                                     </template>
                                                     <template x-if="!product.sale_price">
-                                                        <span>$<span x-text="product.regular_price"></span></span>
+                                                        <span><span x-text="product.regular_price"></span>
+                                                            {{ $site_currency }}</span>
                                                     </template>
                                                 </div>
                                                 <div>
@@ -1109,19 +1151,27 @@
                                                 x-text="product.short_description ?? 'No Description'"></p> --}}
                                         </div>
                                         <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
-                                            <div class="flex text-sm font-semibold">
+                                             <div class="flex text-sm font-semibold">
                                                 <template x-if="product.sale_price">
-                                                    <div>
-                                                        <span class="text-gray-500 line-through"><span>$<span
-                                                                    x-text="product.regular_price"></span></span></span>
-                                                        <span class=""><span>$<span
-                                                                    x-text="product.sale_price"></span></span></span>
-                                                        <span class="ml-1 text-[10px]"
+                                                    <div class="text-sm ">
+                                                        <span class="text-gray-500 line-through">
+                                                            <span>
+                                                                <span x-text="product.regular_price"></span>
+                                                            </span>
+                                                        </span>
+                                                        <span class="">
+                                                            <span>
+                                                                <span x-text="product.sale_price"></span>
+                                                                {{ $site_currency }}
+                                                            </span>
+                                                        </span>
+                                                        <span class="text-[10px]"
                                                             x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="!product.sale_price">
-                                                    <span>$<span x-text="product.regular_price"></span></span>
+                                                    <span><span x-text="product.regular_price"></span>
+                                                        {{ $site_currency }}</span>
                                                 </template>
                                             </div>
                                             <div>
@@ -1238,19 +1288,27 @@
                                             x-text="product.short_description ?? 'No Description'"></p> --}}
                                     </div>
                                     <div class="mt-2 mb-1 flex flex-col items-start justify-between gap-2">
-                                        <div class="flex text-sm font-semibold">
+                                         <div class="flex text-sm font-semibold">
                                             <template x-if="product.sale_price">
-                                                <div>
-                                                    <span class="text-gray-500 line-through"><span>$<span
-                                                                x-text="product.regular_price"></span></span></span>
-                                                    <span class=""><span>$<span
-                                                                x-text="product.sale_price"></span></span></span>
-                                                    <span class="ml-1 text-[10px]"
+                                                <div class="text-sm ">
+                                                    <span class="text-gray-500 line-through">
+                                                        <span>
+                                                            <span x-text="product.regular_price"></span>
+                                                        </span>
+                                                    </span>
+                                                    <span class="">
+                                                        <span>
+                                                            <span x-text="product.sale_price"></span>
+                                                            {{ $site_currency }}
+                                                        </span>
+                                                    </span>
+                                                    <span class="text-[10px]"
                                                         x-text="`${Math.round(((product.regular_price - product.sale_price) / product.regular_price) * 100)}% Off`"></span>
                                                 </div>
                                             </template>
                                             <template x-if="!product.sale_price">
-                                                <span>$<span x-text="product.regular_price"></span></span>
+                                                <span><span x-text="product.regular_price"></span>
+                                                    {{ $site_currency }}</span>
                                             </template>
                                         </div>
                                         <div>
@@ -1447,8 +1505,6 @@
 
 @push('script')
     <script>
-       
-
         function popupCarousel() {
             return {
                 originalImages: @json($popup_images ?? []),

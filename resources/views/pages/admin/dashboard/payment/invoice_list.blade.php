@@ -434,22 +434,47 @@
                 </table>
 
                 {{-- Pagination --}}
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $invoices->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $invoices->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $invoices->total() }}</span> results
+                        <span class="font-semibold">{{ $invoices->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $invoices->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $invoices->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($invoices->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $invoices->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $invoices->lastPage(); $i++)
+
+                        <a href="{{ $invoices->url(1) }}"
+                            class="join-item btn btn-sm {{ $invoices->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $invoices->currentPage() - 1);
+                            $end = min($invoices->lastPage() - 1, $invoices->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $invoices->url($i) }}"
-                                class="join-item btn btn-sm {{ $invoices->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $invoices->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($invoices->lastPage() > 1)
+                            <a href="{{ $invoices->url($invoices->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $invoices->currentPage() === $invoices->lastPage() ? 'btn-active' : '' }}">
+                                {{ $invoices->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($invoices->hasMorePages())
                             <a href="{{ $invoices->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -457,7 +482,7 @@
                         @endif
                     </div>
                 </div>
-
+                
             </div>
         </div>
     </div>

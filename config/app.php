@@ -17,6 +17,8 @@ return [
     'address' => '123 Tech Street, Yangon, Myanmar',
     'map_location_link' => 'https://maps.app.goo.gl/JcKJNjNfRj3Vwfrs7',
 
+    'currency_code' => "USD",
+
     'app_logo' => 'assets/images/app_logo.png',
 
     'app_logo_background' => 'assets/images/app_logo_background.png',

@@ -51,7 +51,8 @@
 
         <form
             action="{{ isset($edit_product) ? route('admin.dashboard.product.id.post', ['id' => $edit_product['id']]) : route('admin.dashboard.product.post') }}"
-            method="POST" class="w-full flex flex-col gap-3" enctype="multipart/form-data">
+            method="POST" class="w-full flex flex-col gap-3" enctype="multipart/form-data" x-data="{ submitting: false }"
+            @submit="submitting=true">
             @csrf
 
             <div class="tabs tabs-box bg-base-100 shadow-none" x-data='{ productType: @json($edit_product['product_type'] ?? 'simple') }'>
@@ -766,8 +767,12 @@
                 </div>
             </div>
 
-            <button type="submit" class="mt-10 btn btn-primary w-fit">
-                {{ isset($edit_product) ? 'Update Product' : 'Add Product' }}
+            <button type="submit" class="mt-10 btn btn-primary w-fit" :disabled="submitting">
+                <span x-show="submitting" class="loading loading-spinner loading-sm mr-2"></span>
+                <span x-show="submitting">{{ isset($edit_product) ? 'Saving Product' : 'Adding Product' }}</span>
+                <span x-show="!submitting">
+                    {{ isset($edit_product) ? 'Update Product' : 'Add Product' }}
+                </span>
             </button>
         </form>
     </div>

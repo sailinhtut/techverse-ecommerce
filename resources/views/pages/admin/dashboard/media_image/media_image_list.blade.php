@@ -587,10 +587,29 @@
                             <a href="{{ $mediaImages->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
 
-                        @for ($i = 1; $i <= $mediaImages->lastPage(); $i++)
+                        <a href="{{ $mediaImages->url(1) }}"
+                            class="join-item btn btn-sm {{ $mediaImages->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $mediaImages->currentPage() - 1);
+                            $end = min($mediaImages->lastPage() - 1, $mediaImages->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $mediaImages->url($i) }}"
-                                class="join-item btn btn-sm {{ $mediaImages->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $mediaImages->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($mediaImages->lastPage() > 1)
+                            <a href="{{ $mediaImages->url($mediaImages->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $mediaImages->currentPage() === $mediaImages->lastPage() ? 'btn-active' : '' }}">
+                                {{ $mediaImages->lastPage() }}
+                            </a>
+                        @endif
 
                         @if ($mediaImages->hasMorePages())
                             <a href="{{ $mediaImages->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
@@ -599,6 +618,7 @@
                         @endif
                     </div>
                 </div>
+
             </div>
         </div>
 

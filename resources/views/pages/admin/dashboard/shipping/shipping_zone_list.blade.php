@@ -420,25 +420,25 @@
 
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div class="md:col-span-2">
-                                                <label class="text-sm">Name</label>
+                                                <label class="text-sm">Name </label>
                                                 <input name="name" class="input w-full" value="{{ $zone['name'] }}"
                                                     required>
                                             </div>
                                             <div>
-                                                <label class="text-sm">Country</label>
+                                                <label class="text-sm">Country (* for All)</label>
                                                 <input name="country" class="input w-full"
                                                     value="{{ $zone['country'] }}">
                                             </div>
                                             <div>
-                                                <label class="text-sm">State</label>
+                                                <label class="text-sm">State (* for All)</label>
                                                 <input name="state" class="input w-full" value="{{ $zone['state'] }}">
                                             </div>
                                             <div>
-                                                <label class="text-sm">City</label>
+                                                <label class="text-sm">City (* for All)</label>
                                                 <input name="city" class="input w-full" value="{{ $zone['city'] }}">
                                             </div>
                                             <div>
-                                                <label class="text-sm">Postal Code</label>
+                                                <label class="text-sm">Postal Code (* for All)</label>
                                                 <input name="postal_code" class="input w-full"
                                                     value="{{ $zone['postal_code'] }}">
                                             </div>
@@ -480,22 +480,47 @@
                     </tbody>
                 </table>
 
-                <div class="flex justify-between items-center py-3 px-5">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $shipping_zones->firstItem() }}</span> –
-                        <span class="font-semibold">{{ $shipping_zones->lastItem() }}</span> of
-                        <span class="font-semibold">{{ $shipping_zones->total() }}</span> results
+                        <span class="font-semibold">{{ $shipping_zones->firstItem() }}</span>
+                        –
+                        <span class="font-semibold">{{ $shipping_zones->lastItem() }}</span>
+                        of
+                        <span class="font-semibold">{{ $shipping_zones->total() }}</span>
+                        results
                     </div>
+
                     <div class="join">
                         @if ($shipping_zones->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
                             <a href="{{ $shipping_zones->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
-                        @for ($i = 1; $i <= $shipping_zones->lastPage(); $i++)
+
+                        <a href="{{ $shipping_zones->url(1) }}"
+                            class="join-item btn btn-sm {{ $shipping_zones->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $shipping_zones->currentPage() - 1);
+                            $end = min($shipping_zones->lastPage() - 1, $shipping_zones->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $shipping_zones->url($i) }}"
-                                class="join-item btn btn-sm {{ $shipping_zones->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $shipping_zones->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($shipping_zones->lastPage() > 1)
+                            <a href="{{ $shipping_zones->url($shipping_zones->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $shipping_zones->currentPage() === $shipping_zones->lastPage() ? 'btn-active' : '' }}">
+                                {{ $shipping_zones->lastPage() }}
+                            </a>
+                        @endif
+
                         @if ($shipping_zones->hasMorePages())
                             <a href="{{ $shipping_zones->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
@@ -503,6 +528,7 @@
                         @endif
                     </div>
                 </div>
+               
             </div>
         </div>
 
@@ -520,19 +546,19 @@
                             <input name="name" class="input w-full" placeholder="Zone Name" required>
                         </div>
                         <div>
-                            <label class="text-sm">Country</label>
+                            <label class="text-sm">Country (* for All)</label>
                             <input name="country" class="input w-full" placeholder="Country">
                         </div>
                         <div>
-                            <label class="text-sm">State</label>
+                            <label class="text-sm">State (* for All)</label>
                             <input name="state" class="input w-full" placeholder="State">
                         </div>
                         <div>
-                            <label class="text-sm">City</label>
+                            <label class="text-sm">City (* for All)</label>
                             <input name="city" class="input w-full" placeholder="City">
                         </div>
                         <div>
-                            <label class="text-sm">Postal Code</label>
+                            <label class="text-sm">Postal Code (* for All)</label>
                             <input name="postal_code" class="input w-full" placeholder="Postal Code">
                         </div>
                         <div class="md:col-span-2">

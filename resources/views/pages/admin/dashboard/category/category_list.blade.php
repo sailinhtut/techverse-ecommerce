@@ -3,8 +3,7 @@
 @section('admin_dashboard_content')
     <div class="p-5 min-h-screen">
         <p class="lg:text-lg font-semibold">Product Categories</p>
-
-
+        
         <div class="mt-3 flex xl:flex-row flex-col justify-between gap-2">
 
             <div class="flex flex-row gap-2 flex-wrap" x-data>

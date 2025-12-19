@@ -8,8 +8,6 @@ use App\Auth\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(AuthController::class)->group(function () {
-
-
     Route::post('/email/resend', 'sendVerificationEmail')->name('email.resend.post')->middleware(['auth']);
 
     Route::get('/email/verify/{id}/{hash}', 'verifyEmail')->name('email.verify.get')->middleware(['signed']);
@@ -40,8 +38,6 @@ Route::controller(UserController::class)->group(function () {
 
     Route::delete('/profile/delete/{id}', 'deleteProfile')->name('profile.delete.delete')->middleware('auth');
 });
-
-
 
 Route::controller(AddressController::class)->group(function () {
     Route::get('/address', 'getAddresses')->name('address.get')->middleware('auth');

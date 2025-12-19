@@ -17,7 +17,6 @@ class AppSettingController
             ->toArray();
         $site_logo = getSiteLogoURL();
 
-
         return view('pages.admin.dashboard.setting', ['settings' => $settings, 'site_logo' => $site_logo]);
     }
 
@@ -49,6 +48,12 @@ class AppSettingController
             ]);
 
             if ($request->hasFile('site_logo')) {
+                $template = AppSetting::where('key', 'site_logo')->first();
+
+                if ($template && $template->value && Storage::disk('public')->exists($template->value)) {
+                    Storage::disk('public')->delete($template->value);
+                }
+
                 $path = Storage::disk('public')
                     ->putFile('site/logos',  $request->file('site_logo'));
 
@@ -123,7 +128,16 @@ class AppSettingController
                 );
             }
 
+            if ($key === 'site_logo') {
+                $template = AppSetting::where('key', 'site_logo')->first();
+
+                if ($template && $template->value && Storage::disk('public')->exists($template->value)) {
+                    Storage::disk('public')->delete($template->value);
+                }
+            }
+
             $setting->delete();
+
 
             return response()->json(
                 [

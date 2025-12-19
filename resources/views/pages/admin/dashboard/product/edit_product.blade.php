@@ -754,10 +754,10 @@
                                 </span>
                             </label>
                             <select name="enable_review" class="select w-full" required>
-                                <option value="1" @selected(old('enable_review', $edit_product['enable_review']))>
+                                <option value="1" @selected(old('enable_review', $edit_product['enable_review'] ?? true))>
                                     Enabled
                                 </option>
-                                <option value="0" @selected(!old('enable_review', $edit_product['enable_review']))>
+                                <option value="0" @selected(!old('enable_review', $edit_product['enable_review'] ?? true))>
                                     Disabled
                                 </option>
                             </select>

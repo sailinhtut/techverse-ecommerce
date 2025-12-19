@@ -152,6 +152,14 @@
     font-style: normal !important;
 }
 
+.prose .ql-align-center {
+    text-align: center !important;
+}
+
+.prose .ql-align-right {
+    text-align: end !important;
+}
+
 .prose li[data-list="ordered"] {
     list-style-type: decimal !important;
     list-style-position: inside;

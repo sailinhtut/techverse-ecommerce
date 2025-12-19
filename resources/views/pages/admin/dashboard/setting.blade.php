@@ -283,9 +283,6 @@
 
         document.addEventListener("alpine:init", () => {
             Quill.register("modules/resize", window.QuillResizeModule);
-
-
-
         });
 
         function logoPickerState(initialLogo) {

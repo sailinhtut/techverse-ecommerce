@@ -10,7 +10,7 @@
 
     {{-- Categories Bar --}}
     {{-- sticky top-[60px] --}}
-    <div x-cloak class="hidden lg:flex flex-row md:justify-between bg-white z-10 w-full text-sm border-b border-b-base-300"
+    <div x-cloak class="hidden lg:flex flex-row md:justify-between bg-white z-10 w-full text-sm border-b border-b-base-300 relative"
         x-data="{ showCategoryBoard: false }">
 
         <div class="px-3 py-2 flex flex-row items-center gap-1 cursor-default hover:text-primary select-none"

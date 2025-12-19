@@ -1,10 +1,7 @@
 <?php
 
 use App\Core\Controllers\StorageManager;
-use App\Inventory\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
-
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/storage-manager', [StorageManager::class, 'show']);

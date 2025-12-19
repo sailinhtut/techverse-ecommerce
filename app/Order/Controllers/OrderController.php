@@ -446,10 +446,20 @@ class OrderController
             $invoice = Invoice::findOrFail($invoice_id);
             $user = auth()->user();
 
+            $site_logo_url = getSiteLogoURL();
+            $raw_site_logo = 'https://masterseller.shop/assets/images/app_logo.png';
+            $imageData = file_get_contents($site_logo_url);
+
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($imageData);
+
+            $base64Image = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+
             $pdf = Pdf::loadView('pdf.order_invoice', [
                 'order' => $order,
                 'invoice' => $invoice,
                 'user' => $user,
+                'base64Image' => $base64Image
             ]);
 
             $fileName = 'invoice-' . $order->order_number . '-' . $invoice->id . '.pdf';

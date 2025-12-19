@@ -308,7 +308,12 @@
                                         class="cursor-pointer hover:underline">
                                         {{ $invoice['invoice_number'] }}</p>
                                 </td>
-                                <td>{{ $invoice['order']['order_number'] ?? '-' }}</td>
+                                <td>
+                                    <a href="{{ route('admin.dashboard.order.id.get', ['id' => $invoice['order']['id']]) }}"
+                                        class="cursor-pointer hover:underline">
+                                        {{ $invoice['order']['order_number'] ?? '-' }}
+                                    </a>
+                                </td>
                                 <td>
                                     @php
                                         $color = match ($invoice['status']) {

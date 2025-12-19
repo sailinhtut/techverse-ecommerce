@@ -48,7 +48,7 @@
                            
                             <img src="{{ $base64Image }}" alt="logo" style="height:45px; object-fit:contain;">
 
-                            <div style="font-weight:bold;color:{{ $site_primary_color }}">{{ $site_name }}</div>
+                            <div style="font-weight:bold;color:{{ $site_primary_color }};margin-top:10px;">{{ $site_name }}</div>
                             <div style="font-size:10px; font-weight:normal;">
                                 {{ $site_description }}
                             </div>

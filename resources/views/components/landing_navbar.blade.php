@@ -16,6 +16,9 @@
 
         <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'text-primary active' : '' }}">Shop</a>
         </li>
+        <li><a href="{{ route('shop.get') }}"
+                class="{{ request()->is('articles') || request()->is('articles/*') ? 'text-primary active' : '' }}">Articles</a>
+        </li>
         <li><a href="{{ route('contact.get') }}"
                 class="{{ request()->is('contact') ? 'text-primary active' : '' }}">Contact</a>
         </li>
@@ -79,6 +82,9 @@
                     <p class="font-semibold px-2 py-1">{{ $site_name }}</p>
 
                     <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'active' : '' }}">Shop</a>
+                    </li>
+                    <li><a href="{{ route('articles.get') }}"
+                            class="{{ request()->is('articles') || request()->is('articles/*') ? 'active' : '' }}">Articles</a>
                     </li>
                     <li><a href="{{ route('about_us.get') }}"
                             class="{{ request()->is('about') ? 'active' : '' }}">About</a>

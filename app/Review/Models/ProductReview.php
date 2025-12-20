@@ -70,7 +70,8 @@ class ProductReview extends Model
             // $response['user'] = $this->user->jsonResponse(['role']);
             $isAdmin = $this->user->hasRole('admin');
 
-            $profile = $isAdmin ? asset('assets/images/master_seller_background_primary.png') : getDownloadableLink($this->user->profile);
+            $site_logo = getSiteLogoURL();
+            $profile = $isAdmin ? $site_logo : getDownloadableLink($this->user->profile);
             $name = $isAdmin ? config('app.name') : $this->user->name;
 
             $response['user']['id'] = $this->user->id;

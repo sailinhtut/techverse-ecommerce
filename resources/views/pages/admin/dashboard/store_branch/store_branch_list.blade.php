@@ -615,10 +615,29 @@
                             <a href="{{ $branches->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
 
-                        @for ($i = 1; $i <= $branches->lastPage(); $i++)
+                        <a href="{{ $branches->url(1) }}"
+                            class="join-item btn btn-sm {{ $branches->currentPage() === 1 ? 'btn-active' : '' }}">
+                            1
+                        </a>
+
+                        @php
+                            $start = max(2, $branches->currentPage() - 1);
+                            $end = min($branches->lastPage() - 1, $branches->currentPage() + 1);
+                        @endphp
+
+                        @for ($i = $start; $i <= $end; $i++)
                             <a href="{{ $branches->url($i) }}"
-                                class="join-item btn btn-sm {{ $branches->currentPage() === $i ? 'btn-active' : '' }}">{{ $i }}</a>
+                                class="join-item btn btn-sm {{ $branches->currentPage() === $i ? 'btn-active' : '' }}">
+                                {{ $i }}
+                            </a>
                         @endfor
+
+                        @if ($branches->lastPage() > 1)
+                            <a href="{{ $branches->url($branches->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $branches->currentPage() === $branches->lastPage() ? 'btn-active' : '' }}">
+                                {{ $branches->lastPage() }}
+                            </a>
+                        @endif
 
                         @if ($branches->hasMorePages())
                             <a href="{{ $branches->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
@@ -627,6 +646,7 @@
                         @endif
                     </div>
                 </div>
+               
             </div>
         </div>
 
@@ -776,7 +796,7 @@
                         return;
                     }
                     if (!this.hasCandidates && !this.current_action.includes('_all')) {
-                        Toast.show('Please select at least one brand', {
+                        Toast.show('Please select at least one article', {
                             type: 'error'
                         });
                         return;

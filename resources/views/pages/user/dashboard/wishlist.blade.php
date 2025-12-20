@@ -13,7 +13,7 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="w-[50px] hidden md:block">No.</th>
+                            <th class="hidden md:block">No.</th>
                             {{-- <th class="w-[50px]">Image</th> --}}
                             <th class="">Name</th>
                             {{-- <th class="w-[200px]">Description</th> --}}
@@ -25,13 +25,13 @@
                     <tbody>
                         @foreach ($wishlists as $wishlist)
                             <tr>
-                                <td style="" class="w-[50px] hidden md:block">
+                                <td style="" class="hidden md:block">
                                     {{ $loop->iteration + ($wishlists->currentPage() - 1) * $wishlists->perPage() }}.
                                 </td>
 
-                                <td class="min-w-[200px]">
+                                <td class="w-full">
                                     <div class="flex flex-row flex-nowrap items-start gap-3">
-                                        <div class="w-[50px] shrink-0">
+                                        <div class="w-[50px]">
                                             @if ($wishlist['product']['image'])
                                                 <img src="{{ $wishlist['product']['image'] }}"
                                                     alt="{{ $wishlist['product']['name'] }}"

@@ -75,3 +75,23 @@ if (!function_exists('getParsedTemplate')) {
         return $template;
     }
 }
+
+
+
+if (!function_exists('generateSocialLinks')) {
+    function generateSocialLinks(array $data = []): array
+    {
+        $url   = urlencode($data['url']);
+        $title = urlencode($data['title'] ?? '');
+        $desc  = urlencode(substr(strip_tags($data['description'] ?? ''), 0, 100));
+        $image = urlencode($data['image'] ?? '');
+
+        return [
+            'facebook' => "https://www.facebook.com/sharer/sharer.php?u={$url}",
+            'twitter'  => "https://twitter.com/intent/tweet?url={$url}&text={$title}",
+            'linkedin' => "https://www.linkedin.com/shareArticle?url={$url}&title={$title}&summary={$desc}",
+            'whatsapp' => "https://api.whatsapp.com/send?text={$title}%20{$url}",
+            'telegram' => "https://t.me/share/url?url={$url}&text={$title}",
+        ];
+    }
+}

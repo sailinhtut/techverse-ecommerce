@@ -8,7 +8,6 @@
     <a href="{{ config('app.logo_link') }}" class="my-0 flex flex-row items-center text-sm lg:text-base font-semibold">
         <img src="{{ $site_logo }}" alt="{!! $site_name !!}" class="h-8 mr-2">
         {!! $site_name !!}
-
     </a>
 
     <ul class="my-0 hidden lg:flex flex-row items-center px-1 gap-5">
@@ -26,6 +25,7 @@
                 </svg>
             </a>
         </li>
+
         <li>
             <a x-data href="{{ route('cart.get') }}" class="relative inline-block mt-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
@@ -38,6 +38,18 @@
 
                 <span class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 text-xs badge badge-error badge-sm"
                     x-text="$store.cart.totalItems()" x-show="$store.cart.totalItems() > 0"></span>
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ route('articles.get') }}"
+                class="{{ request()->is('articles') || request()->is('articles/*') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                </svg>
+
             </a>
         </li>
 
@@ -123,6 +135,10 @@
                     <li>
                         <a href="{{ route('shop.get') }}"
                             class="{{ request()->is('shop') ? 'bg-primary text-primary-content' : '' }}">Shop</a>
+                    </li>
+                    <li>
+                        <a href="{{ route('articles.get') }}"
+                            class="{{ request()->is('articles') || request()->is('articles/*') ? 'bg-primary text-primary-content' : '' }}">Articles</a>
                     </li>
                     <li>
                         <a href="{{ route('cart.get') }}"

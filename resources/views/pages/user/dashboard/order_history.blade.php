@@ -71,12 +71,12 @@
                                                     View Details
                                                 </button>
                                             </li>
-                                            <li>
+                                            {{-- <li>
                                                 <button type="button" class="text-error"
                                                     onclick="document.getElementById('deleteModal{{ $order['id'] }}').showModal()">
                                                     Delete
                                                 </button>
-                                            </li>
+                                            </li> --}}
                                         </ul>
                                     </div>
 

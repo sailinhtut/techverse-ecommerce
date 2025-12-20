@@ -629,6 +629,7 @@
                                                         <template x-for="reply in review.replies" :key="reply.id">
                                                             <div class="flex items-start gap-3">
                                                                 <div class="w-8 h-8">
+                                                                    
                                                                     <template x-if="reply.user?.profile">
                                                                         <img :src="reply.user.profile"
                                                                             class="w-8 h-8 rounded-full border border-base-300 object-cover">
@@ -774,11 +775,11 @@
                                         <div class="mt-2 flex items-center gap-1 text-sm">
                                             @if ($cross['sale_price'])
                                                 <span
-                                                    class="text-gray-400 line-through">${{ number_format($cross['regular_price'], 2) }}</span>
+                                                    class="text-gray-400 line-through">{{ number_format($cross['regular_price'], 2) }}</span>
                                                 <span
-                                                    class="text-primary">${{ number_format($cross['sale_price'], 2) }}</span>
+                                                    class="text-primary">{{ number_format($cross['sale_price'], 2) }} {{ $site_currency }}</span>
                                             @else
-                                                <span>${{ number_format($cross['regular_price'], 2) }}</span>
+                                                <span>{{ number_format($cross['regular_price'], 2) }} {{ $site_currency }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -817,11 +818,11 @@
                                         <div class="mt-2 flex items-center gap-1 text-sm">
                                             @if ($up['sale_price'])
                                                 <span
-                                                    class="text-gray-400 line-through">${{ number_format($up['regular_price'], 2) }}</span>
+                                                    class="text-gray-400 line-through">{{ number_format($up['regular_price'], 2) }}</span>
                                                 <span
-                                                    class="text-primary">${{ number_format($up['sale_price'], 2) }}</span>
+                                                    class="text-primary">{{ number_format($up['sale_price'], 2) }} {{ $site_currency }}</span>
                                             @else
-                                                <span>${{ number_format($up['regular_price'], 2) }}</span>
+                                                <span>{{ number_format($up['regular_price'], 2) }} {{ $site_currency }}</span>
                                             @endif
                                         </div>
                                     </div>

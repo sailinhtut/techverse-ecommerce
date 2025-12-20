@@ -1,5 +1,6 @@
 <?php
 
+use App\Article\Controllers\ArticleController;
 use App\Auth\Controllers\UserController;
 use App\Auth\Middlewares\AdminMiddleware;
 use App\ContactMessage\Controllers\ContactMessageController;
@@ -30,6 +31,8 @@ use App\Review\Controllers\ProductReviewReplyController;
 use App\Setting\Controllers\AppSettingController;
 use App\Store\Controllers\MediaImageController;
 use App\Store\Controllers\StoreBranchController;
+use App\Inventory\Controllers\ProductInventoryLogController;
+use App\FAQ\Controllers\FAQController;
 
 Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
     Route::prefix('/dashboard')->group(function () {
@@ -95,7 +98,30 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::middleware('admin:manage_users')->delete('/user/{id}', 'deleteUserAdmin')->name('admin.dashboard.user.id.delete');
         });
 
+        // blog routes 
+        Route::middleware('admin:manage_articles')->controller(ArticleController::class)->group(function () {
+            Route::delete('/article/bulk/delete-selected', 'deleteSelectedArticles')->name('admin.dashboard.article.bulk.delete-selected');
+            Route::delete('/article/bulk/delete-all', 'deleteAllArticles')->name('admin.dashboard.article.bulk.delete-all');
+
+            Route::get('/article', 'viewAdminArticleListPage')->name('admin.dashboard.article.get');
+            Route::get('/article/edit/{id}', 'viewAdminEditArticlePage')->name('admin.dashboard.article.edit.id.get');
+            Route::get('/article/create', 'viewAdminCreateArticlePage')->name('admin.dashboard.article.create.get');
+            Route::post('/article', 'createArticle')->name('admin.dashboard.article.post');
+            Route::post('/article/{id}', 'updateArticle')->name('admin.dashboard.article.id.post');
+            Route::delete('/article/{id}', 'deleteArticle')->name('admin.dashboard.article.id.delete');
+        });
+
         // store routes
+        Route::middleware('admin:manage_faqs')->controller(FAQController::class)->group(function () {
+            Route::delete('/store/faq/bulk/delete-selected', 'deleteSelectedFAQ')->name('admin.dashboard.store.faq.bulk.delete-selected');
+            Route::delete('/store/faq/bulk/delete-all', 'deleteAllFAQ')->name('admin.dashboard.store.faq.bulk.delete-all');
+
+            Route::get('/store/faq', 'viewAdminFAQListPage')->name('admin.dashboard.store.faq.get');
+            Route::post('/store/faq', 'createFAQ')->name('admin.dashboard.store.faq.post');
+            Route::post('/store/faq/{id}', 'updateFAQ')->name('admin.dashboard.store.faq.id.post');
+            Route::delete('/store/faq/{id}', 'deleteFAQ')->name('admin.dashboard.store.faq.id.delete');
+        });
+
         Route::middleware('admin:manage_media_images')->controller(MediaImageController::class)->group(function () {
             Route::delete('/store/media-image/bulk/delete-selected', 'deleteSelectedMediaImages')->name('admin.dashboard.store.media-image.bulk.delete-selected');
             Route::delete('/store/media-image/bulk/delete-all', 'deleteAllMediaImages')->name('admin.dashboard.store.media-image.bulk.delete-all');
@@ -130,7 +156,16 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
                 ->name('admin.dashboard.store.id.delete');
         });
 
+
+
+
         // product routes
+
+        Route::middleware('admin:manage_product_inventory')->controller(ProductInventoryLogController::class)->group(function () {
+            Route::get('/product/inventory-logs', 'viewAdminInventoryLogPage')
+                ->name('admin.dashboard.product.inventory-logs.get');
+        });
+
         Route::middleware('admin:manage_reviews')->controller(ProductReviewReplyController::class)->group(function () {
             Route::post('/product/review/{review_id}/reply', 'createReviewReply')
                 ->name('admin.dashboard.product.review.review_id.reply.post');
@@ -223,6 +258,7 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::post('/product/{id}', 'updateProduct')->name('admin.dashboard.product.id.post');
             Route::delete('/product/{id}', 'deleteProduct')->name('admin.dashboard.product.id.delete');
         });
+
 
         // order routes
         Route::middleware('admin:manage_orders')->controller(OrderController::class)->group(function () {

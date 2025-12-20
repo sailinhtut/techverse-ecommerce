@@ -94,12 +94,12 @@
                                                     View Details
                                                 </button>
                                             </li>
-                                            <li>
+                                            {{-- <li>
                                                 <button type="button" class="text-error"
                                                     onclick="document.getElementById('delete_modal_{{ $invoice['id'] }}').showModal()">
                                                     Delete
                                                 </button>
-                                            </li>
+                                            </li> --}}
                                         </ul>
                                     </div>
                                 </td>

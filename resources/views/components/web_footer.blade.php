@@ -29,6 +29,9 @@
                 <li><a href="{{ route('shop.get') }}"
                         class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Shop</a>
                 </li>
+                <li><a href="{{ route('articles.get') }}"
+                        class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Articles</a>
+                </li>
                 <li><a href="/store-locator"
                         class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Store
                         Locator</a>
@@ -38,6 +41,9 @@
                         Us</a></li>
                 <li><a href="/contact"
                         class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Contact</a>
+                </li>
+                <li><a href="/frequent-questions"
+                        class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">FAQ</a>
                 </li>
                 <li><a href="/privacy"
                         class="hover:text-primary hover:underline hover:underline-offset-5 transition-colors">Privacy

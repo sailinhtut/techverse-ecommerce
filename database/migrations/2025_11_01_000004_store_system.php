@@ -43,6 +43,47 @@ return new class extends Migration
             $table->dateTime('end_at')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('frequent_questions', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('question');
+            $table->text('answer');
+
+            $table->boolean('is_active')
+                ->default(true)
+                ->comment('Show or hide FAQ');
+
+            $table->integer('sort_order')
+                ->default(0)
+                ->comment('Display order');
+
+            $table->timestamps();
+        });
+
+        Schema::create('articles', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('title');
+            $table->string('slug')->unique();
+            $table->text('description')->nullable();
+            $table->longText('content');
+            $table->json('tags')->nullable();
+
+            $table->string('image')->nullable();
+
+            $table->enum('status', ['draft', 'published', 'archived'])
+                ->default('draft');
+
+            $table->boolean('is_featured')->default(false);
+
+            $table->timestamp('published_at')->nullable();
+
+            $table->unsignedBigInteger('view_count')
+                ->default(0);
+
+            $table->timestamps();
+        });
     }
 
     /**
@@ -50,6 +91,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('articles');
+        Schema::dropIfExists('frequent_questions');
         Schema::dropIfExists('media_images');
         Schema::dropIfExists('store_branches');
     }

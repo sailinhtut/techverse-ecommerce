@@ -1,9 +1,11 @@
 <?php
 
+use App\Article\Controllers\ArticleController;
 use App\Auth\Controllers\NotificationController;
 use App\Auth\Controllers\WishlistController;
 use App\Cart\Controllers\CartController;
 use App\ContactMessage\Controllers\ContactMessageController;
+use App\FAQ\Controllers\FAQController;
 use App\Inventory\Controllers\CouponController;
 use App\Inventory\Controllers\ProductController;
 use App\Inventory\Controllers\ProductVariantController;
@@ -26,6 +28,11 @@ Route::view('/terms', 'pages.user.core.terms')->name('terms.get');
 Route::view('/about', 'pages.user.core.about_us')->name('about_us.get');
 Route::view('/contact', 'pages.user.core.contact')->name('contact.get');
 Route::post('/contact', [ContactMessageController::class, 'createMessage'])->name('contact.post');
+Route::get('/frequent-questions', [FAQController::class, 'viewFAQPage'])->name('frequent-questions.get');
+
+Route::get('/articles/search', [ArticleController::class, 'viewUserArticleSearchListPage'])->name('articles.search.get');
+Route::get('/articles/{slug}', [ArticleController::class, 'viewUserArticleDetailPage'])->name('articles.slug.get');
+Route::get('/articles', [ArticleController::class, 'viewUserArticleListPage'])->name('articles.get');
 
 
 Route::controller(NotificationController::class)->group(function () {

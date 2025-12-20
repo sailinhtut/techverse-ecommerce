@@ -89,8 +89,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                             </svg>
                         </a>
-
-                        <a
+                        <a href="{{ route('frequent-questions.get') }}"
                             class="flex flex-row items-center justify-between gap-1 text-sm cursor-pointer text-primary hover:bg-primary/20 hover:px-2 px-0 py-1 rounded-md group transition-all">
                             <div class="flex flex-row items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

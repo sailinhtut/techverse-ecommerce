@@ -5,7 +5,7 @@ return [
 
     'description' => 'Powerful Ecommerce system built to help businesses sell products online with ease. It offers seamless product management, secure payments, and efficient order tracking—all in one place. With its user-friendly design and smart features, Master Seller makes online selling faster, smarter, and more successful.',
 
-    'site_primary_color' => '#4F46E5',
+    'site_primary_color' => '#132356',
     'site_primary_content_color' => '#FFFFFF',
 
     'phone_1' => '+959252203838',

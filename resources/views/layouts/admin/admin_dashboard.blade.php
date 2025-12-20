@@ -111,6 +111,12 @@
                                                     Images</a>
                                             </li>
                                         @endif
+
+                                        @if (auth()->user()->hasPermissions(['manage_faqs']))
+                                            <li><a href="{{ route('admin.dashboard.store.faq.get') }}"
+                                                    class="{{ request()->is('admin/dashboard/store/faq') ? 'bg-primary text-primary-content' : '' }}">FAQ</a>
+                                            </li>
+                                        @endif
                                     </ul>
                                 </div>
                             </div>
@@ -298,6 +304,12 @@
                             </div>
                         @endif
 
+                        @if (auth()->user()->hasPermissions(['manage_articles']))
+                            <li><a href="{{ route('admin.dashboard.article.get') }}"
+                                    class="{{ request()->is('admin/dashboard/article') || request()->is('admin/dashboard/article/*') ? 'active' : '' }}">Articles</a>
+                            </li>
+                        @endif
+
                         @if (auth()->user()->hasPermissions(['manage_contact_message']))
                             <li><a href="{{ route('admin.dashboard.contact_message.get') }}"
                                     class="{{ request()->is('admin/dashboard/contact_message') ? 'active' : '' }}">Contact
@@ -307,7 +319,8 @@
 
                         @if (auth()->user()->hasPermissions(['manage_storage']))
                             <li><a href="{{ route('admin.media_storage.get') }}"
-                                    class="{{ request()->is('admin/dashboard/media-storage') ? 'active' : '' }}">Media Storage</a>
+                                    class="{{ request()->is('admin/dashboard/media-storage') ? 'active' : '' }}">Media
+                                    Storage</a>
                             </li>
                         @endif
 
@@ -392,6 +405,12 @@
                                         <li><a href="{{ route('admin.dashboard.store.media-image.get') }}"
                                                 class="{{ request()->is('admin/dashboard/store/media-image') ? 'bg-primary text-primary-content' : '' }}">Media
                                                 Images</a>
+                                        </li>
+                                    @endif
+
+                                    @if (auth()->user()->hasPermissions(['manage_faqs']))
+                                        <li><a href="{{ route('admin.dashboard.store.faq.get') }}"
+                                                class="{{ request()->is('admin/dashboard/store/faq') ? 'bg-primary text-primary-content' : '' }}">FAQ</a>
                                         </li>
                                     @endif
                                 </ul>
@@ -574,9 +593,16 @@
                         </div>
                     @endif
 
+                    @if (auth()->user()->hasPermissions(['manage_articles']))
+                        <li><a href="{{ route('admin.dashboard.article.get') }}"
+                                class="{{ request()->is('admin/dashboard/article') || request()->is('admin/dashboard/article/*') ? 'bg-primary text-primary-content' : '' }}">Articles</a>
+                        </li>
+                    @endif
+
                     @if (auth()->user()->hasPermissions(['manage_contact_message']))
                         <li><a href="{{ route('admin.dashboard.contact_message.get') }}"
-                                class="{{ request()->is('admin/dashboard/contact_message') ? 'bg-primary text-primary-content' : '' }}">Contact Messages</a>
+                                class="{{ request()->is('admin/dashboard/contact_message') ? 'bg-primary text-primary-content' : '' }}">Contact
+                                Messages</a>
                         </li>
                     @endif
 

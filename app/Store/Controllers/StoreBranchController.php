@@ -40,7 +40,6 @@ class StoreBranchController
     public function viewAdminStoreBranchListPage(Request $request)
     {
         try {
-
             $sortBy = $request->get('sortBy', 'last_updated');
             $orderBy = $request->get('orderBy', 'desc');
             $perPage = $request->get('perPage', 20);

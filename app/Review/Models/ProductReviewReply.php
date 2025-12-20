@@ -44,7 +44,8 @@ class ProductReviewReply extends Model
         if (in_array('user', $with) && $this->user) {
             $isFromCompany = $this->user->is_company_member;
 
-            $profile = $isFromCompany ? asset('assets/images/master_seller_background_primary.png') : getDownloadableLink($this->user->profile);
+            $site_logo = getSiteLogoURL();
+            $profile = $isFromCompany ? $site_logo : getDownloadableLink($this->user->profile);
             $name = $isFromCompany ? config('app.name') : $this->user->name;
 
             $response['user'] = [

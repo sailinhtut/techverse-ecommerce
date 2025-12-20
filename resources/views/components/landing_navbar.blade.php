@@ -16,7 +16,7 @@
 
         <li><a href="{{ route('shop.get') }}" class="{{ request()->is('shop') ? 'text-primary active' : '' }}">Shop</a>
         </li>
-        <li><a href="{{ route('shop.get') }}"
+        <li><a href="{{ route('articles.get') }}"
                 class="{{ request()->is('articles') || request()->is('articles/*') ? 'text-primary active' : '' }}">Articles</a>
         </li>
         <li><a href="{{ route('contact.get') }}"

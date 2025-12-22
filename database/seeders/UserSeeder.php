@@ -53,7 +53,6 @@ class UserSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-
         Address::create([
             'user_id' => $user->id,
             'label' => 'Office',

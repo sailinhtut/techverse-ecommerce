@@ -6,7 +6,7 @@
 
 @extends('layouts.admin.admin_dashboard')
 @section('admin_dashboard_content')
-    <div class="p-5 min-h-screen">
+    <div class="p-3 lg:p-5 min-h-screen">
         <p class="text-lg font-semibold">Product Management</p>
 
         <div class="mt-3 flex xl:flex-row flex-col justify-between gap-2">
@@ -21,6 +21,8 @@
                         <option value="bulk_update_payment_method_all">Update Payment Method All</option>
                         <option value="bulk_update_shipping_class_selected">Update Shipping Class Selected</option>
                         <option value="bulk_update_shipping_class_all">Update Shipping Class All</option>
+                        <option value="bulk_update_tax_class_selected">Update Tax Class Selected</option>
+                        <option value="bulk_update_tax_class_all">Update Tax Class All</option>
                     </select>
                     <button class="join-item btn btn-sm" @click="$store.bulk.commit()">Commit</button>
                 </div>
@@ -323,6 +325,121 @@
                             <button type="submit" class="btn btn-primary flex items-center gap-2"
                                 :disabled="loading">
                                 <span x-show="!loading">Update Shipping Class</span>
+                                <span x-show="loading" class="loading loading-spinner loading-xs"></span>
+                                <span x-show="loading">Updating...</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
+
+            {{-- bulk tax class selected modal --}}
+            <dialog id="bulk_update_tax_class_selected" class="modal" x-data="{ loading: false, selectedTaxClass: '' }">
+                <div class="modal-box relative">
+                    <form method="dialog">
+                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    </form>
+
+                    <p class="text-lg font-semibold py-0">Update Tax Class</p>
+
+                    <p class="py-2 mb-0 text-sm">
+                        Are you sure you want to updated
+                        <span class="italic text-error">Selected Products</span>?
+                    </p>
+
+                    <template x-if="$store.bulk.hasCandidates">
+                        <ul class="text-sm pl-10 list-decimal max-h-24 overflow-y-auto bg-base-200 p-3">
+                            <template x-for="id in $store.bulk.candidates" :key="id">
+                                <li x-text="'Product ID: ' + id"></li>
+                            </template>
+                        </ul>
+                    </template>
+
+                    <div class="mt-3 w-full flex flex-col gap-2">
+                        <label class="text-sm mb-3">Tax Classes</label>
+                        <div class="w-full flex flex-col gap-2">
+                            <label class="text-sm">Tax Class</label>
+                            <select name="shipping_class_id" class="select w-full" x-model="selectedTaxClass">
+                                <option value="">No Tax Class</option>
+                                @foreach ($tax_classes as $class)
+                                    <option value="{{ $class['id'] }}">
+                                        {{ $class['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 modal-action">
+                        <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
+
+                        <form method="POST"
+                            action="{{ route('admin.dashboard.product.bulk.update-tax-class-selected') }}"
+                            @submit="loading = true">
+                            @csrf
+                            <template x-for="id in $store.bulk.candidates" :key="id">
+                                <input type="hidden" name="ids[]" :value="id">
+                            </template>
+
+                            <template x-if="selectedTaxClass">
+                                <input type="hidden" name="tax_class_id" :value="selectedTaxClass">
+                            </template>
+
+                            <button type="submit" class="btn btn-primary flex items-center gap-2"
+                                :disabled="loading">
+                                <span x-show="!loading">Update Tax Class</span>
+                                <span x-show="loading" class="loading loading-spinner loading-xs"></span>
+                                <span x-show="loading">Updating...</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
+
+            {{-- bulk tax class all modal --}}
+            <dialog id="bulk_update_tax_class_all" class="modal" x-data="{ loading: false, selectedTaxClass: '' }">
+                <div class="modal-box relative">
+                    <form method="dialog">
+                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    </form>
+
+                    <p class="text-lg font-semibold py-0">Update Tax Class</p>
+                    <p class="text-sm mb-4">
+                        Are you sure you want to update
+                        <span class="text-error">All Products</span> ? Updating may take some time depending on the number
+                        of products.
+                    </p>
+
+                    <div class="mt-3 w-full flex flex-col gap-2">
+                        <label class="text-sm">Tax Class</label>
+                        <select name="shipping_class_id" class="select w-full" x-model="selectedTaxClass">
+                            <option value="">No Tax Class</option>
+                            @foreach ($tax_classes as $class)
+                                <option value="{{ $class['id'] }}">
+                                    {{ $class['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mt-3 modal-action">
+                        <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
+
+                        <form method="POST"
+                            action="{{ route('admin.dashboard.product.bulk.update-tax-class-all') }}"
+                            @submit="loading = true">
+                            @csrf
+                            <template x-for="id in $store.bulk.candidates" :key="id">
+                                <input type="hidden" name="ids[]" :value="id">
+                            </template>
+
+                            <template x-if="selectedTaxClass">
+                                <input type="hidden" name="tax_class_id" :value="selectedTaxClass">
+                            </template>
+
+                            <button type="submit" class="btn btn-primary flex items-center gap-2"
+                                :disabled="loading">
+                                <span x-show="!loading">Update Tax Class</span>
                                 <span x-show="loading" class="loading loading-spinner loading-xs"></span>
                                 <span x-show="loading">Updating...</span>
                             </button>

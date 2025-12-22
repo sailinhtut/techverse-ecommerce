@@ -14,11 +14,11 @@
                     <thead>
                         <tr>
                             <th class="w-[50px]">No.</th>
-                            <th class="w-[150px]">Order Number</th>
-                            <th class="w-[150px]">Date</th>
-                            <th class="w-[150px]">Status</th>
-                            <th class="w-[150px]">Total</th>
-                            <th class="w-[150px]">Actions</th>
+                            <th>Order Number</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -35,29 +35,29 @@
                                     </a>
                                 </td>
 
-                                <td>{{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d h:i A') : '-' }}
-                                </td>
+
 
                                 <td>
                                     @php
                                         $color = match ($order['status']) {
                                             'pending' => 'badge-warning',
-                                            'processing' => 'badge-info',
+                                            'processing' => 'badge-warning',
+                                            'shipped' => 'badge-info',
+                                            'delivered' => 'badge-info',
                                             'completed' => 'badge-success',
+                                            'refunded' => 'badge-error',
                                             'cancelled' => 'badge-error',
                                             default => 'badge-ghost',
                                         };
                                     @endphp
-                                    <div class="badge {{ $color }} badge-outline capitalize">
+                                    <div
+                                        class="badge badge-sm {{ $color }} border border-base-300 text-xs capitalize">
                                         {{ $order['status'] }}
                                     </div>
                                 </td>
-
-
-
                                 <td>{{ number_format($order['grand_total'], 2) }} {{ $site_currency }}</td>
-
-
+                                <td>{{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d h:i A') : '-' }}
+                                </td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
                                         <div class="btn btn-square btn-sm btn-ghost">
@@ -91,42 +91,92 @@
                                                 Order #{{ $order['order_number'] }}
                                             </h3>
 
-                                            <div class="text-sm space-y-2">
-                                                <p><strong>ID:</strong> {{ $order['id'] }}</p>
-                                                <p><strong>Date:</strong>
-                                                    {{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d h:i A') : '-' }}
-                                                </p>
-                                                <p><strong>Status:</strong>
-                                                    <span class="badge {{ $color }} badge-outline">
-                                                        {{ ucfirst($order['status']) }}
-                                                    </span>
-                                                </p>
-                                                <p><strong>Subtotal:</strong> ${{ number_format($order['subtotal'], 2) }}
-                                                </p>
-                                                <p><strong>Discount:</strong>
-                                                    -${{ number_format($order['discount_total'], 2) }}</p>
-                                                <p><strong>Tax:</strong> +${{ number_format($order['tax_total'], 2) }}</p>
-                                                <p><strong>Shipping:</strong>
-                                                    +${{ number_format($order['shipping_total'], 2) }}</p>
-                                                <p><strong>Grand Total:</strong>
-                                                    <span
-                                                        class="font-semibold">${{ number_format($order['grand_total'], 2) }}</span>
-                                                </p>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div class="md:col-span-2">
+                                                    <label class="text-sm">Order ID</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ $order['id'] }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Order Number</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ $order['order_number'] }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Subtotal</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ number_format($order['subtotal'], 2) }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Shipping Cost</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ number_format($order['shipping_total'], 2) }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Tax Cost</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ number_format($order['tax_total'], 2) }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Coupon Code</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ $order['coupon_code'] ?? '-' }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Discount Total</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ number_format($order['discount_total'], 2) }}" readonly>
+                                                </div>
+                                                <div>
+                                                    <label class="text-sm">Grand Total</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ number_format($order['grand_total'], 2) }}" readonly>
+                                                </div>
+                                                <div>
+                                                    @php
+                                                        $order_color = match ($order['status']) {
+                                                            'pending' => 'bg-warning',
+                                                            'processing' => 'bg-warning',
+                                                            'shipped' => 'bg-info',
+                                                            'delivered' => 'bg-info',
+                                                            'completed' => 'bg-success',
+                                                            'refunded' => 'bg-error',
+                                                            'cancelled' => 'bg-error',
+                                                            default => 'bg-ghost',
+                                                        };
+                                                    @endphp
+                                                    <label class="text-sm">Order Status</label>
+                                                    <input type="text"
+                                                        class="input w-full border-base-300 {{ $order_color }}"
+                                                        value="{{ ucfirst($order['status']) }}" readonly>
+                                                </div>
 
-                                                {{-- Divider --}}
-                                                <div class="divider my-3"></div>
+                                                <div>
+                                                    <label class="text-sm">Created At</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d h:i A') }}"
+                                                        readonly>
+                                                </div>
 
-                                                {{-- Products Table --}}
+                                                <div>
+                                                    <label class="text-sm">Updated At</label>
+                                                    <input type="text" class="input w-full border-base-300"
+                                                        value="{{ \Carbon\Carbon::parse($order['updated_at'])->format('Y-m-d h:i A') }}"
+                                                        readonly>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3">
                                                 <p class="font-semibold">Ordered Products</p>
-                                                <div class="overflow-x-auto">
-                                                    <table class="table table-sm">
+                                                <div class="overflow-x-auto mt-3">
+                                                    <table class="table table-sm border border-base-300">
                                                         <thead>
                                                             <tr>
                                                                 <th>Name</th>
-                                                                <th>Qty</th>
                                                                 <th>SKU</th>
                                                                 <th>Type</th>
                                                                 <th>Unit Price</th>
+                                                                <th>Qty</th>
                                                                 <th>Subtotal</th>
                                                             </tr>
                                                         </thead>
@@ -134,50 +184,24 @@
                                                             @foreach ($order['products'] ?? [] as $item)
                                                                 <tr>
                                                                     <td>{{ $item['name'] }}</td>
-                                                                    <td>{{ $item['quantity'] }}</td>
                                                                     <td>{{ $item['sku'] }}</td>
                                                                     <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}
                                                                     </td>
-                                                                    <td>${{ number_format($item['unit_price'], 2) }}</td>
-                                                                    <td>${{ number_format($item['subtotal'], 2) }}</td>
+                                                                    <td>{{ number_format($item['unit_price'], 2) }}
+                                                                        {{ $site_currency }}</td>
+                                                                    <td>{{ $item['quantity'] }}</td>
+                                                                    <td>{{ number_format($item['subtotal'], 2) }}
+                                                                        {{ $site_currency }}</td>
                                                                 </tr>
                                                             @endforeach
                                                         </tbody>
                                                     </table>
                                                 </div>
-
-                                                {{-- Divider --}}
-                                                <div class="divider my-3"></div>
-
-                                                {{-- Shipping and Billing --}}
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div class="bg-base-200 rounded-box p-3">
-                                                        <p class="font-semibold mb-1">Shipping Address</p>
-                                                        @php $s = $order['shipping_address'] ?? []; @endphp
-                                                        <p>{{ $s['recipient_name'] ?? '-' }}</p>
-                                                        <p>{{ $s['street_address'] ?? '-' }}</p>
-                                                        <p>{{ $s['city'] ?? '' }} {{ $s['state'] ?? '' }}</p>
-                                                        <p>{{ $s['postal_code'] ?? '' }}</p>
-                                                        <p>{{ $s['country'] ?? '' }}</p>
-                                                        <p class="text-xs text-gray-500 mt-1">{{ $s['phone'] ?? '' }}</p>
-                                                    </div>
-
-                                                    <div class="bg-base-200 rounded-box p-3">
-                                                        <p class="font-semibold mb-1">Billing Address</p>
-                                                        @php $b = $order['billing_address'] ?? []; @endphp
-                                                        <p>{{ $b['recipient_name'] ?? '-' }}</p>
-                                                        <p>{{ $b['street_address'] ?? '-' }}</p>
-                                                        <p>{{ $b['city'] ?? '' }} {{ $b['state'] ?? '' }}</p>
-                                                        <p>{{ $b['postal_code'] ?? '' }}</p>
-                                                        <p>{{ $b['country'] ?? '' }}</p>
-                                                        <p class="text-xs text-gray-500 mt-1">{{ $b['phone'] ?? '' }}</p>
-                                                    </div>
-                                                </div>
                                             </div>
 
                                             <div class="modal-action mt-6">
                                                 <form method="dialog">
-                                                    <button class="btn btn-primary w-full">Close</button>
+                                                    <button class="btn w-full">Close</button>
                                                 </form>
                                             </div>
                                         </div>

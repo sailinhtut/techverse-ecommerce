@@ -1,7 +1,7 @@
 @extends('layouts.admin.admin_dashboard')
 
 @section('admin_dashboard_content')
-    <div class="p-5 min-h-screen">
+    <div class="p-3 lg:p-5 min-h-screen">
         <p class="lg:text-lg font-semibold">Contact Messages</p>
 
         <div class="mt-3 flex xl:flex-row flex-col justify-between gap-2">
@@ -40,7 +40,7 @@
                     <div class="mt-3 modal-action">
                         <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
 
-                        <form method="POST" action="{{ route('admin.dashboard.contact_message.bulk.delete-selected') }}"
+                        <form method="POST" action="{{ route('admin.dashboard.store.contact_message.bulk.delete-selected') }}"
                             @submit="loading = true">
                             @csrf
                             @method('DELETE')
@@ -73,7 +73,7 @@
                     <div class="modal-action">
                         <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
 
-                        <form method="POST" action="{{ route('admin.dashboard.contact_message.bulk.delete-all') }}"
+                        <form method="POST" action="{{ route('admin.dashboard.store.contact_message.bulk.delete-all') }}"
                             @submit="loading = true">
                             @csrf
                             @method('DELETE')
@@ -425,7 +425,7 @@
                                     <h3 class="text-lg font-semibold text-center mb-3">Edit Contact Message</h3>
 
                                     <form method="POST"
-                                        action="{{ route('admin.dashboard.contact_message.id.post', ['id' => $message['id']]) }}">
+                                        action="{{ route('admin.dashboard.store.contact_message.id.post', ['id' => $message['id']]) }}">
                                         @csrf
                                         @method('POST')
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -469,7 +469,7 @@
                                         <button type="button" class="btn"
                                             onclick="delete_modal_{{ $message['id'] }}.close()">Cancel</button>
                                         <form method="POST"
-                                            action="{{ route('admin.dashboard.contact_message.id.delete', ['id' => $message['id']]) }}">
+                                            action="{{ route('admin.dashboard.store.contact_message.id.delete', ['id' => $message['id']]) }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-error">Delete</button>

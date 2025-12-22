@@ -15,19 +15,19 @@
             <div class="breadcrumbs text-sm my-0 py-1">
                 <ul>
                     <li>
-                        <a href="{{ route('admin.dashboard.article.get') }}" class="btn btn-xs btn-ghost">
+                        <a href="{{ route('admin.dashboard.store.article.get') }}" class="btn btn-xs btn-ghost">
                             Articles
                         </a>
                     </li>
 
                     <li>
                         @isset($edit_article)
-                            <a href="{{ route('admin.dashboard.article.edit.id.get', $edit_article['id']) }}"
+                            <a href="{{ route('admin.dashboard.store.article.edit.id.get', $edit_article['id']) }}"
                                 class="btn btn-xs btn-ghost">
                                 {{ $edit_article['title'] ?? 'Edit Article' }}
                             </a>
                         @else
-                            <a href="{{ route('admin.dashboard.article.create.get') }}" class="btn btn-xs btn-ghost">
+                            <a href="{{ route('admin.dashboard.store.article.create.get') }}" class="btn btn-xs btn-ghost">
                                 Add Article
                             </a>
                         @endisset
@@ -50,7 +50,7 @@
         @endif
 
         <form
-            action="{{ isset($edit_article) ? route('admin.dashboard.article.id.post', ['id' => $edit_article['id']]) : route('admin.dashboard.article.post') }}"
+            action="{{ isset($edit_article) ? route('admin.dashboard.store.article.id.post', ['id' => $edit_article['id']]) : route('admin.dashboard.store.article.post') }}"
             method="POST" class="w-full flex flex-col gap-3" enctype="multipart/form-data" x-data="{ submitting: false }"
             @submit="submitting=true">
             @csrf
@@ -102,7 +102,8 @@
                                         Draft
                                     </option>
                                     <option value="published"
-                                        {{ isset($edit_article) && $edit_article['status'] === 'published' ? 'selected' : '' }}>
+                                        {{ isset($edit_article) && $edit_article['status'] === 'published' ? 'selected' : '' }}
+                                        selected>
                                         Published
                                     </option>
                                     <option value="archived"

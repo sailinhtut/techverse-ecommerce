@@ -2,8 +2,8 @@
 
 namespace App\Auth\Models;
 
+use App\Order\Models\Invoice;
 use App\Order\Models\Order;
-use App\Payment\Models\Invoice;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 

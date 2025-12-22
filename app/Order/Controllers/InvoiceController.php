@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Payment\Controllers;
+namespace App\Order\Controllers;
 
-use App\Payment\Models\Invoice;
+use App\Order\Models\Invoice;
+use App\Order\Models\Payment;
+use App\Order\Models\Transaction;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -48,7 +50,7 @@ class InvoiceController
             $invoices->getCollection()->transform(function ($invoice) {
                 return $invoice->jsonResponse(['order']);
             });
-            return view('pages.admin.dashboard.payment.invoice_list', [
+            return view('pages.admin.dashboard.order.invoice_list', [
                 'invoices' => $invoices
             ]);
         } catch (Exception $e) {
@@ -56,14 +58,24 @@ class InvoiceController
         }
     }
 
-    public function viewAdminInvoiceDetailPage(Request $request, $id)
+    public function viewAdminInvoiceDetailPage(Request $request, $invoice_id)
     {
         try {
-            $invoice = Invoice::findOrFail($id);
+            $invoice = Invoice::findOrFail($invoice_id);
             $invoice = $invoice->jsonResponse(['order']);
-            
-            return view('pages.admin.dashboard.payment.invoice_detail', [
-                'invoice' => $invoice
+
+            $order_id = $invoice['order_id'];
+
+            $payments = Payment::where('order_id', $order_id)->orderBy('id', 'desc')->get();
+            $payments = $payments->map(fn($i) => $i->jsonResponse(['invoice', 'order']));
+
+            $transactions = Transaction::where('order_id', $order_id)->orderBy('id', 'desc')->get();
+            $transactions = $transactions->map(fn($i) => $i->jsonResponse(['user', 'invoice', 'order']));
+
+            return view('pages.admin.dashboard.order.invoice_detail', [
+                'invoice' => $invoice,
+                'payments' => $payments,
+                'transactions' => $transactions,
             ]);
         } catch (Exception $e) {
             return handleErrors($e);

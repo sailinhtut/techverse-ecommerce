@@ -1,7 +1,7 @@
 @extends('layouts.admin.admin_dashboard')
 
 @section('admin_dashboard_content')
-    <div class="p-5 min-h-screen">
+    <div class="p-3 lg:p-5 min-h-screen">
         <div class="mb-4">
             <button onclick="history.back()" class="btn btn-sm flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"

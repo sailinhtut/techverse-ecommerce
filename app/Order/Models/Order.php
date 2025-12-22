@@ -6,7 +6,6 @@ use App\Auth\Models\User;
 use App\Payment\Models\PaymentMethod;
 use App\Shipping\Models\ShippingMethod;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 
 class Order extends Model
 {
@@ -28,7 +27,9 @@ class Order extends Model
         'shipping_method_id',
         'payment_method_id',
         'coupon_code',
-        // to add note
+        'seen_at',
+        'archived',
+        'stock_consumed',
     ];
 
     protected function casts(): array
@@ -44,6 +45,9 @@ class Order extends Model
             'grand_total' => 'decimal:2',
             'shipping_address' => 'array',
             'billing_address' => 'array',
+            'seen_at' => 'datetime',
+            'archived' => 'boolean',
+            'stock_consumed' => 'boolean',
         ];
     }
 
@@ -112,6 +116,9 @@ class Order extends Model
             'billing_address' => $this->billing_address,
             'shipping_method_id' => $this->shipping_method_id,
             'payment_method_id' => $this->payment_method_id,
+            'seen_at' => $this->seen_at,
+            'archived' => $this->archived,
+            'stock_consumed' => $this->stock_consumed,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

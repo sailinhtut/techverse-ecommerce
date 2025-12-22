@@ -4,7 +4,7 @@
 
 @extends('layouts.admin.admin_dashboard')
 @section('admin_dashboard_content')
-    <div class="p-5 min-h-screen">
+    <div class="p-3 lg:p-5 min-h-screen">
         <p class="lg:text-lg font-semibold">Orders</p>
 
         <div class="mt-3 flex xl:flex-row flex-col justify-between gap-2">
@@ -266,7 +266,6 @@
         </div>
 
 
-
         <div class="mt-3 card shadow-sm border border-base-300">
             <div class="card-body p-0 m-0 overflow-x-auto">
                 <table class="table">
@@ -280,10 +279,10 @@
                             <th class="w-[50px]">No.</th>
                             <th x-cloak x-data x-show="$store.order_search_setting.showIDColumn" class="w-[50px]">ID
                             </th>
-                            <th class="w-[150px]">Order Number</th>
-                            <th class="w-[150px]">Date</th>
-                            <th class="w-[150px]">Status</th>
-                            <th class="w-[150px]">Total</th>
+                            <th class="">Order Number</th>
+                            <th class="">Order Status</th>
+                            <th class="">Stock Inventory</th>
+                            <th class="">Grand Total</th>
                             <th x-cloak x-data
                                 x-show="$store.order_search_setting.showUpdatedTimeColumn || $store.order_search_setting.is_last_updated_filter">
                                 Updated At</th>
@@ -314,22 +313,35 @@
                                         {{ $order['order_number'] }}
                                     </a>
                                 </td>
-
-                                <td>{{ $order['created_at'] ? \Carbon\Carbon::parse($order['created_at'])->format('Y-m-d h:i A') : '-' }}
-                                </td>
-
                                 <td>
                                     @php
                                         $color = match ($order['status']) {
                                             'pending' => 'badge-warning',
-                                            'processing' => 'badge-info',
+                                            'processing' => 'badge-warning',
+                                            'shipped' => 'badge-info',
+                                            'delivered' => 'badge-info',
                                             'completed' => 'badge-success',
+                                            'refunded' => 'badge-error',
                                             'cancelled' => 'badge-error',
                                             default => 'badge-ghost',
                                         };
                                     @endphp
-                                    <div class="badge {{ $color }} badge-outline capitalize">
+                                    <div
+                                        class="badge badge-sm {{ $color }} border border-base-300 capitalize text-xs">
                                         {{ $order['status'] }}
+                                    </div>
+                                </td>
+                                <td>
+                                    @php
+                                        $color = match ($order['stock_consumed']) {
+                                            false => 'badge-info',
+                                            true => 'badge-ghost',
+                                            default => 'badge-ghost',
+                                        };
+                                    @endphp
+                                    <div
+                                        class="badge badge-sm {{ $color }} border border-base-300 capitalize text-xs">
+                                        {{ $order['stock_consumed'] ? 'Consumed' : 'Not Consumed' }}
                                     </div>
                                 </td>
 
@@ -400,7 +412,8 @@
                                                 <div>
                                                     <label class="text-sm">Subtotal</label>
                                                     <input type="text"
-                                                        value="{{ number_format($order['subtotal'], 2) }} {{ $site_currency }}" readonly
+                                                        value="{{ number_format($order['subtotal'], 2) }} {{ $site_currency }}"
+                                                        readonly
                                                         class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                                 <div>
@@ -419,7 +432,8 @@
                                                 <div>
                                                     <label class="text-sm">Tax</label>
                                                     <input type="text"
-                                                        value="+ {{ number_format($order['tax_total'], 2) }} {{ $site_currency }}" readonly
+                                                        value="+ {{ number_format($order['tax_total'], 2) }} {{ $site_currency }}"
+                                                        readonly
                                                         class="input w-full cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                                 <div>
@@ -432,7 +446,8 @@
                                                 <div>
                                                     <label class="text-sm">Grand Total</label>
                                                     <input type="text"
-                                                        value="{{ number_format($order['grand_total'], 2) }} {{ $site_currency }}" readonly
+                                                        value="{{ number_format($order['grand_total'], 2) }} {{ $site_currency }}"
+                                                        readonly
                                                         class="input w-full font-semibold cursor-default select-none focus:outline-none focus:ring-0 focus:border-base-300">
                                                 </div>
                                             </div>
@@ -461,8 +476,10 @@
                                                                 <td>{{ $item['sku'] }}</td>
                                                                 <td>{{ $item['variant_id'] ? 'Variant Product' : 'Simple Product' }}
                                                                 </td>
-                                                                <td>{{ number_format($item['unit_price'], 2) }} {{ $site_currency }}</td>
-                                                                <td>{{ number_format($item['subtotal'], 2) }} {{ $site_currency }}</td>
+                                                                <td>{{ number_format($item['unit_price'], 2) }}
+                                                                    {{ $site_currency }}</td>
+                                                                <td>{{ number_format($item['subtotal'], 2) }}
+                                                                    {{ $site_currency }}</td>
                                                             </tr>
                                                         @endforeach
                                                     </tbody>

@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Payment\Models;
+namespace App\Order\Models;
 
-use App\Order\Models\Order;
-use App\Payment\Models\Payment;
 use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
@@ -68,7 +66,7 @@ class Invoice extends Model
 
 
         if (in_array('order', $eager_list) && $this->order_id) {
-            $response['order'] = $this->order ? $this->order->jsonResponse(['products','user','paymentMethod']) : null;
+            $response['order'] = $this->order ? $this->order->jsonResponse(['products', 'user', 'paymentMethod']) : null;
         }
 
         if (in_array('payments', $eager_list)) {

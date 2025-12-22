@@ -2,21 +2,14 @@
 
 use App\Article\Controllers\ArticleController;
 use App\Auth\Controllers\UserController;
-use App\Auth\Middlewares\AdminMiddleware;
 use App\ContactMessage\Controllers\ContactMessageController;
 use App\Dashboard\Controllers\DashboardController;
 use App\Inventory\Controllers\BrandController;
 use App\Inventory\Controllers\CategoryController;
-use App\Inventory\Controllers\ProductAttributeController;
 use App\Inventory\Controllers\ProductController;
-use App\Inventory\Controllers\ProductVariantAttributeController;
 use App\Inventory\Controllers\ProductVariantController;
-use App\Inventory\Models\ProductVariantAttribute;
 use App\Order\Controllers\OrderController;
-use App\Payment\Controllers\InvoiceController;
-use App\Payment\Controllers\PaymentController;
 use App\Payment\Controllers\PaymentMethodController;
-use App\Payment\Controllers\TransactionController;
 use App\Shipping\Controllers\ShippingClassController;
 use App\Shipping\Controllers\ShippingMethodController;
 use App\Shipping\Controllers\ShippingRateController;
@@ -33,6 +26,9 @@ use App\Store\Controllers\MediaImageController;
 use App\Store\Controllers\StoreBranchController;
 use App\Inventory\Controllers\ProductInventoryLogController;
 use App\FAQ\Controllers\FAQController;
+use App\Order\Controllers\InvoiceController;
+use App\Order\Controllers\PaymentController;
+use App\Order\Controllers\TransactionController;
 
 Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
     Route::prefix('/dashboard')->group(function () {
@@ -59,15 +55,6 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::get('/api/sale-brand-pie', 'getSaleBrandPieAPI');
         });
 
-        // contact message routes
-        Route::controller(ContactMessageController::class)->group(function () {
-            Route::middleware('admin:manage_contact_message')->delete('/contact_message/bulk/delete-selected', 'deleteSelectedMessages')->name('admin.dashboard.contact_message.bulk.delete-selected');
-            Route::middleware('admin:manage_contact_message')->delete('/contact_message/bulk/delete-all', 'deleteAllMessages')->name('admin.dashboard.contact_message.bulk.delete-all');
-
-            Route::middleware('admin:manage_contact_message')->get('/contact_message', 'viewAdminContactMessageListPage')->name('admin.dashboard.contact_message.get');
-            Route::middleware('admin:manage_contact_message')->post('/contact_message/{id}', 'updateMessage')->name('admin.dashboard.contact_message.id.post');
-            Route::middleware('admin:manage_contact_message')->delete('/contact_message/{id}', 'deleteMessage')->name('admin.dashboard.contact_message.id.delete');
-        });
 
         // user routes
         Route::controller(UserController::class)->group(function () {
@@ -98,19 +85,6 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::middleware('admin:manage_users')->delete('/user/{id}', 'deleteUserAdmin')->name('admin.dashboard.user.id.delete');
         });
 
-        // blog routes 
-        Route::middleware('admin:manage_articles')->controller(ArticleController::class)->group(function () {
-            Route::delete('/article/bulk/delete-selected', 'deleteSelectedArticles')->name('admin.dashboard.article.bulk.delete-selected');
-            Route::delete('/article/bulk/delete-all', 'deleteAllArticles')->name('admin.dashboard.article.bulk.delete-all');
-
-            Route::get('/article', 'viewAdminArticleListPage')->name('admin.dashboard.article.get');
-            Route::get('/article/edit/{id}', 'viewAdminEditArticlePage')->name('admin.dashboard.article.edit.id.get');
-            Route::get('/article/create', 'viewAdminCreateArticlePage')->name('admin.dashboard.article.create.get');
-            Route::post('/article', 'createArticle')->name('admin.dashboard.article.post');
-            Route::post('/article/{id}', 'updateArticle')->name('admin.dashboard.article.id.post');
-            Route::delete('/article/{id}', 'deleteArticle')->name('admin.dashboard.article.id.delete');
-        });
-
         // store routes
         Route::middleware('admin:manage_faqs')->controller(FAQController::class)->group(function () {
             Route::delete('/store/faq/bulk/delete-selected', 'deleteSelectedFAQ')->name('admin.dashboard.store.faq.bulk.delete-selected');
@@ -122,48 +96,59 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::delete('/store/faq/{id}', 'deleteFAQ')->name('admin.dashboard.store.faq.id.delete');
         });
 
+        Route::middleware('admin:manage_contact_message')->controller(ContactMessageController::class)->group(function () {
+            Route::delete('/store/contact_message/bulk/delete-selected', 'deleteSelectedMessages')->name('admin.dashboard.store.contact_message.bulk.delete-selected');
+            Route::delete('/store/contact_message/bulk/delete-all', 'deleteAllMessages')->name('admin.dashboard.store.contact_message.bulk.delete-all');
+
+            Route::get('/store/contact_message', 'viewAdminContactMessageListPage')->name('admin.dashboard.store.contact_message.get');
+            Route::post('/store/contact_message/{id}', 'updateMessage')->name('admin.dashboard.store.contact_message.id.post');
+            Route::delete('/store/contact_message/{id}', 'deleteMessage')->name('admin.dashboard.store.contact_message.id.delete');
+        });
+
+        Route::middleware('admin:manage_articles')->controller(ArticleController::class)->group(function () {
+            Route::delete('/store/article/bulk/delete-selected', 'deleteSelectedArticles')->name('admin.dashboard.store.article.bulk.delete-selected');
+            Route::delete('/store/article/bulk/delete-all', 'deleteAllArticles')->name('admin.dashboard.store.article.bulk.delete-all');
+
+            Route::get('/store/article', 'viewAdminArticleListPage')->name('admin.dashboard.store.article.get');
+            Route::get('/store/article/edit/{id}', 'viewAdminEditArticlePage')->name('admin.dashboard.store.article.edit.id.get');
+            Route::get('/store/article/create', 'viewAdminCreateArticlePage')->name('admin.dashboard.store.article.create.get');
+            Route::post('/store/article', 'createArticle')->name('admin.dashboard.store.article.post');
+            Route::post('/store/article/{id}', 'updateArticle')->name('admin.dashboard.store.article.id.post');
+            Route::delete('/store/article/{id}', 'deleteArticle')->name('admin.dashboard.store.article.id.delete');
+        });
+
         Route::middleware('admin:manage_media_images')->controller(MediaImageController::class)->group(function () {
             Route::delete('/store/media-image/bulk/delete-selected', 'deleteSelectedMediaImages')->name('admin.dashboard.store.media-image.bulk.delete-selected');
             Route::delete('/store/media-image/bulk/delete-all', 'deleteAllMediaImages')->name('admin.dashboard.store.media-image.bulk.delete-all');
 
-            Route::get('/store/media-image', 'viewAdminMediaImageListPage')
-                ->name('admin.dashboard.store.media-image.get');
-
-            Route::post('/store/media-image', 'createMediaImage')
-                ->name('admin.dashboard.store.media-image.post');
-
-            Route::post('/store/media-image/{id}', 'updateMediaImage')
-                ->name('admin.dashboard.media-image.id.post');
-
-            Route::delete('/store/media-image/{id}', 'deleteMediaImage')
-                ->name('admin.dashboard.media-image.id.delete');
+            Route::get('/store/media-image', 'viewAdminMediaImageListPage')->name('admin.dashboard.store.media-image.get');
+            Route::post('/store/media-image', 'createMediaImage')->name('admin.dashboard.store.media-image.post');
+            Route::post('/store/media-image/{id}', 'updateMediaImage')->name('admin.dashboard.media-image.id.post');
+            Route::delete('/store/media-image/{id}', 'deleteMediaImage')->name('admin.dashboard.media-image.id.delete');
         });
 
         Route::middleware('admin:manage_branches')->controller(StoreBranchController::class)->group(function () {
             Route::delete('/store/bulk/delete-selected', 'deleteSelectedStoreBranches')->name('admin.dashboard.store.bulk.delete-selected');
             Route::delete('/store/bulk/delete-all', 'deleteAllStoreBranches')->name('admin.dashboard.store.bulk.delete-all');
 
-            Route::get('/store', 'viewAdminStoreBranchListPage')
-                ->name('admin.dashboard.store.get');
-
-            Route::post('/store', 'createStoreBranch')
-                ->name('admin.dashboard.store.post');
-
-            Route::post('/store/{id}', 'updateStoreBranch')
-                ->name('admin.dashboard.store.id.post');
-
-            Route::delete('/store/{id}', 'deleteStoreBranch')
-                ->name('admin.dashboard.store.id.delete');
+            Route::get('/store', 'viewAdminStoreBranchListPage')->name('admin.dashboard.store.get');
+            Route::post('/store', 'createStoreBranch')->name('admin.dashboard.store.post');
+            Route::post('/store/{id}', 'updateStoreBranch')->name('admin.dashboard.store.id.post');
+            Route::delete('/store/{id}', 'deleteStoreBranch')->name('admin.dashboard.store.id.delete');
         });
 
 
-
-
         // product routes
-
         Route::middleware('admin:manage_product_inventory')->controller(ProductInventoryLogController::class)->group(function () {
-            Route::get('/product/inventory-logs', 'viewAdminInventoryLogPage')
-                ->name('admin.dashboard.product.inventory-logs.get');
+            Route::delete('/product/inventory/bulk/delete-selected', 'deleteSelectedTransactions')->name('admin.dashboard.product.inventory.bulk.delete-selected');
+            Route::delete('/product/inventory/bulk/delete-all', 'deleteAllTransactions')->name('admin.dashboard.product.inventory.bulk.delete-all');
+
+            Route::get('/product/inventory/search', 'searchProducts')->name('admin.dashboard.product.inventory.search.get');
+            Route::get('/product/inventory', 'viewAdminInventoryLogListPage')->name('admin.dashboard.product.inventory.get');
+            Route::get('/product/inventory/{id}', 'viewAdminLogDetailPage')->name('admin.dashboard.product.inventory.id.get');
+            Route::post('/product/inventory', 'createTransaction')->name('admin.dashboard.product.inventory.post');
+            Route::post('/product/inventory/{id}', 'updateTransaction')->name('admin.dashboard.product.inventory.id.post');
+            Route::delete('/product/inventory/{id}', 'deleteTransaction')->name('admin.dashboard.product.inventory.id.delete');
         });
 
         Route::middleware('admin:manage_reviews')->controller(ProductReviewReplyController::class)->group(function () {
@@ -199,7 +184,6 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
         });
 
         Route::middleware('admin:manage_coupons')->controller(CouponController::class)->group(function () {
-
             Route::delete('/product/coupon/bulk/delete-selected', 'deleteSelectedCoupons')->name('admin.dashboard.product.coupon.bulk.delete-selected');
             Route::delete('/product/coupon/bulk/delete-all', 'deleteAllCoupons')->name('admin.dashboard.product.coupon.bulk.delete-all');
 
@@ -245,6 +229,8 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::post('/product/bulk/update-payment-method-all', 'updatePaymentMethodAll')->name('admin.dashboard.product.bulk.update-payment-method-all');
             Route::post('/product/bulk/update-shipping-class-selected', 'updateShippingClassSelected')->name('admin.dashboard.product.bulk.update-shipping-class-selected');
             Route::post('/product/bulk/update-shipping-class-all', 'updateShippingClassAll')->name('admin.dashboard.product.bulk.update-shipping-class-all');
+            Route::post('/product/bulk/update-tax-class-selected', 'updateTaxClassSelected')->name('admin.dashboard.product.bulk.update-tax-class-selected');
+            Route::post('/product/bulk/update-tax-class-all', 'updateTaxClassAll')->name('admin.dashboard.product.bulk.update-tax-class-all');
             Route::delete('/product/bulk/delete-selected', 'deleteSelectedProducts')->name('admin.dashboard.product.bulk.delete-selected');
             Route::delete('/product/bulk/delete-all', 'deleteAllProducts')->name('admin.dashboard.product.bulk.delete-all');
 
@@ -261,7 +247,56 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
 
 
         // order routes
+
+        Route::middleware('admin:manage_invoices')->controller(InvoiceController::class)->group(function () {
+            Route::delete('/order/invoice/bulk/delete-selected', 'deleteSelectedInvoices')->name('admin.dashboard.order.invoice.bulk.delete-selected');
+            Route::delete('/order/invoice/bulk/delete-all', 'deleteAllInvoices')->name('admin.dashboard.order.invoice.bulk.delete-all');
+
+            Route::get('/order/invoice/{id}', 'viewAdminInvoiceDetailPage')->name('admin.dashboard.order.invoice.id.get');
+
+            Route::get('/order/invoice', 'viewAdminInvoiceListPage')->name('admin.dashboard.order.invoice.get');
+
+            Route::delete('/order/invoice/{id}', 'deleteAdminInvoice')->name('admin.dashboard.order.invoice.id.delete');
+        });
+
+        Route::middleware('admin:manage_payments')->controller(PaymentController::class)->group(function () {
+            Route::delete('/order/payment/bulk/delete-selected', 'deleteSelectedPayments')->name('admin.dashboard.order.payment.bulk.delete-selected');
+            Route::delete('/order/payment/bulk/delete-all', 'deleteAllPayments')->name('admin.dashboard.order.payment.bulk.delete-all');
+
+            Route::get('/order/payment/{id}', 'viewAdminPaymentDetailPage')->name('admin.dashboard.order.payment.id.get');
+
+            Route::get('/order/payment', 'viewAdminPaymentListPage')->name('admin.dashboard.order.payment.get');
+
+            Route::delete('/order/payment/{id}', 'deleteAdminPayment')->name('admin.dashboard.order.payment.id.delete');
+        });
+
+        Route::middleware('admin:manage_transactions')->controller(TransactionController::class)->group(function () {
+            Route::delete('/order/transaction/bulk/delete-selected', 'deleteSelectedTransactions')->name('admin.dashboard.order.transaction.bulk.delete-selected');
+            Route::delete('/order/transaction/bulk/delete-all', 'deleteAllTransactions')->name('admin.dashboard.order.transaction.bulk.delete-all');
+
+            Route::get('/order/transaction/{id}', 'viewAdminTransactionDetailPage')->name('admin.dashboard.order.transaction.id.get');
+
+            Route::get('/order/transaction', 'viewAdminTransactionListPage')->name('admin.dashboard.order.transaction.get');
+
+            Route::delete('/order/transaction/{id}', 'deleteAdminTransaction')->name('admin.dashboard.order.transaction.id.delete');
+        });
+
+
         Route::middleware('admin:manage_orders')->controller(OrderController::class)->group(function () {
+
+            Route::post('/order/{id}/create-invoice', 'createOrderInvoice')->name('admin.dashboard.order.id.create-invoice.post');
+
+            Route::post('/order/{id}/complete-invoice-payment', 'completeInvoicePayment')->name('admin.dashboard.order.id.complete-invoice-payment.post');
+
+            Route::post('/order/{id}/cancel-invoice-payment', 'cancelInvoicePayment')->name('admin.dashboard.order.id.cancel-invoice-payment.post');
+
+            Route::post('/order/{id}/refund-invoice-payment', 'refundInvoicePayment')->name('admin.dashboard.order.id.refund-invoice-payment.post');
+
+            Route::post('/order/{id}/consume-order-stock', 'consumeOrderStock')->name('admin.dashboard.order.id.consume-order-stock.post');
+
+            Route::post('/order/{id}/refund-order-stock', 'refundOrderStock')->name('admin.dashboard.order.id.refund-order-stock.post');
+
+
             Route::delete('/order/bulk/delete-selected', 'deleteSelectedOrders')->name('admin.dashboard.order.bulk.delete-selected');
             Route::delete('/order/bulk/delete-all', 'deleteAllOrders')->name('admin.dashboard.order.bulk.delete-all');
 
@@ -273,6 +308,8 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
 
             Route::delete('/order/{id}', 'deleteAdminOrder')->name('admin.dashboard.order.id.delete');
         });
+
+
 
         // shipping routes
         Route::middleware('admin:manage_shipping_classes')->controller(ShippingClassController::class)->group(function () {
@@ -373,37 +410,6 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
         });
 
         // payment routes
-        Route::middleware('admin:manage_invoices')->controller(InvoiceController::class)->group(function () {
-
-            Route::delete('/payment/invoice/bulk/delete-selected', 'deleteSelectedInvoices')->name('admin.dashboard.payment.invoice.bulk.delete-selected');
-            Route::delete('/payment/invoice/bulk/delete-all', 'deleteAllInvoices')->name('admin.dashboard.payment.invoice.bulk.delete-all');
-
-            Route::get('/payment/invoice/{id}', 'viewAdminInvoiceDetailPage')->name('admin.dashboard.payment.invoice.id.get');
-
-            Route::get('/payment/invoice', 'viewAdminInvoiceListPage')->name('admin.dashboard.payment.invoice.get');
-
-            Route::delete('/payment/invoice/{id}', 'deleteAdminInvoice')->name('admin.dashboard.payment.invoice.id.delete');
-        });
-
-        Route::middleware('admin:manage_payments')->controller(PaymentController::class)->group(function () {
-            Route::post('/order/{id}/pay', 'completePayment')->name('admin.dashboard.order.id.pay.post');
-
-            Route::delete('/payment/payment/bulk/delete-selected', 'deleteSelectedPayments')->name('admin.dashboard.payment.payment.bulk.delete-selected');
-            Route::delete('/payment/payment/bulk/delete-all', 'deleteAllPayments')->name('admin.dashboard.payment.payment.bulk.delete-all');
-
-            Route::get('/payment/payment', 'viewAdminPaymentListPage')->name('admin.dashboard.payment.payment.get');
-
-            Route::delete('/payment/payment/{id}', 'deleteAdminPayment')->name('admin.dashboard.payment.payment.id.delete');
-        });
-
-        Route::middleware('admin:manage_transactions')->controller(TransactionController::class)->group(function () {
-            Route::delete('/payment/transaction/bulk/delete-selected', 'deleteSelectedTransactions')->name('admin.dashboard.payment.transaction.bulk.delete-selected');
-            Route::delete('/payment/transaction/bulk/delete-all', 'deleteAllTransactions')->name('admin.dashboard.payment.transaction.bulk.delete-all');
-
-            Route::get('/payment/transaction', 'viewAdminTransactionListPage')->name('admin.dashboard.payment.transaction.get');
-
-            Route::delete('/payment/transaction/{id}', 'deleteAdminTransaction')->name('admin.dashboard.payment.transaction.id.delete');
-        });
 
         Route::middleware('admin:manage_payment_methods')->controller(PaymentMethodController::class)->group(function () {
             Route::delete('/payment/payment-method/bulk/delete-selected', 'deleteSelectedPaymentMethods')->name('admin.dashboard.payment.payment-method.bulk.delete-selected');

@@ -1,7 +1,7 @@
 @extends('layouts.admin.admin_dashboard')
 
 @section('admin_dashboard_content')
-    <div class="p-5">
+    <div class="p-3 lg:p-5">
         <p class="lg:text-lg font-semibold">Dashboard</p>
 
         <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">

@@ -13,12 +13,12 @@
                     <thead>
                         <tr>
                             <th class="w-[50px]">No.</th>
-                            <th class="w-[150px]">Invoice Number</th>
-                            <th class="w-[150px]">Order Number</th>
-                            <th class="w-[150px]">Status</th>
-                            <th class="w-[150px]">Total</th>
-                            <th class="w-[150px]">Download</th>
-                            <th class="w-[150px]">Actions</th>
+                            <th>Invoice Number</th>
+                            <th>Order Number</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Download</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -52,7 +52,8 @@
                                             default => 'badge-ghost',
                                         };
                                     @endphp
-                                    <div class="badge {{ $color }} badge-outline capitalize">
+                                    <div
+                                        class="badge badge-sm {{ $color }} border border-base-300 text-xs capitalize">
                                         {{ $invoice['status'] }}
                                     </div>
                                 </td>
@@ -73,13 +74,7 @@
                                             </span>
                                         </button>
                                     </form>
-                                    {{-- <a href="{{ route('order.id.invoice.id.download.get', [
-                                        'order_id' => $invoice['order_id'],
-                                        'invoice_id' => $invoice['id'],
-                                    ]) }}"
-                                        class="btn btn-sm">
-                                        Download Invoice
-                                    </a> --}}
+
                                 </td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
@@ -105,7 +100,6 @@
                                 </td>
                             </tr>
 
-                            {{-- Invoice Detail Modal --}}
                             <dialog id="detail_modal_{{ $invoice['id'] }}" class="modal">
                                 <div class="modal-box max-h-[85vh] max-w-2xl">
                                     <form method="dialog">
@@ -116,35 +110,79 @@
                                         Invoice #{{ $invoice['invoice_number'] }}
                                     </h3>
 
-                                    <div class="text-sm space-y-2">
-                                        <p><strong>ID:</strong> {{ $invoice['id'] }}</p>
-                                        <p><strong>Order:</strong> {{ $invoice['order']['order_number'] ?? '-' }}</p>
-                                        <p><strong>Status:</strong>
-                                            <span
-                                                class="badge {{ $color }} badge-outline">{{ ucfirst($invoice['status']) }}</span>
-                                        </p>
-                                        <p><strong>Subtotal:</strong>{{ number_format($invoice['subtotal'], 2) }} {{ $site_currency }}</p>
-                                        <p><strong>Discount:</strong> -{{ number_format($invoice['discount_total'], 2) }} {{ $site_currency }}
-                                        </p>
-                                        <p><strong>Tax:</strong> +{{ number_format($invoice['tax_total'], 2) }} {{ $site_currency }}</p>
-                                        <p><strong>Shipping:</strong> +{{ number_format($invoice['shipping_total'], 2) }} {{ $site_currency }}
-                                        </p>
-                                        <p><strong>Grand Total:</strong> <span
-                                                class="font-semibold">{{ number_format($invoice['grand_total'], 2) }} {{ $site_currency }}</span>
-                                        </p>
-                                        <p><strong>Issued At:</strong> {{ $invoice['issued_at'] }}</p>
-                                        <p><strong>Due At:</strong> {{ $invoice['due_at'] ?? '-' }}</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="text-sm">Invoice ID</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ $invoice['id'] }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm">Order ID</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ $invoice['id'] }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm">Invoice Number</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ $invoice['invoice_number'] }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm">Subtotal</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ number_format($invoice['subtotal'], 2) }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm">Shipping Cost</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ number_format($invoice['shipping_total'], 2) }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm">Tax Cost</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ number_format($invoice['tax_total'], 2) }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm">Discount Total</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ number_format($invoice['discount_total'], 2) }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="text-sm">Grand Total</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ number_format($invoice['grand_total'], 2) }}" readonly>
+                                        </div>
+                                        <div>
+                                            {{ $invoice['status'] }}
+                                            @php
+                                                $input_color = match ($invoice['status']) {
+                                                    'unpaid' => 'bg-error',
+                                                    'paid' => 'bg-success',
+                                                    'refunded' => 'bg-warning',
+                                                    default => 'bg-ghost',
+                                                };
+                                            @endphp
+                                            <label class="text-sm">Payment Status</label>
+                                            <input type="text" class="input w-full border-base-300 {{ $input_color }}"
+                                                value="{{ ucfirst($invoice['status']) }}" readonly>
+                                        </div>
+
+                                        <div>
+                                            <label class="text-sm">Issued At</label>
+                                            <input type="text" class="input w-full border-base-300"
+                                                value="{{ \Carbon\Carbon::parse($invoice['created_at'])->format('Y-m-d h:i A') }}"
+                                                readonly>
+                                        </div>
                                     </div>
 
                                     <div class="modal-action mt-6">
                                         <form method="dialog">
-                                            <button class="btn">Close</button>
+                                            <button class="btn w-fit">Close</button>
                                         </form>
                                     </div>
                                 </div>
                             </dialog>
 
-                            <dialog id="delete_modal_{{ $invoice['id'] }}" class="modal">
+                            {{-- <dialog id="delete_modal_{{ $invoice['id'] }}" class="modal">
                                 <div class="modal-box">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -169,7 +207,7 @@
                                         </form>
                                     </div>
                                 </div>
-                            </dialog>
+                            </dialog> --}}
                         @endforeach
                     </tbody>
                 </table>

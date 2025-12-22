@@ -3,23 +3,25 @@
 namespace App\Order\Controllers;
 
 use App\Auth\Models\Address;
-use App\Auth\Models\Notification;
 use App\Cart\Models\Cart;
 use App\Inventory\Models\Coupon;
+use App\Inventory\Models\Product;
+use App\Inventory\Models\ProductInventoryLog;
+use App\Inventory\Models\ProductVariant;
 use App\Inventory\Services\CouponService;
+use App\Order\Models\Invoice;
 use App\Order\Models\Order;
 use App\Order\Models\OrderProduct;
-use App\Order\Services\OrderMailService;
+use App\Order\Models\Payment;
+use App\Order\Models\Transaction;
 use App\Order\Services\OrderNotificationService;
 use App\Order\Services\OrderService;
-use App\Payment\Models\Invoice;
 use App\Shipping\Services\ShippingMethodService;
 use App\Tax\Services\TaxRateService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class OrderController
 {
@@ -146,23 +148,32 @@ class OrderController
     public function viewAdminOrderDetailPage(Request $request, $id)
     {
         try {
-            $order = OrderService::getOrder(intval($id));
+            $order = OrderService::getOrder((int) $id);
 
-            if (!$order) abort(404, 'No Order Found');
+            if (!$order) {
+                abort(404, 'No Order Found');
+            }
 
-            $invoices = Invoice::where('order_id', $id)->get();
-            $invoices = $invoices->map(function ($invoice) {
-                return $invoice->jsonResponse();
-            });
+            $invoices = Invoice::where('order_id', $id)->orderBy('id', 'desc')->get();
+            $invoices = $invoices->map(fn($i) => $i->jsonResponse(['payments']));
+
+            $payments = Payment::where('order_id', $id)->orderBy('id', 'desc')->get();
+            $payments = $payments->map(fn($i) => $i->jsonResponse(['invoice', 'order']));
+
+            $transactions = Transaction::where('order_id', $id)->orderBy('id', 'desc')->get();
+            $transactions = $transactions->map(fn($i) => $i->jsonResponse(['user', 'invoice', 'order']));
 
             return view('pages.admin.dashboard.order.order_detail', [
-                'order' => $order,
-                'invoices' => $invoices,
+                'order'        => $order,
+                'invoices'     => $invoices,
+                'payments'     => $payments,
+                'transactions' => $transactions,
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return handleErrors($e);
         }
     }
+
 
     public function createOrder(Request $request)
     {
@@ -170,19 +181,6 @@ class OrderController
             $user = auth()->user();
 
             $validated = $request->validate([
-                // 'cart_items' => 'required|array|min:1',
-                // 'cart_items.*.id' => 'required|integer|exists:products,id',
-                // 'cart_items.*.variant_id' => 'nullable|integer|exists:product_variants,id',
-                // 'cart_items.*.name' => 'required|string|max:150',
-                // 'cart_items.*.sku' => 'required|string|max:150',
-                // 'cart_items.*.price' => 'required|numeric|min:0',
-                // 'cart_items.*.quantity' => 'required|integer|min:1',
-                // 'cart_items.*.tax' => 'nullable|numeric|min:0',
-                // 'cart_items.*.shipping_cost' => 'nullable|numeric|min:0',
-                // 'cart_items.*.discount' => 'nullable|numeric|min:0',
-                // 'shipping_cost_total' => 'required|numeric',
-                // 'tax_cost_total' => 'required|numeric',
-                // 'discount_total' => 'nullable|numeric',
                 'coupon_code' => 'nullable|string',
 
                 'shipping_address' => 'required|array',
@@ -296,7 +294,7 @@ class OrderController
             $invoice = Invoice::firstOrCreate(
                 ['order_id' => $order->id],
                 [
-                    'invoice_number' => sprintf('INV-%s', $order->order_number),
+                    'invoice_number' => $this->generateInvoiceNumber($order),
                     'subtotal' => $order->subtotal,
                     'discount_total' => $order->discount_total,
                     'tax_total' => $order->tax_total,
@@ -312,11 +310,7 @@ class OrderController
                 if (!$applied) abort(400, 'Coupon Code Is Invalid');
             }
 
-            $consumed = OrderService::consumeOrderProductQuantity($order->id);
-            if (!$consumed) {
-                abort(400, 'Stock is not sufficient for order');
-            }
-
+            // saving addresses
             if (!$user->addresses()->where('is_default_shipping', true)->exists()) {
                 Address::create(array_merge($shipping_address, [
                     'label' => $shipping_address['recipient_name'],
@@ -335,8 +329,8 @@ class OrderController
                 ]));
             }
 
+            // clean cart
             $cart->delete();
-
 
             DB::commit();
 
@@ -360,7 +354,7 @@ class OrderController
             if (!$order) abort(404, "No order found [ID:{$id}]");
 
             $validated = $request->validate([
-                'status' => 'nullable|string|in:pending,processing,shipped,delivered,cancelled,refunded',
+                'status' => 'nullable|string|in:pending,processing,shipped,delivered,completed,cancelled,refunded',
                 'subtotal' => 'nullable|numeric|min:0',
                 'discount_total' => 'nullable|numeric|min:0',
                 'tax_total' => 'nullable|numeric|min:0',
@@ -429,6 +423,298 @@ class OrderController
         }
     }
 
+    public function createOrderInvoice(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'order_id' => 'required|exists:orders,id',
+                'issue_amount_percentage' => 'required|in:10,25,50,75,100'
+            ]);
+
+            $order = Order::find($validated['order_id']);
+
+            // if ($validated['issue_amount_percentage'] == 100) {
+            //     $existing = Invoice::where('order_id', $order->id)->exists();
+            //     if ($existing) {
+            //         return abort(422,  '< 100% Invoice already exists for this order.');
+            //     }
+            // }
+
+            $percentage = (int) $validated['issue_amount_percentage'] / 100;
+
+            Invoice::create([
+                'order_id'         => $order->id,
+                'invoice_number'   => $this->generateInvoiceNumber($order),
+                'subtotal'         => round($order->subtotal * $percentage, 2),
+                'discount_total'   => round($order->discount_total * $percentage, 2),
+                'tax_total'        => round($order->tax_total * $percentage, 2),
+                'shipping_total'   => round($order->shipping_total * $percentage, 2),
+                'grand_total'      => round($order->grand_total * $percentage, 2),
+                'status'           => 'unpaid',
+                'issued_at'        => now(),
+            ]);
+
+            return redirect()->back()->with('success', 'Invoice created successfully');
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
+    public function completeInvoicePayment(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'invoice_id' => 'required|exists:invoices,id',
+            ]);
+
+            DB::beginTransaction();
+
+            $invoice = Invoice::lockForUpdate()->findOrFail($validated['invoice_id']);
+
+            if ($invoice->status === 'paid') {
+                return abort(422,  'Invoice is already paid.');
+            }
+
+            if ($invoice->status === 'refunded') {
+                return abort(422,  'Refunded invoice cannot be paid. Create new invoice and complete payment.');
+            }
+
+            $payment = Payment::create([
+                'order_id' => $invoice->order_id,
+                'invoice_id' => $invoice->id,
+                'amount'     => $invoice->grand_total,
+            ]);
+
+            Transaction::create([
+                'order_id'   => $invoice->order_id,
+                'invoice_id' => $invoice->id,
+                'payment_id' => $payment->id,
+                'user_id'    => auth()->id(),
+                'status'     => 'succeeded',
+                'amount'     => $payment->amount,
+            ]);
+
+            $invoice->update([
+                'status' => 'paid',
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Invoice payment completed successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return handleErrors($e);
+        }
+    }
+
+
+    public function cancelInvoicePayment(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'invoice_id' => 'required|exists:invoices,id',
+            ]);
+
+            DB::beginTransaction();
+
+            $invoice = Invoice::lockForUpdate()->findOrFail($validated['invoice_id']);
+
+            $payments = Payment::where('invoice_id', $invoice->id)->get();
+
+            if ($payments->isEmpty()) {
+                return abort(422,  'No payments found for this invoice.');
+            }
+
+            foreach ($payments as $payment) {
+                Transaction::create([
+                    'order_id'   => $invoice->order_id,
+                    'invoice_id' => $invoice->id,
+                    'payment_id' => $payment->id,
+                    'user_id'    => auth()->id(),
+                    'status'     => 'cancelled',
+                    'amount'     => $payment->amount,
+                ]);
+            }
+
+            Payment::where('invoice_id', $invoice->id)->delete();
+
+            $invoice->update([
+                'status' => 'unpaid',
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Invoice payments cancelled successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return handleErrors($e);
+        }
+    }
+
+
+    public function refundInvoicePayment(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'invoice_id' => 'required|exists:invoices,id',
+            ]);
+
+            DB::beginTransaction();
+
+            $invoice = Invoice::lockForUpdate()->findOrFail($validated['invoice_id']);
+
+            $payments = Payment::where('invoice_id', $invoice->id)->get();
+
+            if ($payments->isEmpty()) {
+                return abort(422, 'No payments found for this invoice.');
+            }
+
+            foreach ($payments as $payment) {
+                Transaction::create([
+                    'order_id'   => $invoice->order_id,
+                    'invoice_id' => $invoice->id,
+                    'payment_id' => $payment->id,
+                    'user_id'    => auth()->id(),
+                    'status'     => 'refunded',
+                    'amount'     => $payment->amount,
+                ]);
+            }
+
+            Payment::where('invoice_id', $invoice->id)->delete();
+
+            $invoice->update([
+                'status' => 'refunded',
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Invoice payments refunded successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return handleErrors($e);
+        }
+    }
+
+
+    public function consumeOrderStock(int $orderId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $order = Order::with('products')
+                ->lockForUpdate()
+                ->findOrFail($orderId);
+
+            foreach ($order->products as $item) {
+
+                $product = Product::lockForUpdate()->findOrFail($item->product_id);
+
+                $variant = $item->variant_id
+                    ? ProductVariant::lockForUpdate()->findOrFail($item->variant_id)
+                    : null;
+
+                $stockSource = $variant ?: $product;
+
+                if (!$stockSource->enable_stock) {
+                    continue;
+                }
+
+                $before = $stockSource->stock;
+                $after  = $before - $item->quantity;
+
+                if ($after < 0) {
+                    abort(400, "Insufficient stock for {$item->name}");
+                }
+
+                $stockSource->update([
+                    'stock' => $after,
+                ]);
+
+                ProductInventoryLog::create([
+                    'product_id'     => $product->id,
+                    'variant_id'     => $variant?->id,
+                    'action_type'    => 'out',
+                    'quantity'       => $item->quantity,
+                    'stock_before'   => $before,
+                    'stock_after'    => $after,
+                    'reference_type' => 'order',
+                    'reference_id'   => $order->id,
+                    'note'           => 'Order stock consumption',
+                    'created_by'     => auth()->id(),
+                ]);
+            }
+
+            $order->update([
+                'stock_consumed' => true
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Order stock are consumed successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            handleErrors($e);
+        }
+    }
+
+    public function refundOrderStock(int $orderId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $order = Order::with('products')
+                ->lockForUpdate()
+                ->findOrFail($orderId);
+
+            foreach ($order->products as $item) {
+
+                $product = Product::lockForUpdate()->findOrFail($item->product_id);
+
+                $variant = $item->variant_id
+                    ? ProductVariant::lockForUpdate()->findOrFail($item->variant_id)
+                    : null;
+
+                $stockSource = $variant ?: $product;
+
+                if (!$stockSource->enable_stock) {
+                    continue;
+                }
+
+                $before = $stockSource->stock;
+                $after  = $before + $item->quantity;
+
+                $stockSource->update([
+                    'stock' => $after,
+                ]);
+
+                ProductInventoryLog::create([
+                    'product_id'     => $product->id,
+                    'variant_id'     => $variant?->id,
+                    'action_type'    => 'in',
+                    'quantity'       => $item->quantity,
+                    'stock_before'   => $before,
+                    'stock_after'    => $after,
+                    'reference_type' => 'order_refund',
+                    'reference_id'   => $order->id,
+                    'note'           => 'Order stock refund',
+                    'created_by'     => auth()->id(),
+                ]);
+            }
+
+            $order->update([
+                'stock_consumed' => false
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Order stock are refunded successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            handleErrors($e);
+        }
+    }
+
+
     public function viewOrderInvoice(Request $request, int $order_id, int $invoice_id)
     {
         try {
@@ -445,7 +731,6 @@ class OrderController
             return handleErrors($e);
         }
     }
-
 
     public function downloadOrderInvoice(Request $request, int $order_id, int $invoice_id)
     {
@@ -540,5 +825,16 @@ class OrderController
         } catch (\Exception $error) {
             return handleErrors($error, "Something went wrong while deleting all orders.");
         }
+    }
+
+    private function generateInvoiceNumber(Order $order): string
+    {
+        $count = Invoice::where('order_id', $order->id)->count() + 1;
+
+        return sprintf(
+            'INV-%s-%02d',
+            $order->order_number,
+            $count
+        );
     }
 }

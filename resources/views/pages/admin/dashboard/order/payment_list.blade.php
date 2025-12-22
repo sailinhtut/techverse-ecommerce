@@ -1,7 +1,12 @@
+@php
+    $site_currency = getParsedTemplate('site_currency');
+@endphp
+
 @extends('layouts.admin.admin_dashboard')
 @section('admin_dashboard_content')
-    <div class="p-5 min-h-screen">
-        <p class="lg:text-lg font-semibold">Invoices</p>
+    <div class="p-3 lg:p-5 min-h-screen">
+        <p class="lg:text-lg font-semibold">Payments</p>
+
 
         <div class="mt-3 flex xl:flex-row flex-col justify-between gap-2">
             <div class="flex flex-row gap-2 flex-wrap" x-data>
@@ -27,13 +32,13 @@
                     <p class="text-lg font-semibold py-0">Confirm Delete</p>
                     <p class="py-2 mb-0 text-sm">
                         Are you sure you want to delete
-                        <span class="italic text-error">Selected Invoices</span>?
+                        <span class="italic text-error">Selected Payments</span>?
                     </p>
 
                     <template x-if="$store.bulk.hasCandidates">
                         <ul class="text-sm pl-10 list-decimal max-h-24 overflow-y-auto bg-base-200 p-3">
                             <template x-for="id in $store.bulk.candidates" :key="id">
-                                <li x-text="'Invoice ID: ' + id"></li>
+                                <li x-text="'Payment ID: ' + id"></li>
                             </template>
                         </ul>
                     </template>
@@ -41,7 +46,7 @@
                     <div class="mt-3 modal-action">
                         <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
 
-                        <form method="POST" action="{{ route('admin.dashboard.payment.invoice.bulk.delete-selected') }}"
+                        <form method="POST" action="{{ route('admin.dashboard.order.payment.bulk.delete-selected') }}"
                             @submit="loading = true">
                             @csrf
                             @method('DELETE')
@@ -68,13 +73,13 @@
                     <p class="text-lg font-semibold">Confirm Delete</p>
                     <p class="text-sm mb-4">
                         Are you sure you want to delete
-                        <span class="text-error">All Invoices</span>?
+                        <span class="text-error">All Payments</span>?
                     </p>
 
                     <div class="modal-action">
                         <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
 
-                        <form method="POST" action="{{ route('admin.dashboard.payment.invoice.bulk.delete-all') }}"
+                        <form method="POST" action="{{ route('admin.dashboard.order.payment.bulk.delete-all') }}"
                             @submit="loading = true">
                             @csrf
                             @method('DELETE')
@@ -96,21 +101,21 @@
             <div class="flex flex-row flex-wrap justify-start xl:justify-end gap-2">
                 {{-- product searching --}}
                 <form id="queryForm" method="GET" action="{{ request()->url() }}" class="join join-horizontal">
-                    <template x-data x-if="$store.invoice_search_setting.sortBy">
-                        <input type="hidden" name="sortBy" :value="$store.invoice_search_setting.sortBy">
+                    <template x-data x-if="$store.payment_search_setting.sortBy">
+                        <input type="hidden" name="sortBy" :value="$store.payment_search_setting.sortBy">
                     </template>
 
-                    <template x-data x-if="$store.invoice_search_setting.perPage">
-                        <input type="hidden" x-data name="perPage" :value="$store.invoice_search_setting.perPage">
+                    <template x-data x-if="$store.payment_search_setting.perPage">
+                        <input type="hidden" x-data name="perPage" :value="$store.payment_search_setting.perPage">
                     </template>
 
-                    <template x-data x-if="$store.invoice_search_setting.orderBy">
-                        <input type="hidden" x-data name="orderBy" :value="$store.invoice_search_setting.orderBy">
+                    <template x-data x-if="$store.payment_search_setting.orderBy">
+                        <input type="hidden" x-data name="orderBy" :value="$store.payment_search_setting.orderBy">
                     </template>
 
                     <input type="text" x-data x-cloak class="join-item input input-sm rounded-l-box" name="query"
-                        :value="$store.invoice_search_setting.query"
-                        @change="$store.invoice_search_setting.query = $event.target.value; $store.invoice_search_setting.save(); $el.form.submit()">
+                        :value="$store.payment_search_setting.query"
+                        @change="$store.payment_search_setting.query = $event.target.value; $store.payment_search_setting.save(); $el.form.submit()">
 
                     <button class="join-item btn btn-sm">Search</button>
                 </form>
@@ -118,21 +123,21 @@
                 {{-- page limiting --}}
                 <form method="GET" action="{{ request()->url() }}">
                     <template x-data
-                        x-if="$store.invoice_search_setting.query && $store.invoice_search_setting.query.length > 0">
-                        <input type="hidden" name="query" :value="$store.invoice_search_setting.query">
+                        x-if="$store.payment_search_setting.query && $store.payment_search_setting.query.length > 0">
+                        <input type="hidden" name="query" :value="$store.payment_search_setting.query">
                     </template>
 
-                    <template x-data x-if="$store.invoice_search_setting.sortBy">
-                        <input type="hidden" x-data name="sortBy" :value="$store.invoice_search_setting.sortBy">
+                    <template x-data x-if="$store.payment_search_setting.sortBy">
+                        <input type="hidden" x-data name="sortBy" :value="$store.payment_search_setting.sortBy">
                     </template>
 
-                    <template x-data x-if="$store.invoice_search_setting.orderBy">
-                        <input type="hidden" x-data name="orderBy" :value="$store.invoice_search_setting.orderBy">
+                    <template x-data x-if="$store.payment_search_setting.orderBy">
+                        <input type="hidden" x-data name="orderBy" :value="$store.payment_search_setting.orderBy">
                     </template>
 
                     <select name="perPage" x-data x-cloak class="select select-sm w-fit shrink-0" x-data
-                        x-model="$store.invoice_search_setting.perPage"
-                        @change="$store.invoice_search_setting.perPage = $event.target.value; $store.invoice_search_setting.save(); $el.form.submit()">
+                        x-model="$store.payment_search_setting.perPage"
+                        @change="$store.payment_search_setting.perPage = $event.target.value; $store.payment_search_setting.save(); $el.form.submit()">
                         <option value="5">Show 5</option>
                         <option value="10">Show 10</option>
                         <option value="20">Show 20</option>
@@ -143,21 +148,21 @@
                 {{-- ascending & descending --}}
                 <form method="GET" action="{{ request()->url() }}">
                     <template x-data
-                        x-if="$store.invoice_search_setting.query && $store.invoice_search_setting.query.length > 0">
-                        <input type="hidden" name="query" :value="$store.invoice_search_setting.query">
+                        x-if="$store.payment_search_setting.query && $store.payment_search_setting.query.length > 0">
+                        <input type="hidden" name="query" :value="$store.payment_search_setting.query">
                     </template>
 
-                    <template x-data x-if="$store.invoice_search_setting.perPage">
-                        <input type="hidden" x-data name="perPage" :value="$store.invoice_search_setting.perPage">
+                    <template x-data x-if="$store.payment_search_setting.perPage">
+                        <input type="hidden" x-data name="perPage" :value="$store.payment_search_setting.perPage">
                     </template>
 
-                    <template x-data x-if="$store.invoice_search_setting.sortBy">
-                        <input type="hidden" x-data name="sortBy" :value="$store.invoice_search_setting.sortBy">
+                    <template x-data x-if="$store.payment_search_setting.sortBy">
+                        <input type="hidden" x-data name="sortBy" :value="$store.payment_search_setting.sortBy">
                     </template>
 
-                    <select name="orderBy" x-data x-cloak x-model="$store.invoice_search_setting.orderBy"
-                        class="select select-sm w-fit shrink-0" x-data :value="$store.invoice_search_setting.orderBy"
-                        @change="$store.invoice_search_setting.orderBy = $event.target.value; $store.invoice_search_setting.save() ; $el.form.submit()">
+                    <select name="orderBy" x-data x-cloak x-model="$store.payment_search_setting.orderBy"
+                        class="select select-sm w-fit shrink-0" x-data :value="$store.payment_search_setting.orderBy"
+                        @change="$store.payment_search_setting.orderBy = $event.target.value; $store.payment_search_setting.save() ; $el.form.submit()">
                         <option value="desc">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.5" stroke="currentColor" class="size-4">
@@ -180,21 +185,21 @@
                 {{-- sorting --}}
                 <form method="GET" action="{{ request()->url() }}">
                     <template x-data
-                        x-if="$store.invoice_search_setting.query && $store.invoice_search_setting.query.length > 0">
-                        <input type="hidden" name="query" :value="$store.invoice_search_setting.query">
+                        x-if="$store.payment_search_setting.query && $store.payment_search_setting.query.length > 0">
+                        <input type="hidden" name="query" :value="$store.payment_search_setting.query">
                     </template>
 
-                    <template x-data x-if="$store.invoice_search_setting.perPage">
-                        <input type="hidden" x-data name="perPage" :value="$store.invoice_search_setting.perPage">
+                    <template x-data x-if="$store.payment_search_setting.perPage">
+                        <input type="hidden" x-data name="perPage" :value="$store.payment_search_setting.perPage">
                     </template>
 
-                    <template x-data x-if="$store.invoice_search_setting.orderBy">
-                        <input type="hidden" x-data name="orderBy" :value="$store.invoice_search_setting.orderBy">
+                    <template x-data x-if="$store.payment_search_setting.orderBy">
+                        <input type="hidden" x-data name="orderBy" :value="$store.payment_search_setting.orderBy">
                     </template>
 
                     <select name="sortBy" class="select select-sm w-fit shrink-0" x-data x-cloak
-                        :value="$store.invoice_search_setting.sortBy"
-                        @change="$store.invoice_search_setting.sortBy = $event.target.value; $store.invoice_search_setting.save() ; $el.form.submit()">
+                        :value="$store.payment_search_setting.sortBy"
+                        @change="$store.payment_search_setting.sortBy = $event.target.value; $store.payment_search_setting.save() ; $el.form.submit()">
                         <option value="last_updated">Sort By Last Updated
                         </option>
                         <option value="last_created">Sort By Last Created
@@ -203,26 +208,26 @@
                 </form>
 
                 {{-- <button class="btn btn-sm bg-base-100 font-normal shadow-none border-slate-300" x-data x-transition x-cloak
-                    @click="$store.invoice_search_setting.showFilterOption = !$store.invoice_search_setting.showFilterOption;$store.invoice_search_setting.save()">
-                    <span x-text="$store.invoice_search_setting.showFilterOption ? 'Hide Filter' : 'Filter Option'"></span>
+                    @click="$store.payment_search_setting.showFilterOption = !$store.payment_search_setting.showFilterOption;$store.payment_search_setting.save()">
+                    <span x-text="$store.payment_search_setting.showFilterOption ? 'Hide Filter' : 'Filter Option'"></span>
                 </button> --}}
                 <button class="btn btn-sm bg-base-100 font-normal shadow-none border-slate-300" x-data x-transition x-cloak
-                    @click="$store.invoice_search_setting.showDisplayOption = !$store.invoice_search_setting.showDisplayOption;$store.invoice_search_setting.save()">
+                    @click="$store.payment_search_setting.showDisplayOption = !$store.payment_search_setting.showDisplayOption;$store.payment_search_setting.save()">
                     <span
-                        x-text="$store.invoice_search_setting.showDisplayOption ? 'Hide Display' : 'Display Option'"></span>
+                        x-text="$store.payment_search_setting.showDisplayOption ? 'Hide Display' : 'Display Option'"></span>
                 </button>
             </div>
         </div>
 
         {{-- filtering --}}
         <div class="mt-3 p-3 border border-base-300 rounded-md flex flex-col gap-2" x-cloak x-transition x-data
-            x-show="$store.invoice_search_setting.showFilterOption">
+            x-show="$store.payment_search_setting.showFilterOption">
             <p class="text-xs">Filter Options</p>
             <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3">
                 {{-- <div class="flex flex-col gap-1">
                     <select x-data class="select select-sm text-xs" name="brand"
-                        :value="$store.invoice_search_setting.pinnedFilter ? 'true' : 'false'"
-                        @change="$store.invoice_search_setting.pinnedFilter = $event.target.value; $store.invoice_search_setting.save()">
+                        :value="$store.payment_search_setting.pinnedFilter ? 'true' : 'false'"
+                        @change="$store.payment_search_setting.pinnedFilter = $event.target.value; $store.payment_search_setting.save()">
                         <option value="false">Filter Pinned</option>
                         <option value="true">Pinned Product</option>
                     </select>
@@ -230,35 +235,35 @@
             </div>
             <div class="flex flex-row gap-2">
                 {{-- <button class="btn btn-primary btn-sm">Save</button> --}}
-                <button class="btn btn-sm" x-data @click="$store.invoice_search_setting.resetFilter()">Reset</button>
+                <button class="btn btn-sm" x-data @click="$store.payment_search_setting.resetFilter()">Reset</button>
             </div>
         </div>
 
         {{-- column displaying --}}
         <div class="mt-3 p-3 border border-base-300 rounded-md flex flex-col gap-2" x-cloak x-transition x-data
-            x-show="$store.invoice_search_setting.showDisplayOption">
+            x-show="$store.payment_search_setting.showDisplayOption">
             <p class="text-xs">Display Options</p>
             <div class="flex sm:flex-row flex-col flex-wrap gap-3">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" class="checkbox checkbox-xs rounded-sm" x-data
-                        :checked="$store.invoice_search_setting.showIDColumn"
-                        @change="$store.invoice_search_setting.showIDColumn = !$store.invoice_search_setting.showIDColumn; $store.invoice_search_setting.save()">
+                        :checked="$store.payment_search_setting.showIDColumn"
+                        @change="$store.payment_search_setting.showIDColumn = !$store.payment_search_setting.showIDColumn; $store.payment_search_setting.save()">
                     <span class="text-xs">Show ID</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" class="checkbox checkbox-xs rounded-sm" x-data
-                        :checked="$store.invoice_search_setting.showUpdatedTimeColumn || $store
-                            .invoice_search_setting
+                        :checked="$store.payment_search_setting.showUpdatedTimeColumn || $store
+                            .payment_search_setting
                             .is_last_updated_filter"
-                        @change="$store.invoice_search_setting.showUpdatedTimeColumn = !$store.invoice_search_setting.showUpdatedTimeColumn; $store.invoice_search_setting.save()">
+                        @change="$store.payment_search_setting.showUpdatedTimeColumn = !$store.payment_search_setting.showUpdatedTimeColumn; $store.payment_search_setting.save()">
                     <span class="text-xs">Show Updated Time</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" class="checkbox checkbox-xs rounded-sm" x-data
-                        :checked="$store.invoice_search_setting.showCreatedTimeColumn || $store
-                            .invoice_search_setting
+                        :checked="$store.payment_search_setting.showCreatedTimeColumn || $store
+                            .payment_search_setting
                             .is_last_created_filter"
-                        @change="$store.invoice_search_setting.showCreatedTimeColumn = !$store.invoice_search_setting.showCreatedTimeColumn; $store.invoice_search_setting.save()">
+                        @change="$store.payment_search_setting.showCreatedTimeColumn = !$store.payment_search_setting.showCreatedTimeColumn; $store.payment_search_setting.save()">
                     <span class="text-xs">Show Created Time</span>
                 </label>
             </div>
@@ -275,70 +280,65 @@
                                     @change="$store.bulk.toggleSelectAll($el.checked)">
                             </th>
                             <th class="w-[10px]">No.</th>
-                            <th x-cloak x-data x-show="$store.invoice_search_setting.showIDColumn" class="w-[50px]">ID
+                            <th x-cloak x-data x-show="$store.payment_search_setting.showIDColumn" class="w-[50px]">ID
                             </th>
-                            <th class="w-[150px]">Invoice Number</th>
-                            <th class="w-[150px]">Order Number</th>
-                            <th class="w-[150px]">Status</th>
-                            <th class="w-[150px]">Total</th>
+                            <th>Payment ID</th>
+                            <th>Order Number</th>
+                            <th>Invoice Number</th>
+                            <th>Amount</th>
                             <th x-cloak x-data
-                                x-show="$store.invoice_search_setting.showUpdatedTimeColumn || $store.invoice_search_setting.is_last_updated_filter">
+                                x-show="$store.payment_search_setting.showUpdatedTimeColumn || $store.payment_search_setting.is_last_updated_filter">
                                 Updated At</th>
                             <th x-cloak x-data
-                                x-show="$store.invoice_search_setting.showCreatedTimeColumn || $store.invoice_search_setting.is_last_created_filter">
+                                x-show="$store.payment_search_setting.showCreatedTimeColumn || $store.payment_search_setting.is_last_created_filter">
                                 Created At</th>
-                            <th class="w-[150px]">Actions</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($invoices as $invoice)
+                        @foreach ($payments as $payment)
                             <tr>
                                 <td>
                                     <input type="checkbox" class="checkbox checkbox-xs rounded-sm row-checkbox"
-                                        data-id="{{ $invoice['id'] }}" x-data
-                                        :checked="$store.bulk.candidates.includes({{ $invoice['id'] }})"
-                                        @change="$store.bulk.toggleCandidate({{ $invoice['id'] }})">
+                                        data-id="{{ $payment['id'] }}" x-data
+                                        :checked="$store.bulk.candidates.includes({{ $payment['id'] }})"
+                                        @change="$store.bulk.toggleCandidate({{ $payment['id'] }})">
                                 </td>
-                                <td>{{ $loop->iteration + ($invoices->currentPage() - 1) * $invoices->perPage() }}.</td>
-                                <td x-cloak x-data x-show="$store.invoice_search_setting.showIDColumn">
-                                    {{ $invoice['id'] }}
-                                </td>
+                                <td>{{ $loop->iteration + ($payments->currentPage() - 1) * $payments->perPage() }}.</td>
                                 <td>
-                                    {{-- <p onclick="document.getElementById('detail_modal_{{ $invoice['id'] }}').showModal()"
+                                    <a href="{{ route('admin.dashboard.order.payment.id.get', ['id' => $payment['id']]) }}"
                                         class="cursor-pointer hover:underline">
-                                        {{ $invoice['invoice_number'] }}</p> --}}
-                                    <a href="{{ route('admin.dashboard.payment.invoice.id.get', ['id' => $invoice['id']]) }}"
-                                        class="cursor-pointer hover:underline">
-                                        {{ $invoice['invoice_number'] }}
+                                        Payment #{{ $payment['id'] }}
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.dashboard.order.id.get', ['id' => $invoice['order']['id']]) }}"
-                                        class="cursor-pointer hover:underline">
-                                        {{ $invoice['order']['order_number'] ?? '-' }}
-                                    </a>
+                                    @if ($payment['order_id'])
+                                        <a href="{{ route('admin.dashboard.order.id.get', ['id' => $payment['order_id']]) }}"
+                                            class="cursor-pointer hover:underline">
+                                            {{ $payment['order']['order_number'] }}
+                                        </a>
+                                    @else
+                                        No Order Found
+                                    @endif
                                 </td>
                                 <td>
-                                    @php
-                                        $color = match ($invoice['status']) {
-                                            'unpaid' => 'badge-error',
-                                            'paid' => 'badge-success',
-                                            'refunded' => 'badge-warning',
-                                            default => 'badge-ghost',
-                                        };
-                                    @endphp
-                                    <div class="badge {{ $color }} badge-outline capitalize">
-                                        {{ $invoice['status'] }}
-                                    </div>
+                                    @if ($payment['invoice_id'])
+                                        <a href="{{ route('admin.dashboard.order.invoice.id.get', ['id' => $payment['invoice_id']]) }}"
+                                            class="cursor-pointer hover:underline">
+                                            {{ $payment['invoice']['invoice_number'] }}
+                                        </a>
+                                    @else
+                                        No Invoice Found
+                                    @endif
                                 </td>
-                                <td>${{ number_format($invoice['grand_total'], 2) }}</td>
+                                <td>{{ number_format($payment['amount'], 2) }} {{ $site_currency }}</td>
                                 <td x-cloak x-data
-                                    x-show="$store.invoice_search_setting.showUpdatedTimeColumn || $store.invoice_search_setting.is_last_updated_filter">
-                                    {{ $invoice['updated_at'] ? \Carbon\Carbon::parse($invoice['updated_at'])->format('Y-m-d h:i A') : '-' }}
+                                    x-show="$store.payment_search_setting.showUpdatedTimeColumn || $store.payment_search_setting.is_last_updated_filter">
+                                    {{ $payment['updated_at'] ? \Carbon\Carbon::parse($payment['updated_at'])->format('Y-m-d h:i A') : '-' }}
                                 </td>
                                 <td x-cloak x-data
-                                    x-show="$store.invoice_search_setting.showCreatedTimeColumn || $store.invoice_search_setting.is_last_created_filter">
-                                    {{ $invoice['created_at'] ? \Carbon\Carbon::parse($invoice['created_at'])->format('Y-m-d h:i A') : '-' }}
+                                    x-show="$store.payment_search_setting.showCreatedTimeColumn || $store.payment_search_setting.is_last_created_filter">
+                                    {{ $payment['created_at'] ? \Carbon\Carbon::parse($payment['created_at'])->format('Y-m-d h:i A') : '-' }}
                                 </td>
                                 <td>
                                     <div tabindex="0" role="button" class="dropdown dropdown-left">
@@ -349,13 +349,13 @@
                                             class="menu dropdown-content bg-base-100 border border-base-300 w-30 rounded-box p-1 shadow-sm">
                                             <li>
                                                 <button
-                                                    onclick="document.getElementById('detail_modal_{{ $invoice['id'] }}').showModal()">
+                                                    onclick="document.getElementById('detail_modal_{{ $payment['id'] }}').showModal()">
                                                     View Details
                                                 </button>
                                             </li>
                                             <li>
                                                 <button type="button" class="text-error"
-                                                    onclick="document.getElementById('delete_modal_{{ $invoice['id'] }}').showModal()">
+                                                    onclick="document.getElementById('delete_modal_{{ $payment['id'] }}').showModal()">
                                                     Delete
                                                 </button>
                                             </li>
@@ -364,35 +364,24 @@
                                 </td>
                             </tr>
 
-                            {{-- Invoice Detail Modal --}}
-                            <dialog id="detail_modal_{{ $invoice['id'] }}" class="modal">
+                            {{-- Payment Modal --}}
+                            <dialog id="detail_modal_{{ $payment['id'] }}" class="modal">
                                 <div class="modal-box max-h-[85vh] max-w-2xl">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
                                     </form>
 
                                     <h3 class="text-lg font-semibold text-center mb-3">
-                                        Invoice #{{ $invoice['invoice_number'] }}
+                                        Payment #{{ $payment['id'] }}
                                     </h3>
 
                                     <div class="text-sm space-y-2">
-                                        <p><strong>ID:</strong> {{ $invoice['id'] }}</p>
-                                        <p><strong>Order:</strong> {{ $invoice['order']['order_number'] ?? '-' }}</p>
-                                        <p><strong>Status:</strong>
-                                            <span
-                                                class="badge {{ $color }} badge-outline">{{ ucfirst($invoice['status']) }}</span>
-                                        </p>
-                                        <p><strong>Subtotal:</strong> ${{ number_format($invoice['subtotal'], 2) }}</p>
-                                        <p><strong>Discount:</strong> -${{ number_format($invoice['discount_total'], 2) }}
-                                        </p>
-                                        <p><strong>Tax:</strong> +${{ number_format($invoice['tax_total'], 2) }}</p>
-                                        <p><strong>Shipping:</strong> +${{ number_format($invoice['shipping_total'], 2) }}
-                                        </p>
-                                        <p><strong>Grand Total:</strong> <span
-                                                class="font-semibold">${{ number_format($invoice['grand_total'], 2) }}</span>
-                                        </p>
-                                        <p><strong>Issued At:</strong> {{ $invoice['issued_at'] }}</p>
-                                        <p><strong>Due At:</strong> {{ $invoice['due_at'] ?? '-' }}</p>
+                                        <p><strong>Payment ID:</strong> {{ $payment['id'] }}</p>
+                                        <p><strong>Invoice:</strong>{{ $payment['invoice']['invoice_number'] ?? '-' }}</p>
+                                        <p><strong>Amount:</strong>{{ number_format($payment['amount'], 2) }}
+                                            {{ $site_currency }}</p>
+                                        <p><strong>Created At:</strong> {{ $payment['created_at'] }}</p>
+                                        <p><strong>Updated At:</strong> {{ $payment['updated_at'] }}</p>
                                     </div>
 
                                     <div class="modal-action mt-6">
@@ -403,7 +392,7 @@
                                 </div>
                             </dialog>
 
-                            <dialog id="delete_modal_{{ $invoice['id'] }}" class="modal">
+                            <dialog id="delete_modal_{{ $payment['id'] }}" class="modal">
                                 <div class="modal-box">
                                     <form method="dialog">
                                         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -412,8 +401,8 @@
 
                                     <p class="py-2 mb-0 text-sm">
                                         Are you sure you want to delete
-                                        <span class="italic text-error">Invoice
-                                            #{{ $invoice['id'] }}</span>
+                                        <span class="italic text-error">Payment
+                                            #{{ $payment['id'] }}</span>
                                         ?
                                     </p>
                                     <div class="modal-action mt-0">
@@ -421,7 +410,7 @@
                                             <button class="btn">Cancel</button>
                                         </form>
                                         <form method="POST"
-                                            action="{{ route('admin.dashboard.payment.invoice.id.delete', ['id' => $invoice['id']]) }}">
+                                            action="{{ route('admin.dashboard.order.payment.id.delete', ['id' => $payment['id']]) }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-error">Delete</button>
@@ -436,57 +425,59 @@
                 {{-- Pagination --}}
                 <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 py-3 px-5">
                     <div class="text-sm text-gray-500">
-                        <span class="font-semibold">{{ $invoices->firstItem() }}</span>
+                        <span class="font-semibold">{{ $payments->firstItem() }}</span>
                         –
-                        <span class="font-semibold">{{ $invoices->lastItem() }}</span>
+                        <span class="font-semibold">{{ $payments->lastItem() }}</span>
                         of
-                        <span class="font-semibold">{{ $invoices->total() }}</span>
+                        <span class="font-semibold">{{ $payments->total() }}</span>
                         results
                     </div>
 
                     <div class="join">
-                        @if ($invoices->onFirstPage())
+                        @if ($payments->onFirstPage())
                             <button class="join-item btn btn-sm btn-disabled">«</button>
                         @else
-                            <a href="{{ $invoices->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
+                            <a href="{{ $payments->previousPageUrl() }}" class="join-item btn btn-sm">«</a>
                         @endif
 
-                        <a href="{{ $invoices->url(1) }}"
-                            class="join-item btn btn-sm {{ $invoices->currentPage() === 1 ? 'btn-active' : '' }}">
+                        <a href="{{ $payments->url(1) }}"
+                            class="join-item btn btn-sm {{ $payments->currentPage() === 1 ? 'btn-active' : '' }}">
                             1
                         </a>
 
                         @php
-                            $start = max(2, $invoices->currentPage() - 1);
-                            $end = min($invoices->lastPage() - 1, $invoices->currentPage() + 1);
+                            $start = max(2, $payments->currentPage() - 1);
+                            $end = min($payments->lastPage() - 1, $payments->currentPage() + 1);
                         @endphp
 
                         @for ($i = $start; $i <= $end; $i++)
-                            <a href="{{ $invoices->url($i) }}"
-                                class="join-item btn btn-sm {{ $invoices->currentPage() === $i ? 'btn-active' : '' }}">
+                            <a href="{{ $payments->url($i) }}"
+                                class="join-item btn btn-sm {{ $payments->currentPage() === $i ? 'btn-active' : '' }}">
                                 {{ $i }}
                             </a>
                         @endfor
 
-                        @if ($invoices->lastPage() > 1)
-                            <a href="{{ $invoices->url($invoices->lastPage()) }}"
-                                class="join-item btn btn-sm {{ $invoices->currentPage() === $invoices->lastPage() ? 'btn-active' : '' }}">
-                                {{ $invoices->lastPage() }}
+                        @if ($payments->lastPage() > 1)
+                            <a href="{{ $payments->url($payments->lastPage()) }}"
+                                class="join-item btn btn-sm {{ $payments->currentPage() === $payments->lastPage() ? 'btn-active' : '' }}">
+                                {{ $payments->lastPage() }}
                             </a>
                         @endif
 
-                        @if ($invoices->hasMorePages())
-                            <a href="{{ $invoices->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
+                        @if ($payments->hasMorePages())
+                            <a href="{{ $payments->nextPageUrl() }}" class="join-item btn btn-sm">»</a>
                         @else
                             <button class="join-item btn btn-sm btn-disabled">»</button>
                         @endif
                     </div>
                 </div>
-                
+
+
             </div>
         </div>
     </div>
 @endsection
+
 
 
 @push('script')
@@ -535,7 +526,7 @@
                         return;
                     }
                     if (!this.hasCandidates && !this.current_action.includes('_all')) {
-                        Toast.show('Please select at least one invoice', {
+                        Toast.show('Please select at least one method', {
                             type: 'error'
                         });
                         return;
@@ -545,7 +536,7 @@
                 },
             });
 
-            Alpine.store('invoice_search_setting', {
+            Alpine.store('payment_search_setting', {
                 showDisplayOption: false,
                 showFilterOption: false,
                 query: "",
@@ -561,7 +552,7 @@
                 showCreatedTimeColumn: false,
 
                 init() {
-                    const savedSetting = JSON.parse(localStorage.getItem('invoice_search_setting') ??
+                    const savedSetting = JSON.parse(localStorage.getItem('payment_search_setting') ??
                         "{}");
 
                     this.showDisplayOption = savedSetting.showDisplayOption ?? false;
@@ -588,7 +579,7 @@
                         showUpdatedTimeColumn: this.showUpdatedTimeColumn,
                         showCreatedTimeColumn: this.showCreatedTimeColumn,
                     };
-                    localStorage.setItem('invoice_search_setting', JSON.stringify(data));
+                    localStorage.setItem('payment_search_setting', JSON.stringify(data));
                 },
 
                 resetFilter() {
@@ -601,7 +592,7 @@
                 }
             });
 
-            Alpine.store('invoice_search_setting').init();
+            Alpine.store('payment_search_setting').init();
         });
     </script>
 @endpush

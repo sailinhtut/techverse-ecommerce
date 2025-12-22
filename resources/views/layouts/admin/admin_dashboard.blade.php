@@ -84,6 +84,8 @@
                                             </li>
                                         @endif
 
+
+
                                     </ul>
                                 </div>
                             </div>
@@ -109,6 +111,19 @@
                                             <li><a href="{{ route('admin.dashboard.store.media-image.get') }}"
                                                     class="{{ request()->is('admin/dashboard/store/media-image') ? 'bg-primary text-primary-content' : '' }}">Media
                                                     Images</a>
+                                            </li>
+                                        @endif
+
+                                        @if (auth()->user()->hasPermissions(['manage_articles']))
+                                            <li><a href="{{ route('admin.dashboard.store.article.get') }}"
+                                                    class="{{ request()->is('admin/dashboard/store/article') || request()->is('admin/dashboard/article/*') ? 'active' : '' }}">Articles</a>
+                                            </li>
+                                        @endif
+
+                                        @if (auth()->user()->hasPermissions(['manage_contact_message']))
+                                            <li><a href="{{ route('admin.dashboard.store.contact_message.get') }}"
+                                                    class="{{ request()->is('admin/dashboard/store/contact_message') ? 'active' : '' }}">Contact
+                                                    Messages</a>
                                             </li>
                                         @endif
 
@@ -138,6 +153,12 @@
                                             </li>
                                         @endif
 
+                                        @if (auth()->user()->hasPermissions(['manage_product_inventory']))
+                                            <li><a href="{{ route('admin.dashboard.product.inventory.get') }}"
+                                                    class="{{ request()->is('admin/dashboard/product/inventory') || request()->is('admin/dashboard/product/inventory/*') ? 'bg-primary text-primary-content' : '' }}">Inventory</a>
+                                            </li>
+                                        @endif
+
                                         @if (auth()->user()->hasPermissions(['manage_categories']))
                                             <li><a href="{{ route('admin.dashboard.product.category.get') }}"
                                                     class="{{ request()->is('admin/dashboard/product/category') ? 'bg-primary text-primary-content' : '' }}">Categories</a>
@@ -161,6 +182,8 @@
                                                     class="{{ request()->is('admin/dashboard/product/coupon') ? 'bg-primary text-primary-content' : '' }}">Coupons</a>
                                             </li>
                                         @endif
+
+
                                     </ul>
                                 </div>
                             </div>
@@ -180,6 +203,25 @@
                                                     class="{{ request()->is('admin/dashboard/order') ? 'bg-primary text-primary-content' : '' }}">Orders</a>
                                             </li>
                                         @endif
+
+                                        @if (auth()->user()->hasPermissions(['manage_invoices']))
+                                            <li><a href="{{ route('admin.dashboard.order.invoice.get') }}"
+                                                    class="{{ request()->is('admin/dashboard/order/invoice') || request()->is('admin/dashboard/order/invoice/*') ? 'bg-primary text-primary-content' : '' }}">Invoices</a>
+                                            </li>
+                                        @endif
+
+                                        @if (auth()->user()->hasPermissions(['manage_payments']))
+                                            <li><a href="{{ route('admin.dashboard.order.payment.get') }}"
+                                                    class="{{ request()->is('admin/dashboard/order/payment') || request()->is('admin/dashboard/order/payment/*') ? 'bg-primary text-primary-content' : '' }}">Payments</a>
+                                            </li>
+                                        @endif
+
+                                        @if (auth()->user()->hasPermissions(['manage_transactions']))
+                                            <li><a href="{{ route('admin.dashboard.order.transaction.get') }}"
+                                                    class="{{ request()->is('admin/dashboard/order/transaction') || request()->is('admin/dashboard/order/transaction/*') ? 'bg-primary text-primary-content' : '' }}">Transactions</a>
+                                            </li>
+                                        @endif
+
                                     </ul>
                                 </div>
                             </div>
@@ -273,25 +315,6 @@
                                 </div>
                                 <div class="collapse-content m-0 pl-5">
                                     <ul class="w-full space-y-1">
-                                        @if (auth()->user()->hasPermissions(['manage_invoices']))
-                                            <li><a href="{{ route('admin.dashboard.payment.invoice.get') }}"
-                                                    class="{{ request()->is('admin/dashboard/payment/invoice') ? 'bg-primary text-primary-content' : '' }}">Invoices</a>
-                                            </li>
-                                        @endif
-
-                                        @if (auth()->user()->hasPermissions(['manage_payments']))
-                                            <li><a href="{{ route('admin.dashboard.payment.payment.get') }}"
-                                                    class="{{ request()->is('admin/dashboard/payment/payment') ? 'bg-primary text-primary-content' : '' }}">Payments</a>
-                                            </li>
-                                        @endif
-
-                                        @if (auth()->user()->hasPermissions(['manage_transactions']))
-                                            <li><a href="{{ route('admin.dashboard.payment.transaction.get') }}"
-                                                    class="{{ request()->is('admin/dashboard/payment/transaction') ? 'bg-primary text-primary-content' : '' }}">Transactions</a>
-                                            </li>
-                                        @endif
-
-
                                         @if (auth()->user()->hasPermissions(['manage_payment_methods']))
                                             <li><a href="{{ route('admin.dashboard.payment.payment-method.get') }}"
                                                     class="{{ request()->is('admin/dashboard/payment/payment-method') ? 'bg-primary text-primary-content' : '' }}">Payment
@@ -304,18 +327,7 @@
                             </div>
                         @endif
 
-                        @if (auth()->user()->hasPermissions(['manage_articles']))
-                            <li><a href="{{ route('admin.dashboard.article.get') }}"
-                                    class="{{ request()->is('admin/dashboard/article') || request()->is('admin/dashboard/article/*') ? 'active' : '' }}">Articles</a>
-                            </li>
-                        @endif
 
-                        @if (auth()->user()->hasPermissions(['manage_contact_message']))
-                            <li><a href="{{ route('admin.dashboard.contact_message.get') }}"
-                                    class="{{ request()->is('admin/dashboard/contact_message') ? 'active' : '' }}">Contact
-                                    Messages</a>
-                            </li>
-                        @endif
 
                         @if (auth()->user()->hasPermissions(['manage_storage']))
                             <li><a href="{{ route('admin.media_storage.get') }}"
@@ -408,6 +420,19 @@
                                         </li>
                                     @endif
 
+                                    @if (auth()->user()->hasPermissions(['manage_articles']))
+                                        <li><a href="{{ route('admin.dashboard.store.article.get') }}"
+                                                class="{{ request()->is('admin/dashboard/store/article') || request()->is('admin/dashboard/article/*') ? 'bg-primary text-primary-content' : '' }}">Articles</a>
+                                        </li>
+                                    @endif
+
+                                    @if (auth()->user()->hasPermissions(['manage_contact_message']))
+                                        <li><a href="{{ route('admin.dashboard.store.contact_message.get') }}"
+                                                class="{{ request()->is('admin/dashboard/store/contact_message') ? 'bg-primary text-primary-content' : '' }}">Contact
+                                                Messages</a>
+                                        </li>
+                                    @endif
+
                                     @if (auth()->user()->hasPermissions(['manage_faqs']))
                                         <li><a href="{{ route('admin.dashboard.store.faq.get') }}"
                                                 class="{{ request()->is('admin/dashboard/store/faq') ? 'bg-primary text-primary-content' : '' }}">FAQ</a>
@@ -434,6 +459,13 @@
                                         </li>
                                     @endif
 
+                                    @if (auth()->user()->hasPermissions(['manage_product_inventory']))
+                                        <li><a href="{{ route('admin.dashboard.product.inventory.get') }}"
+                                                class="{{ request()->is('admin/dashboard/product/inventory') || request()->is('admin/dashboard/product/inventory/*') ? 'bg-primary text-primary-content' : '' }}">Inventroy</a>
+                                        </li>
+                                    @endif
+
+
                                     @if (auth()->user()->hasPermissions(['manage_categories']))
                                         <li><a href="{{ route('admin.dashboard.product.category.get') }}"
                                                 class="{{ request()->is('admin/dashboard/product/category') ? 'bg-primary text-primary-content' : '' }}">Categories</a>
@@ -459,6 +491,7 @@
                                         </li>
                                     @endif
 
+
                                 </ul>
                             </div>
                         </div>
@@ -475,9 +508,27 @@
                                 <ul class="w-full space-y-1">
                                     @if (auth()->user()->hasPermissions(['manage_orders']))
                                         <li><a href="{{ route('admin.dashboard.order.get') }}"
-                                                class="{{ request()->is('admin/dashboard/order') ? 'bg-primary text-primary-content' : '' }}">Orders</a>
+                                                class="{{ request()->is('admin/dashboard/order')  ? 'bg-primary text-primary-content' : '' }}">Orders</a>
                                         </li>
                                     @endif
+
+                                    @if (auth()->user()->hasPermissions(['manage_invoices']))
+                                        <li><a href="{{ route('admin.dashboard.order.invoice.get') }}"
+                                                class="{{ request()->is('admin/dashboard/order/invoice') || request()->is('admin/dashboard/order/invoice/*') ? 'bg-primary text-primary-content' : '' }}">Invoices</a>
+                                    @endif
+
+                                    @if (auth()->user()->hasPermissions(['manage_payments']))
+                                        <li><a href="{{ route('admin.dashboard.order.payment.get') }}"
+                                                class="{{ request()->is('admin/dashboard/order/payment') || request()->is('admin/dashboard/order/payment/*') ? 'bg-primary text-primary-content' : '' }}">Payments</a>
+                                        </li>
+                                    @endif
+
+                                    @if (auth()->user()->hasPermissions(['manage_transactions']))
+                                        <li><a href="{{ route('admin.dashboard.order.transaction.get') }}"
+                                                class="{{ request()->is('admin/dashboard/order/transaction') || request()->is('admin/dashboard/order/transaction/*') ? 'bg-primary text-primary-content' : '' }}">Transactions</a>
+                                        </li>
+                                    @endif
+
                                 </ul>
                             </div>
                         </div>
@@ -564,23 +615,6 @@
                             </div>
                             <div class="collapse-content m-0 pl-5">
                                 <ul class="w-full space-y-1">
-                                    @if (auth()->user()->hasPermissions(['manage_invoices']))
-                                        <li><a href="{{ route('admin.dashboard.payment.invoice.get') }}"
-                                                class="{{ request()->is('admin/dashboard/payment/invoice') ? 'bg-primary text-primary-content' : '' }}">Invoices</a>
-                                    @endif
-
-                                    @if (auth()->user()->hasPermissions(['manage_payments']))
-                                        <li><a href="{{ route('admin.dashboard.payment.payment.get') }}"
-                                                class="{{ request()->is('admin/dashboard/payment/payment') ? 'bg-primary text-primary-content' : '' }}">Payments</a>
-                                        </li>
-                                    @endif
-
-                                    @if (auth()->user()->hasPermissions(['manage_transactions']))
-                                        <li><a href="{{ route('admin.dashboard.payment.transaction.get') }}"
-                                                class="{{ request()->is('admin/dashboard/payment/transaction') ? 'bg-primary text-primary-content' : '' }}">Transactions</a>
-                                        </li>
-                                    @endif
-
                                     @if (auth()->user()->hasPermissions(['manage_payment_methods']))
                                         <li><a href="{{ route('admin.dashboard.payment.payment-method.get') }}"
                                                 class="{{ request()->is('admin/dashboard/payment/payment-method') ? 'bg-primary text-primary-content' : '' }}">Payment
@@ -591,19 +625,6 @@
                                 </ul>
                             </div>
                         </div>
-                    @endif
-
-                    @if (auth()->user()->hasPermissions(['manage_articles']))
-                        <li><a href="{{ route('admin.dashboard.article.get') }}"
-                                class="{{ request()->is('admin/dashboard/article') || request()->is('admin/dashboard/article/*') ? 'bg-primary text-primary-content' : '' }}">Articles</a>
-                        </li>
-                    @endif
-
-                    @if (auth()->user()->hasPermissions(['manage_contact_message']))
-                        <li><a href="{{ route('admin.dashboard.contact_message.get') }}"
-                                class="{{ request()->is('admin/dashboard/contact_message') ? 'bg-primary text-primary-content' : '' }}">Contact
-                                Messages</a>
-                        </li>
                     @endif
 
                     @if (auth()->user()->hasPermissions(['manage_storage']))

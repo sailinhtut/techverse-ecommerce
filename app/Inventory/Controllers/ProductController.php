@@ -700,7 +700,8 @@ class ProductController
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%")->orWhere('id', 'like', "%{$search}%");
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('id', 'like', "%{$search}%");
             });
         }
 
@@ -772,6 +773,7 @@ class ProductController
         $brands = Brand::orderBy('id', 'desc')->get();
         $payment_methods = PaymentMethod::orderBy('id', 'desc')->get();
         $shipping_classes = ShippingClass::orderBy('id', 'desc')->get();
+        $tax_classes = TaxClass::orderBy('id', 'desc')->get();
 
         return view('pages.admin.dashboard.product.product_list', [
             'products' => $products,
@@ -779,6 +781,7 @@ class ProductController
             'brands' => $brands,
             'payment_methods' => $payment_methods,
             'shipping_classes' => $shipping_classes,
+            'tax_classes' => $tax_classes,
         ]);
     }
 
@@ -963,7 +966,7 @@ class ProductController
             ]);
         }
 
-        $products = Product::select('id', 'name', 'slug', 'regular_price')
+        $products = Product::select('id', 'name', 'slug', 'regular_price', 'stock')
             ->where('name', 'like', "%{$keyword}%")
             ->orWhere('slug', 'like', "%{$keyword}%")
             ->limit(10)
@@ -987,7 +990,7 @@ class ProductController
         }
 
         $products = Product::whereIn('id', $ids)
-            ->select('id', 'name', 'regular_price', 'image')
+            ->select('id', 'name', 'regular_price', 'image', 'stock')
             ->get();
 
         return response()->json([
@@ -1350,7 +1353,7 @@ class ProductController
                 'regular_price' => $validated['regular_price'],
                 'sale_price' => $validated['sale_price'] ?? null,
                 'enable_stock' => $validated['enable_stock'] ?? false,
-                'stock' => $validated['stock'] ?? null,
+                // 'stock' => $validated['stock'] ?? null,
                 'category_id' => $validated['category_id'] ?? null,
                 'brand_id' => $validated['brand_id'] ?? null,
                 'image_gallery' => $gallery,
@@ -1389,7 +1392,7 @@ class ProductController
                     $variant->regular_price = $variantData['regular_price'] ?? 0;
                     $variant->sale_price = $variantData['sale_price'] ?? null;
                     $variant->enable_stock = $variantData['enable_stock'] ?? false;
-                    $variant->stock = $variantData['stock'] ?? 0;
+                    // $variant->stock = $variantData['stock'] ?? 0;
                     $variant->weight = $variantData['weight'] ?? 0;
                     $variant->combination = $variantData['combination'] ?? [];
                 } else {
@@ -1428,6 +1431,75 @@ class ProductController
         } catch (\Exception $error) {
             DB::rollBack();
             return handleErrors($error, "Something Went Wrong");
+        }
+    }
+
+    public function updateTaxClassSelected(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array',
+            'tax_class_id' => 'nullable|exists:tax_classes,id',
+        ]);
+
+        if ($validator->fails()) {
+            return handleErrors(new Exception($validator->errors()->first()), 'Validation failed', 422);
+        }
+
+        $validated = $validator->validated();
+
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No products selected for deletion.');
+            }
+
+            $products = Product::whereIn('id', $ids)->get();
+
+            foreach ($products as $product) {
+
+                $product->fill([
+                    'tax_class_id' => $validated['tax_class_id'] ?? null
+                ]);
+
+                $product->save();
+            }
+
+            return redirect()->back()->with('success', 'Selected products updated successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while updating selected products.");
+        }
+    }
+
+    public function updateTaxClassAll(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'tax_class_id' => 'nullable|exists:tax_classes,id',
+        ]);
+
+        
+        if ($validator->fails()) {
+            return handleErrors(new Exception($validator->errors()->first()), 'Validation failed', 422);
+        }
+        
+        $validated = $validator->validated();
+      
+
+        try {
+            $products = Product::all();
+
+            foreach ($products as $product) {
+
+                $product->fill([
+                    'tax_class_id' => $validated['tax_class_id'] ?? null
+                ]);
+
+                $product->save();
+            }
+
+            return redirect()->back()->with('success', 'All products deleted successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while deleting all products.");
         }
     }
 

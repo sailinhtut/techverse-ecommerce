@@ -132,7 +132,7 @@
                 $attributes = $payment['payment_attributes'] ?? [];
             @endphp
 
-            <div class="bg-base-200 rounded-box p-5">
+            <div class="bg-base-100 border border-base-300 rounded-box p-5">
                 <h2 class="font-semibold mb-2 flex flex-row gap-3"> <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -148,7 +148,7 @@
 
                     <div class="space-y-3">
                         @foreach ($attributes['bank_accounts'] as $bank)
-                            <div class="border border-base-300 rounded-box py-2 px-3 ">
+                            <div class="bg-base-200 border border-base-300 rounded-box py-2 px-3 ">
                                 <p class="text-sm font-semibold">{{ $bank['bank_name'] ?? 'Bank' }}</p>
                                 <p class="text-sm text-gray-600">
                                     Account Name: {{ $bank['account_name'] ?? '-' }}

@@ -1,17 +1,12 @@
 <?php
 
-namespace App\Payment\Controllers;
+namespace App\Order\Controllers;
 
-use App\Inventory\Services\CouponService;
-use App\Order\Models\Order;
-use App\Order\Services\OrderService;
-use App\Payment\Models\Invoice;
-use App\Payment\Models\Payment;
-use App\Payment\Models\Transaction;
+use App\Order\Models\Invoice;
+use App\Order\Models\Payment;
+use App\Order\Models\Transaction;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class PaymentController
 {
@@ -92,10 +87,10 @@ class PaymentController
             $payments->appends(request()->query());
 
             $payments->getCollection()->transform(function ($payment) {
-                return $payment->jsonResponse(['invoice', 'payment_method']);
+                return $payment->jsonResponse(['order', 'invoice', 'payment_method']);
             });
 
-            return view('pages.admin.dashboard.payment.payment_list', [
+            return view('pages.admin.dashboard.order.payment_list', [
                 'payments' => $payments
             ]);
         } catch (Exception $e) {
@@ -103,70 +98,25 @@ class PaymentController
         }
     }
 
-    public function completePayment(Request $request, $orderId)
+    public function viewAdminPaymentDetailPage(Request $request, $payment_id)
     {
         try {
-            DB::beginTransaction();
+            $payment = Payment::findOrFail($payment_id);
+            $payment = $payment->jsonResponse();
 
-            $order = Order::findOrFail($orderId);
+            $order_id = $payment['order_id'];
+            $transactions = [];
 
-            $today = now();
-            $order_number = sprintf('ORD-%d-%d-%d-%04d', $today->year, $today->month, $today->day, (Order::max('id') ?? 0) + 1);
-
-            $invoice = Invoice::firstOrCreate(
-                ['order_id' => $order->id],
-                [
-                    'invoice_number' => sprintf('INV-%s', $order->order_number),
-                    'subtotal' => $order->subtotal,
-                    'discount_total' => $order->discount_total,
-                    'tax_total' => $order->tax_total,
-                    'shipping_total' => $order->shipping_total,
-                    'grand_total' => $order->grand_total,
-                    'status' => 'paid',
-                    'issued_at' => now(),
-                ]
-            );
-
-            if ($invoice->wasRecentlyCreated === false) {
-                $invoice->update(['status' => 'paid']);
+            if ($order_id) {
+                $transactions = Transaction::where('order_id', $order_id)->orderBy('id', 'desc')->get();
+                $transactions = $transactions->map(fn($i) => $i->jsonResponse(['user', 'invoice', 'order']));
             }
 
-            $payment = Payment::firstOrCreate(
-                ['invoice_id' => $invoice->id],
-                [
-                    'payment_method_id' => $order->payment_method_id,
-                    'transaction_id' => Str::uuid(),
-                    'amount' => $invoice->grand_total,
-                    'details' => json_encode([
-                        'method' =>  'COD',
-                        'completed_at' => now()->toDateTimeString(),
-                    ]),
-                ]
-            );
-
-            $transaction = Transaction::firstOrCreate(
-                ['payment_id' => $payment->id],
-                [
-                    'user_id' => $order->user_id,
-                    'reference' => $payment->transaction_id,
-                    'type' => 'credit',
-                    'status' => 'completed',
-                    'amount' => $payment->amount,
-                ]
-            );
-
-            if ($transaction->wasRecentlyCreated === false) {
-                $transaction->update(['status' => 'completed']);
-            }
-
-
-
-            DB::commit();
-
-            return redirect()->back()->with('success', 'Payment completed successfully!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
+            return view('pages.admin.dashboard.order.payment_detail', [
+                'payment' => $payment,
+                'transactions' => $transactions,
+            ]);
+        } catch (Exception $e) {
             return handleErrors($e);
         }
     }

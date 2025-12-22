@@ -12,12 +12,13 @@ class ProductInventoryLog extends Model
 
     protected $fillable = [
         'product_id',
-        'action_type',
+        'variant_id',
+        'action_type', // in,out,adjustment
         'quantity',
         'stock_before',
         'stock_after',
-        'reference_type',
-        'reference_id',
+        'reference_type', // order,return,manual
+        'reference_id', // record id
         'created_by',
         'note',
     ];
@@ -29,6 +30,16 @@ class ProductInventoryLog extends Model
             'stock_before' => 'integer',
             'stock_after' => 'integer',
         ];
+    }
+
+
+    public function productVariant()
+    {
+        return $this->belongsTo(
+            ProductVariant::class,
+            'variant_id',
+            'id'
+        );
     }
 
     public function product()
@@ -70,6 +81,7 @@ class ProductInventoryLog extends Model
         $response = [
             'id' => $this->id,
             'product_id' => $this->product_id,
+            'variant_id' => $this->variant_id,
             'action_type' => $this->action_type,
             'quantity' => $this->quantity,
             'stock_before' => $this->stock_before,
@@ -87,9 +99,15 @@ class ProductInventoryLog extends Model
                 : null;
         }
 
+        if (in_array('productVariant', $eager_list)) {
+            $response['variant'] = $this->productVariant
+                ? $this->productVariant->jsonResponse()
+                : ['note' => 'test'];
+        }
+
         if (in_array('creator', $eager_list)) {
             $response['creator'] = $this->creator
-                ? $this->creator->jsonResponse()
+                ? $this->creator->jsonResponse(['role'])
                 : null;
         }
 

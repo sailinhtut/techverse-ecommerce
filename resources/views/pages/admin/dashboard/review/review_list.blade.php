@@ -1,7 +1,7 @@
 @extends('layouts.admin.admin_dashboard')
 
 @section('admin_dashboard_content')
-    <div class="p-5 min-h-screen">
+    <div class="p-3 lg:p-5 min-h-screen">
         <p class="lg:text-lg font-semibold">Product Reviews</p>
 
         <div class="mt-3 flex xl:flex-row flex-col justify-between gap-2">

@@ -1,7 +1,7 @@
 @extends('layouts.admin.admin_dashboard')
 
 @section('admin_dashboard_content')
-    <div class="p-5 min-h-screen">
+    <div class="p-3 lg:p-5 min-h-screen">
         <p class="lg:text-lg font-semibold">Articles</p>
 
         <div class="mt-3 flex xl:flex-row flex-col justify-between gap-2">
@@ -14,7 +14,7 @@
                     </select>
                     <button class="join-item btn btn-sm" @click="$store.bulk.commit()">Commit</button>
                 </div>
-                <a href="{{ route('admin.dashboard.article.create.get') }}" class="btn btn-sm shadow-none">Add Article</a>
+                <a href="{{ route('admin.dashboard.store.article.create.get') }}" class="btn btn-sm shadow-none">Add Article</a>
             </div>
 
             {{-- bulk delete selected modal --}}
@@ -41,7 +41,7 @@
                     <div class="mt-3 modal-action">
                         <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
 
-                        <form method="POST" action="{{ route('admin.dashboard.article.bulk.delete-selected') }}"
+                        <form method="POST" action="{{ route('admin.dashboard.store.article.bulk.delete-selected') }}"
                             @submit="loading = true">
                             @csrf
                             @method('DELETE')
@@ -74,7 +74,7 @@
                     <div class="modal-action">
                         <form method="dialog"><button class="btn" :disabled="loading">Cancel</button></form>
 
-                        <form method="POST" action="{{ route('admin.dashboard.article.bulk.delete-all') }}"
+                        <form method="POST" action="{{ route('admin.dashboard.store.article.bulk.delete-all') }}"
                             @submit="loading = true">
                             @csrf
                             @method('DELETE')
@@ -302,7 +302,7 @@
                                     {{ $article['id'] }}
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.dashboard.article.edit.id.get', $article['id']) }}"
+                                    <a href="{{ route('admin.dashboard.store.article.edit.id.get', $article['id']) }}"
                                         class="cursor-pointer hover:underline">
                                         {{ $article['title'] ?? '-' }}
                                     </a>
@@ -345,7 +345,7 @@
                                     <div class="modal-action">
                                         <form method="dialog"><button class="btn">Cancel</button></form>
                                         <form method="POST"
-                                            action="{{ route('admin.dashboard.article.id.delete', $article['id']) }}">
+                                            action="{{ route('admin.dashboard.store.article.id.delete', $article['id']) }}">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-error">Delete</button>

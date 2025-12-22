@@ -44,9 +44,9 @@ return new class extends Migration
             $table->enum('status', [
                 'pending',
                 'processing',
-                'completed',
                 'shipped',
                 'delivered',
+                'completed',
                 'cancelled',
                 'refunded'
             ])->default('pending');
@@ -61,6 +61,9 @@ return new class extends Migration
             $table->json('billing_address');
             $table->foreignId('shipping_method_id')->nullable()->constrained('shipping_methods')->onDelete('set null');
             $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->onDelete('set null');
+            $table->timestamp('seen_at')->nullable();
+            $table->boolean('archived')->default(false);
+            $table->boolean('stock_consumed')->default(false);
             $table->timestamps();
         });
 
@@ -75,7 +78,7 @@ return new class extends Migration
             $table->decimal('unit_price', 10, 2);
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('tax', 10, 2)->default(0);
-            $table->decimal('subtotal', 10, 2); // (unit_price * qty - discount + tax)
+            $table->decimal('subtotal', 10, 2);
             $table->timestamps();
         });
 
@@ -96,21 +99,19 @@ return new class extends Migration
 
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoice_id')->nullable()->constrained('invoices')->onDelete('cascade');
-            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->onDelete('set null');
-            $table->string('transaction_id')->nullable();
+            $table->foreignId('order_id')->nullable()->constrained('orders')->onDelete('set null');
+            $table->foreignId('invoice_id')->nullable()->constrained('invoices')->onDelete('set null');
             $table->decimal('amount', 10, 2);
-            $table->json('details')->nullable();
             $table->timestamps();
         });
 
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payment_id')->nullable()->constrained('payments')->onDelete('cascade');
+            $table->foreignId('order_id')->nullable()->constrained('orders')->onDelete('set null');
+            $table->foreignId('invoice_id')->nullable()->constrained('invoices')->onDelete('set null');
+            $table->foreignId('payment_id')->nullable()->constrained('payments')->onDelete('set null');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('reference')->nullable();
-            $table->enum('type', ['credit', 'debit']);
-            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
+            $table->enum('status', ['succeeded', 'cancelled', 'refunded']);
             $table->decimal('amount', 10, 2);
             $table->timestamps();
         });

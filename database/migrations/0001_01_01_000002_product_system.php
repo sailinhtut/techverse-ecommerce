@@ -153,7 +153,6 @@ return new class extends Migration
             $table->decimal('weight', 10, 2)->nullable();
 
             $table->boolean('enable_review')->default(true);
-
             $table->timestamps();
         });
 
@@ -175,6 +174,21 @@ return new class extends Migration
             $table->integer('stock')->default(0);
             $table->string('image')->nullable();
             $table->decimal('weight', 10, 2)->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('product_inventory_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null');
+            $table->foreignId('variant_id')->nullable()->constrained('product_variants')->onDelete('set null');
+            $table->enum('action_type', ['in', 'out', 'reset']);
+            $table->integer('quantity');
+            $table->integer('stock_before');
+            $table->integer('stock_after');
+            $table->string('reference_type')->nullable();
+            $table->unsignedBigInteger('reference_id')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->text('note')->nullable();
             $table->timestamps();
         });
 
@@ -245,6 +259,7 @@ return new class extends Migration
         Schema::dropIfExists('product_up_sell');
         Schema::dropIfExists('product_cross_sell');
         Schema::dropIfExists('wishlists');
+        Schema::dropIfExists('product_inventory_logs');
         Schema::dropIfExists('product_variants');
         Schema::dropIfExists('product_attributes');
 

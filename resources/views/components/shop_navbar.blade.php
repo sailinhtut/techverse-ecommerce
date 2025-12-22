@@ -179,8 +179,7 @@
                         </li>
                         <li>
                             <a href="{{ route('payment.get') }}"
-                                class="{{ request()->is('payment-transaction') ? 'bg-primary text-primary-content' : '' }}">Payment
-                                Invoices</a>
+                                class="{{ request()->is('payment-transaction') ? 'bg-primary text-primary-content' : '' }}">Invoices</a>
                         </li>
                         {{-- <li>
                             <a href="{{ route('setting.get') }}"

@@ -2,7 +2,7 @@
 
 
 @section('admin_dashboard_content')
-    <div class="p-5" x-data="storageManager()" x-init="load()">
+    <div class="p-3 lg:p-5" x-data="storageManager()" x-init="load()">
         <p class="text-lg font-semibold">File Manager</p>
 
         <div class="mt-5 flex flex-col lg:flex-row gap-3 justify-between items-start lg:items-center">

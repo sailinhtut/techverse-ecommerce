@@ -51,8 +51,7 @@
 
         <form
             action="{{ isset($edit_product) ? route('admin.dashboard.product.id.post', ['id' => $edit_product['id']]) : route('admin.dashboard.product.post') }}"
-            method="POST" class="w-full flex flex-col gap-3" enctype="multipart/form-data" x-data="{ submitting: false }"
-            @submit="submitting=true">
+            method="POST" class="w-full flex flex-col gap-3" enctype="multipart/form-data" x-data="{ submitting: false }">
             @csrf
 
             <div class="tabs tabs-box bg-base-100 shadow-none" x-data='{ productType: @json($edit_product['product_type'] ?? 'simple') }'>
@@ -220,15 +219,8 @@
                                     value="{{ old('sale_price', $edit_product['sale_price'] ?? '') }}" step="any">
                             </div>
 
-                            <div class="w-full flex flex-col gap-2">
-                                <div x-show="enable_stock" x-cloak x-transition>
-                                    <label for="stock" class="text-sm">Stock (Optional)</label>
-                                    <input type="number" name="stock" id="stock" class="input input-sm w-full"
-                                        value="{{ old('stock', $edit_product['stock'] ?? '0') }}">
-                                </div>
-                            </div>
-
-                            <div class="w-full flex flex-col gap-2 self-end">
+                              <div class="w-full flex flex-col gap-2 self-end">
+                                <label for="sale_price" class="text-sm">Enable Stock</label>
                                 <label class="label text-sm">
                                     <input type="hidden" name="enable_stock" value="0">
                                     <input type="checkbox" class="toggle toggle-sm toggle-primary" name="enable_stock"
@@ -236,6 +228,28 @@
                                     Enable Stock Availability
                                 </label>
                             </div>
+
+                            <div class="w-full flex flex-col gap-2">
+                                <div x-show="enable_stock" x-cloak x-transition>
+                                    <label for="stock" class="text-sm">Stock (Optional)</label>
+                                    @if (isset($edit_product))
+                                        <div class="join-horizontal flex">
+                                            <input type="number" name="stock" id="stock"
+                                                class="input input-sm join-item"
+                                                value="{{ old('stock', $edit_product['stock'] ?? '0') }}" readonly>
+                                            <button class="btn btn-sm join-item" type="button"
+                                                onclick="document.getElementById('edit_product_inventory_modal').showModal()">
+                                                Edit
+                                            </button>
+                                        </div>
+                                    @else
+                                        <input type="number" name="stock" id="stock"
+                                            class="input input-sm join-item" value="{{ old('stock') }}" >
+                                    @endif
+                                </div>
+                            </div>
+
+                          
                         </div>
 
                         <div class="p-3 rounded-box border border-base-300 w-full flex flex-col gap-2">
@@ -393,9 +407,106 @@
 
                                     <div class="flex flex-col gap-2" x-show="variant.enable_stock">
                                         <label class="text-sm">Stock</label>
-                                        <input type="number" class="input input-bordered w-full" placeholder="Stock"
-                                            :name="`product_variants[${index}][stock]`" x-model="variant.stock">
+                                        @if (isset($edit_product))
+                                            <div class="flex join-horizontal">
+                                                <input type="number" class="input input-bordered join-item"
+                                                    placeholder="Stock" :name="`product_variants[${index}][stock]`"
+                                                    x-model="variant.stock" readonly>
+                                                <button type='button' class="btn join-item"
+                                                    @click="document.getElementById('variant_inventory_modal_'+ variant.id).showModal()">Edit</button>
+                                            </div>
+
+                                            <dialog :id="`variant_inventory_modal_${variant.id}`" class="modal">
+                                                <div class="modal-box max-w-2xl max-h-[85vh] overflow-y-auto"
+                                                    x-data="{ submitting: false }">
+                                                    <form method="dialog">
+                                                        <button
+                                                            class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                                                    </form>
+
+                                                    <h3 class="text-lg font-semibold text-center mb-3">Create Inventory
+                                                        Transaction
+                                                    </h3>
+
+                                                    <form method="POST"
+                                                        action="{{ route('admin.dashboard.product.inventory.post') }}"
+                                                        @submit="submitting=true">
+                                                        @csrf
+                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                                                            <div class="w-full flex flex-col gap-2 md:col-span-2">
+                                                                <div class="pt-2">
+                                                                    <p class="font-medium mb-1 text-sm">Selected Product
+                                                                    </p>
+                                                                    <div
+                                                                        class="flex justify-between items-center mb-1 border border-base-300 rounded-box py-2 px-3">
+                                                                        <span class=""
+                                                                            x-text="`${variant.sku} [Stock - ${variant.stock}]`"></span>
+                                                                        <button type="button"
+                                                                            @click="unselectProduct(index)"
+                                                                            class="btn btn-xs btn-ghost btn-square">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                fill="none" viewBox="0 0 24 24"
+                                                                                stroke-width="1.5" stroke="currentColor"
+                                                                                class="size-4 stroke-error">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    d="M6 18L18 6M6 6l12 12" />
+                                                                            </svg>
+                                                                        </button>
+                                                                        <input type="hidden" name="product_id"
+                                                                            value="{{ $edit_product['id'] }}">
+                                                                        <input type="hidden" name="variant_id"
+                                                                            :value="variant.id">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+
+                                                            <div class="flex flex-col gap-1">
+                                                                <label>Action Type</label>
+                                                                <select name="action_type" class="select w-full">
+                                                                    <option value="in" selected>Add (+)</option>
+                                                                    <option value="out">Remove (-)</option>
+                                                                    <option value="reset">Reset (#)</option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="flex flex-col gap-1">
+                                                                <label>Quantity</label>
+                                                                <input type="number" name="quantity"
+                                                                    class="input w-full" required>
+                                                            </div>
+
+                                                            <div class="flex flex-col gap-1 md:col-span-2">
+                                                                <label>Note</label>
+                                                                <textarea name="note" class="textarea w-full border-base-300" rows="4"></textarea>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="modal-action mt-3">
+                                                            <button type="submit" class="btn btn-primary"
+                                                                :disabled="submitting">
+                                                                <span x-show="submitting"
+                                                                    class="loading loading-spinner loading-sm mr-2"></span>
+                                                                <span x-show="submitting">Creating Log</span>
+                                                                <span x-show="!submitting">
+                                                                    Create Transaction
+                                                                </span>
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </dialog>
+                                        @else
+                                            <input type="number" class="input input-bordered join-item"
+                                                placeholder="Stock" :name="`product_variants[${index}][stock]`"
+                                                x-model="variant.stock">
+                                        @endif
+
                                     </div>
+
 
 
 
@@ -775,6 +886,77 @@
                 </span>
             </button>
         </form>
+
+
+        @if (isset($edit_product))
+            <dialog id="edit_product_inventory_modal" class="modal">
+                <div class="modal-box max-w-2xl max-h-[85vh] overflow-y-auto" x-data="{ submitting: false }">
+                    <form method="dialog">
+                        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    </form>
+
+                    <h3 class="text-lg font-semibold text-center mb-3">Create Inventory
+                        Transaction
+                    </h3>
+
+                    <form method="POST" action="{{ route('admin.dashboard.product.inventory.post') }}"
+                        @submit="submitting=true">
+                        @csrf
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                            <div class="w-full flex flex-col gap-2 md:col-span-2">
+                                <div class="pt-2">
+                                    <p class="font-medium mb-1 text-sm">Selected Product
+                                    </p>
+                                    <div
+                                        class="flex justify-between items-center mb-1 border border-base-300 rounded-box py-2 px-3">
+                                        <span>{{ $edit_product['name'] }} [Stock - {{ $edit_product['stock'] }}]</span>
+                                        <button type="button" @click="unselectProduct(index)"
+                                            class="btn btn-xs btn-ghost btn-square">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="size-4 stroke-error">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                        <input type="hidden" name="product_id" value="{{ $edit_product['id'] }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-1">
+                                <label>Action Type</label>
+                                <select name="action_type" class="select w-full">
+                                    <option value="in" selected>Add (+)</option>
+                                    <option value="out">Remove (-)</option>
+                                    <option value="reset">Reset (#)</option>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-col gap-1">
+                                <label>Quantity</label>
+                                <input type="number" name="quantity" class="input w-full" required>
+                            </div>
+
+                            <div class="flex flex-col gap-1 md:col-span-2">
+                                <label>Note</label>
+                                <textarea name="note" class="textarea w-full border-base-300" rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="modal-action mt-3">
+                            <button type="submit" class="btn btn-primary" :disabled="submitting">
+                                <span x-show="submitting" class="loading loading-spinner loading-sm mr-2"></span>
+                                <span x-show="submitting">Creating Log</span>
+                                <span x-show="!submitting">
+                                    Create Transaction
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+        @endif
     </div>
 @endsection
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Payment\Controllers;
+namespace App\Order\Controllers;
 
-use App\Payment\Models\Transaction;
+use App\Order\Models\Transaction;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -43,10 +43,24 @@ class TransactionController
             $transactions->appends(request()->query());
 
             $transactions->getCollection()->transform(function ($transaction) {
-                return $transaction->jsonResponse(['user']);
+                return $transaction->jsonResponse(['user', 'invoice','order']);
             });
-            return view('pages.admin.dashboard.payment.transaction_list', [
+            return view('pages.admin.dashboard.order.transaction_list', [
                 'transactions' => $transactions
+            ]);
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
+    public function viewAdminTransactionDetailPage(Request $request, $transaction_id)
+    {
+        try {
+            $transaction = Transaction::findOrFail($transaction_id);
+            $transaction = $transaction->jsonResponse();
+
+            return view('pages.admin.dashboard.order.transaction_detail', [
+                'transaction' => $transaction,
             ]);
         } catch (Exception $e) {
             return handleErrors($e);

@@ -16,12 +16,14 @@ class Transaction extends Model
         'user_id',
         'status',
         'amount',
+        'archived'
     ];
 
     protected function casts(): array
     {
         return [
             'amount'     => 'decimal:2',
+            'archived'   => 'boolean',
         ];
     }
 
@@ -55,6 +57,7 @@ class Transaction extends Model
             'user_id'    => $this->user_id,
             'status'     => $this->status,
             'amount'     => (float) $this->amount,
+            'archived'   => $this->archived,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

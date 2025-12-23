@@ -300,6 +300,17 @@ Route::middleware(['auth', 'admin'])->prefix('/admin')->group(function () {
             Route::delete('/order/bulk/delete-selected', 'deleteSelectedOrders')->name('admin.dashboard.order.bulk.delete-selected');
             Route::delete('/order/bulk/delete-all', 'deleteAllOrders')->name('admin.dashboard.order.bulk.delete-all');
 
+            Route::post('/order/bulk/archive-selected', 'archiveSelectedOrders')->name('admin.dashboard.order.bulk.archive-selected');
+            Route::post('/order/bulk/archive-all', 'archiveAllOrders')->name('admin.dashboard.order.bulk.archive-all');
+            Route::post('/order/{id}/archive', 'archiveOrder')->name('admin.dashboard.order.id.archive.post');
+
+            Route::post('/order/bulk/unarchive-selected', 'unarchiveSelectedOrders')->name('admin.dashboard.order.bulk.unarchive-selected');
+            Route::post('/order/bulk/unarchive-all', 'unarchiveAllOrders')->name('admin.dashboard.order.bulk.unarchive-all');
+            Route::post('/order/{id}/unarchive', 'unarchiveOrder')->name('admin.dashboard.order.id.unarchive.post');
+
+            Route::post('/order/export-order', 'exportOrders')->name('admin.dashboard.order.export-order.post');
+            Route::get('/order/export-order', 'viewAdminOrderExportPage')->name('admin.dashboard.order.export-order.get');
+
             Route::get('/order', 'viewAdminOrderListPage')->name('admin.dashboard.order.get');
 
             Route::get('/order/{id}', 'viewAdminOrderDetailPage')->name('admin.dashboard.order.id.get');

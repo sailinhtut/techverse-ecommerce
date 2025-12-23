@@ -47,6 +47,7 @@ class Product extends Model
         'width',
         'height',
         'weight',
+        'archived',
         'enable_review',
     ];
 
@@ -76,6 +77,7 @@ class Product extends Model
             'weight' => 'decimal:2',
             'promotion_end_time' => 'datetime',
             'enable_review' => 'boolean',
+            'archived' => 'boolean',
         ];
     }
 
@@ -173,6 +175,7 @@ class Product extends Model
             'regular_price' =>  (float) $this->regular_price ?? 0,
             'sale_price' => $sale_price <= 0 ? null : $sale_price,
             'enable_stock' => $this->enable_stock,
+            'archived' => $this->archived,
             'stock' => $this->stock,
             'image' => $image,
             'image_gallery' => $gallery,

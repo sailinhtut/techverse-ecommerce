@@ -1,3 +1,6 @@
+@php
+    $site_currency = getParsedTemplate('site_currency');
+@endphp
 @extends('layouts.admin.admin_dashboard')
 
 @section('admin_dashboard_content')
@@ -6,13 +9,21 @@
 
         <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="relative card bg-base-100 p-4 border border-base-300" x-data="chartSaleCountBar()" x-init="init()">
-                <div class="flex flex-row justify-between items-center">
-                    <h2 class="font-semibold mb-2">Total Sale</h2>
+                <div class="flex flex-row justify-between items-start">
+                    <div class="flex flex-col gap-1 mb-2">
+                        <h2 class="font-semibold">Total Sale</h2>
+                        <p class="text-sm">Total Value: <span x-text="total_value"></span></p>
+                    </div>
+
                     <select class="select w-max" x-model="duration" @change="updateChart()">
                         <option value="today">Today</option>
                         <option value="last_week">Last Week</option>
                         <option value="last_month">Last Month</option>
                         <option value="last_year">Last Year</option>
+                        <option value="last_2_year">Last 2 Years</option>
+                        <option value="last_3_year">Last 3 Years</option>
+                        <option value="last_5_year">Last 5 Years</option>
+                        <option value="last_10_year">Last 10 Years</option>
                     </select>
                 </div>
 
@@ -27,13 +38,20 @@
 
             <div class="relative card bg-base-100 p-4 border border-base-300" x-data="chartSaleAmountBar()"
                 x-init="init()">
-                <div class="flex flex-row justify-between items-center">
-                    <h2 class="font-semibold mb-2">Total Revenue</h2>
+                <div class="flex flex-row justify-between items-start">
+                    <div class="flex flex-col gap-1 mb-2">
+                        <h2 class="font-semibold">Total Revenue</h2>
+                        <p class="text-sm">Total Value: <span x-text="total_value"></span> {{ $site_currency }}</p>
+                    </div>
                     <select class="select w-max" x-model="duration" @change="updateChart()">
                         <option value="today">Today</option>
                         <option value="last_week">Last Week</option>
                         <option value="last_month">Last Month</option>
                         <option value="last_year">Last Year</option>
+                        <option value="last_2_year">Last 2 Years</option>
+                        <option value="last_3_year">Last 3 Years</option>
+                        <option value="last_5_year">Last 5 Years</option>
+                        <option value="last_10_year">Last 10 Years</option>
                     </select>
                 </div>
 
@@ -48,13 +66,20 @@
 
             <div class="relative card bg-base-100 p-4 border border-base-300" x-data="chartProfitAmountBar()"
                 x-init="init()">
-                <div class="flex flex-row justify-between items-center">
-                    <h2 class="font-semibold mb-2">Total Profit</h2>
+                <div class="flex flex-row justify-between items-start">
+                    <div class="flex flex-col gap-1 mb-2">
+                        <h2 class="font-semibold">Total Profit</h2>
+                        <p class="text-sm">Total Value: <span x-text="total_value"></span> {{ $site_currency }}</p>
+                    </div>
                     <select class="select w-max" x-model="duration" @change="updateChart()">
                         <option value="today">Today</option>
                         <option value="last_week">Last Week</option>
                         <option value="last_month">Last Month</option>
                         <option value="last_year">Last Year</option>
+                        <option value="last_2_year">Last 2 Years</option>
+                        <option value="last_3_year">Last 3 Years</option>
+                        <option value="last_5_year">Last 5 Years</option>
+                        <option value="last_10_year">Last 10 Years</option>
                     </select>
                 </div>
 
@@ -68,13 +93,21 @@
             </div>
 
             <div class="card bg-base-100 p-4 border border-base-300" x-data="chartSaleProductPie()" x-init="init()">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="font-semibold">Top Selling Products</h2>
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col gap-1 mb-2">
+                        <h2 class="font-semibold">Top Selling Products</h2>
+                        <p class="text-sm">Total Type: <span x-text="total_type"></span>, Total Count: <span x-text="total_count"></span></p>
+                    </div>
+                    <h2 class="font-semibold"></h2>
                     <select class="select w-max" x-model="duration" @change="updateChart()">
                         <option value="today">Today</option>
                         <option value="last_week">Last Week</option>
                         <option value="last_month">Last Month</option>
                         <option value="last_year">Last Year</option>
+                        <option value="last_2_year">Last 2 Years</option>
+                        <option value="last_3_year">Last 3 Years</option>
+                        <option value="last_5_year">Last 5 Years</option>
+                        <option value="last_10_year">Last 10 Years</option>
                     </select>
                 </div>
 
@@ -88,13 +121,20 @@
             </div>
 
             <div class="card bg-base-100 p-4 border border-base-300" x-data="chartTopCategoryPie()" x-init="init()">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="font-semibold">Top Selling Categories</h2>
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col gap-1 mb-2">
+                        <h2 class="font-semibold">Top Selling Categories</h2>
+                        <p class="text-sm">Total Type: <span x-text="total_type"></span>, Total Count: <span x-text="total_count"></span></p>
+                    </div>
                     <select class="select w-max" x-model="duration" @change="updateChart()">
                         <option value="today">Today</option>
                         <option value="last_week">Last Week</option>
                         <option value="last_month">Last Month</option>
                         <option value="last_year">Last Year</option>
+                        <option value="last_2_year">Last 2 Years</option>
+                        <option value="last_3_year">Last 3 Years</option>
+                        <option value="last_5_year">Last 5 Years</option>
+                        <option value="last_10_year">Last 10 Years</option>
                     </select>
                 </div>
                 <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-base-100/70 z-10">
@@ -107,13 +147,20 @@
             </div>
 
             <div class="card bg-base-100 p-4 border border-base-300" x-data="chartTopBrandPie()" x-init="init()">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="font-semibold">Top Selling Brands</h2>
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col gap-1 mb-2">
+                        <h2 class="font-semibold">Top Selling Brands</h2>
+                        <p class="text-sm">Total Type: <span x-text="total_type"></span>, Total Count: <span x-text="total_count"></span></p>
+                    </div>
                     <select class="select w-max" x-model="duration" @change="updateChart()">
                         <option value="today">Today</option>
                         <option value="last_week">Last Week</option>
                         <option value="last_month">Last Month</option>
                         <option value="last_year">Last Year</option>
+                        <option value="last_2_year">Last 2 Years</option>
+                        <option value="last_3_year">Last 3 Years</option>
+                        <option value="last_5_year">Last 5 Years</option>
+                        <option value="last_10_year">Last 10 Years</option>
                     </select>
                 </div>
                 <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-base-100/70 z-10">
@@ -136,6 +183,7 @@
                 error: false,
                 chart: null,
                 duration: 'today',
+                total_value: 0,
                 async init() {
                     await this.fetchData();
                     this.loading = false;
@@ -156,6 +204,7 @@
                             }
                         });
                         const data = res.data.data;
+                        this.total_value = data.total;
                         if (!this.chart) {
                             this.chart = new ApexCharts(this.$refs.chartContainer, {
                                 chart: {
@@ -218,6 +267,7 @@
                     } catch (e) {
                         console.error(e);
                         this.error = true;
+                        this.total_value = 0;
                     } finally {
                         this.loading = false;
                     }
@@ -231,6 +281,7 @@
                 error: false,
                 chart: null,
                 duration: 'today',
+                total_value: 0,
                 async init() {
                     await this.fetchData();
                     this.loading = false;
@@ -251,6 +302,7 @@
                             }
                         });
                         const data = res.data.data;
+                        this.total_value = data.total;
                         if (!this.chart) {
                             this.chart = new ApexCharts(this.$refs.chartContainer, {
                                 chart: {
@@ -313,6 +365,7 @@
                     } catch (e) {
                         console.error(e);
                         this.error = true;
+                        this.total_value = 0;
                     } finally {
                         this.loading = false;
                     }
@@ -326,6 +379,7 @@
                 error: false,
                 chart: null,
                 duration: 'today',
+                total_value: 0,
                 async init() {
                     await this.fetchData();
                     this.loading = false;
@@ -346,6 +400,7 @@
                             }
                         });
                         const data = res.data.data;
+                        this.total_value = data.total;
                         if (!this.chart) {
                             this.chart = new ApexCharts(this.$refs.chartContainer, {
                                 chart: {
@@ -408,6 +463,7 @@
                     } catch (e) {
                         console.error(e);
                         this.error = true;
+                        this.total_value = 0;
                     } finally {
                         this.loading = false;
                     }
@@ -421,6 +477,8 @@
                 error: false,
                 chart: null,
                 duration: 'today',
+                total_type: 0,
+                total_count:0,
                 async init() {
                     await this.fetchData();
                     this.loading = false;
@@ -440,6 +498,8 @@
                         });
 
                         const data = res.data.data;
+                        this.total_type = data.total_type;
+                        this.total_count = data.total_count;
                         if (!data?.labels || !data?.series) throw new Error('Invalid data');
 
                         if (this.chart) this.chart.destroy();
@@ -499,142 +559,8 @@
                     } catch (e) {
                         console.error(e);
                         this.error = true;
-                    } finally {
-                        this.loading = false;
-                    }
-                }
-            };
-        }
-
-        function chartPaymentPie() {
-            return {
-                loading: true,
-                error: false,
-                chart: null,
-                async init() {
-                    try {
-                        const res = await axios.get('/admin/dashboard/api/payment-pie');
-                        const data = res.data.data;
-                        if (!data?.labels || !data?.series) throw new Error('Invalid data');
-
-                        if (this.chart) {
-                            this.chart.destroy();
-                        }
-
-                        this.chart = new ApexCharts(this.$refs.chartContainer, {
-                            chart: {
-                                type: 'pie',
-                                height: 300,
-                                zoom: {
-                                    enabled: false
-                                },
-                                selection: {
-                                    enabled: false
-                                }
-                            },
-                            labels: data.labels,
-                            series: data.series,
-                            tooltip: {
-                                y: {
-                                    formatter: function(value) {
-                                        return parseFloat(value).toFixed(2);
-                                    }
-                                }
-                            },
-                            dataLabels: {
-                                formatter: function(value, {
-                                    seriesIndex,
-                                    w
-                                }) {
-                                    const val = w.config.series[seriesIndex];
-                                    return val.toFixed(2);
-                                }
-                            },
-                            legend: {
-                                position: 'right'
-                            },
-                            responsive: [{
-                                breakpoint: 640,
-                                options: {
-                                    chart: {
-                                        height: 280
-                                    },
-                                    legend: {
-                                        position: 'bottom',
-                                        fontSize: '12px'
-                                    },
-                                    dataLabels: {
-                                        style: {
-                                            fontSize: '11px'
-                                        }
-                                    }
-                                }
-                            }],
-                        });
-                        this.chart.render();
-                    } catch (e) {
-                        console.error(e);
-                        this.error = true;
-                    } finally {
-                        this.loading = false;
-                    }
-                }
-            };
-        }
-
-        function chartDevicePie() {
-            return {
-                loading: true,
-                error: false,
-                chart: null,
-                async init() {
-                    try {
-                        const res = await axios.get('/admin/dashboard/api/device-pie');
-                        const data = res.data.data;
-                        if (!data?.labels || !data?.series) throw new Error('Invalid data');
-
-                        if (this.chart) {
-                            this.chart.destroy();
-                        }
-
-                        this.chart = new ApexCharts(this.$refs.chartContainer, {
-                            chart: {
-                                type: 'pie',
-                                height: 300,
-                                zoom: {
-                                    enabled: false
-                                },
-                                selection: {
-                                    enabled: false
-                                }
-                            },
-                            labels: data.labels,
-                            series: data.series,
-                            legend: {
-                                position: 'right'
-                            },
-                            responsive: [{
-                                breakpoint: 640,
-                                options: {
-                                    chart: {
-                                        height: 280
-                                    },
-                                    legend: {
-                                        position: 'bottom',
-                                        fontSize: '12px'
-                                    },
-                                    dataLabels: {
-                                        style: {
-                                            fontSize: '11px'
-                                        }
-                                    }
-                                }
-                            }],
-                        });
-                        this.chart.render();
-                    } catch (e) {
-                        console.error(e);
-                        this.error = true;
+                        this.total_type = 0;
+                        this.total_count = 0;
                     } finally {
                         this.loading = false;
                     }
@@ -648,6 +574,8 @@
                 error: false,
                 chart: null,
                 duration: 'today',
+                total_type: 0,
+                total_count:0,
                 async init() {
                     await this.fetchData();
                     this.loading = false;
@@ -665,6 +593,8 @@
                             }
                         });
                         const data = res.data.data;
+                        this.total_type = data.total_type;
+                        this.total_count = data.total_count;
                         if (!data?.labels || !data?.series) throw new Error('Invalid data');
                         if (this.chart) this.chart.destroy();
                         this.chart = new ApexCharts(this.$refs.chartContainer, {
@@ -706,6 +636,8 @@
                     } catch (e) {
                         console.error(e);
                         this.error = true;
+                        this.total_type = 0;
+                        this.total_count = 0;
                     } finally {
                         this.loading = false;
                     }
@@ -719,6 +651,8 @@
                 error: false,
                 chart: null,
                 duration: 'today',
+                total_type: 0,
+                total_count:0,
                 async init() {
                     await this.fetchData();
                     this.loading = false;
@@ -736,6 +670,8 @@
                             }
                         });
                         const data = res.data.data;
+                        this.total_type = data.total_type;
+                        this.total_count = data.total_count;
                         if (!data?.labels || !data?.series) throw new Error('Invalid data');
                         if (this.chart) this.chart.destroy();
                         this.chart = new ApexCharts(this.$refs.chartContainer, {
@@ -777,6 +713,8 @@
                     } catch (e) {
                         console.error(e);
                         this.error = true;
+                        this.total_type = 0;
+                        this.total_count = 0;
                     } finally {
                         this.loading = false;
                     }

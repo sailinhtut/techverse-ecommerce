@@ -51,7 +51,7 @@
 
         <form
             action="{{ isset($edit_product) ? route('admin.dashboard.product.id.post', ['id' => $edit_product['id']]) : route('admin.dashboard.product.post') }}"
-            method="POST" class="w-full flex flex-col gap-3" enctype="multipart/form-data" x-data="{ submitting: false }">
+            method="POST" class="w-full flex flex-col gap-3" enctype="multipart/form-data" x-data="{ submitting: false }" @submit="submitting=true">
             @csrf
 
             <div class="tabs tabs-box bg-base-100 shadow-none" x-data='{ productType: @json($edit_product['product_type'] ?? 'simple') }'>

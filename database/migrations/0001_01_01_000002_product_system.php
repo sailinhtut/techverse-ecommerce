@@ -153,6 +153,7 @@ return new class extends Migration
             $table->decimal('weight', 10, 2)->nullable();
 
             $table->boolean('enable_review')->default(true);
+            $table->boolean('archived')->default(false);
             $table->timestamps();
         });
 

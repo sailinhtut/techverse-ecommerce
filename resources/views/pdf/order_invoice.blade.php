@@ -7,6 +7,7 @@
     $site_phone_2 = getParsedTemplate('site_phone_2');
     $site_contact_email = getParsedTemplate('site_contact_email');
     $site_primary_color = getParsedTemplate('site_primary_color');
+    $site_currency = getParsedTemplate('site_currency');
 @endphp
 
 <!DOCTYPE html>
@@ -45,10 +46,11 @@
                 <table width="100%">
                     <tr>
                         <td align="left" style="font-size:20px;">
-                           
+
                             <img src="{{ $base64Image }}" alt="logo" style="height:45px; object-fit:contain;">
 
-                            <div style="font-weight:bold;color:{{ $site_primary_color }};margin-top:10px;">{{ $site_name }}</div>
+                            <div style="font-weight:bold;color:{{ $site_primary_color }};margin-top:10px;">
+                                {{ $site_name }}</div>
                             <div style="font-size:10px; font-weight:normal;">
                                 {{ $site_description }}
                             </div>
@@ -143,7 +145,7 @@
                                 </td>
 
                                 <td align="center">
-                                    {{ number_format($item->unit_price, 2) }} {{ $order->currency }}
+                                    {{ number_format($item->unit_price, 2) }} {{ $site_currency }}
                                 </td>
 
                                 <td align="center">
@@ -151,7 +153,7 @@
                                 </td>
 
                                 <td align="right" style="color:#111; padding-right:15px;">
-                                    {{ number_format($item->subtotal, 2) }} {{ $order->currency }}
+                                    {{ number_format($item->subtotal, 2) }} {{ $site_currency }}
                                 </td>
                             </tr>
                         @endforeach
@@ -168,7 +170,7 @@
                     <tr>
                         <td style="padding:6px 0;">Subtotal</td>
                         <td align="right" style="padding:6px 0;">
-                            {{ number_format($invoice->subtotal, 2) }} {{ $order->currency }}
+                            {{ number_format($invoice->subtotal, 2) }} {{ $site_currency }}
                         </td>
                     </tr>
 
@@ -178,7 +180,7 @@
                                 Discount ({{ $order->coupon_code }})
                             </td>
                             <td align="right" style="padding:6px 0;">
-                                -{{ number_format($invoice->discount_total, 2) }} {{ $order->currency }}
+                                -{{ number_format($invoice->discount_total, 2) }} {{ $site_currency }}
                             </td>
                         </tr>
                     @endif
@@ -186,14 +188,14 @@
                     <tr>
                         <td style="padding:6px 0;">Tax</td>
                         <td align="right">
-                            {{ number_format($invoice->tax_total, 2) }} {{ $order->currency }}
+                            {{ number_format($invoice->tax_total, 2) }} {{ $site_currency }}
                         </td>
                     </tr>
 
                     <tr>
                         <td style="padding:6px 0; padding-bottom:10px;">Shipping</td>
                         <td align="right" style="padding-bottom:10px;">
-                            {{ number_format($invoice->shipping_total, 2) }} {{ $order->currency }}
+                            {{ number_format($invoice->shipping_total, 2) }} {{ $site_currency }}
                         </td>
                     </tr>
 
@@ -204,7 +206,14 @@
                     <tr>
                         <td style="padding-top: 10px;">Grand Total</td>
                         <td align="right" style="padding-top:10px;">
-                            {{ number_format($invoice->grand_total, 2) }} {{ $order->currency }}
+                            {{ number_format($invoice->grand_total, 2) }} {{ $site_currency }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding-top: 10px;">Payment Status</td>
+                        <td align="right" style="padding-top:10px;">
+                            {{ strtoupper($invoice->status) }}
                         </td>
                     </tr>
                 </table>

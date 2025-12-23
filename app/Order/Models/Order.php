@@ -73,10 +73,8 @@ class Order extends Model
 
     public function getProfit(): float
     {
-
         return $this->products->sum(function ($item) {
             $product = $item->product;
-
 
             if (!$product) {
                 return 0;

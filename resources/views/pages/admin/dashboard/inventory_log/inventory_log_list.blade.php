@@ -242,7 +242,7 @@
                 </div> --}}
             </div>
             <div class="flex flex-row gap-2">
-                {{-- <button class="btn btn-primary btn-sm">Save</button> --}}
+                  <button class="btn btn-sm" x-data @click="document.getElementById('queryForm').requestSubmit();">Search</button>
                 <button class="btn btn-sm" x-data
                     @click="$store.product_inventory_search_setting.resetFilter()">Reset</button>
             </div>

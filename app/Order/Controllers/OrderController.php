@@ -9,6 +9,7 @@ use App\Inventory\Models\Product;
 use App\Inventory\Models\ProductInventoryLog;
 use App\Inventory\Models\ProductVariant;
 use App\Inventory\Services\CouponService;
+use App\Order\Exports\OrdersExport;
 use App\Order\Models\Invoice;
 use App\Order\Models\Order;
 use App\Order\Models\OrderProduct;
@@ -19,9 +20,11 @@ use App\Order\Services\OrderService;
 use App\Shipping\Services\ShippingMethodService;
 use App\Tax\Services\TaxRateService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OrderController
 {
@@ -106,7 +109,41 @@ class OrderController
             $perPage = $request->get('perPage', 20);
             $search = $request->get('query', null);
 
+            $date_limit = $request->get('date_limit', null);
+            $order_status = $request->get('order_status', null);
+
+            $is_archived = $request->get('is_archived', null);
+
             $query = Order::query();
+
+            if (!is_null($is_archived) || $is_archived === 'true') {
+                $query->where('archived', true);
+            } else {
+                $query->where('archived', false);
+            }
+
+            if ($date_limit) {
+                $now = now();
+                if (preg_match('/last_(\d+)_(day|month|year)/', $date_limit, $matches)) {
+                    $amount = (int) $matches[1];
+                    $unit = $matches[2];
+
+                    $fromDate = match ($unit) {
+                        'day' => $now->copy()->subDays($amount)->startOfDay(),
+                        'month' => $now->copy()->subMonths($amount)->startOfDay(),
+                        'year' => $now->copy()->subYears($amount)->startOfDay(),
+                        default => null,
+                    };
+
+                    if ($fromDate) {
+                        $query->where('created_at', '>=', $fromDate);
+                    }
+                }
+            }
+
+            if ($order_status) {
+                $query->where('status', $order_status);
+            }
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -129,6 +166,7 @@ class OrderController
                     $query->orderBy('updated_at', 'desc')
                         ->orderBy('id', 'desc');
             }
+
 
             $orders = $query->paginate($perPage);
             $orders->appends(request()->query());
@@ -173,6 +211,17 @@ class OrderController
             return handleErrors($e);
         }
     }
+
+
+    public function viewAdminOrderExportPage(Request $request)
+    {
+        try {
+            return view('pages.admin.dashboard.order.order_export', []);
+        } catch (\Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
 
 
     public function createOrder(Request $request)
@@ -763,6 +812,149 @@ class OrderController
         }
     }
 
+
+    public function exportOrders(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'export_name'       => 'nullable|string',
+                'export_start_date' => 'nullable|date',
+                'export_end_date'   => 'nullable|date',
+            ]);
+
+            $startDate = !empty($validated['export_start_date'])
+                ? Carbon::parse($validated['export_start_date'])->startOfDay()
+                : null;
+
+            $endDate = !empty($validated['export_end_date'])
+                ? Carbon::parse($validated['export_end_date'])->endOfDay()
+                : null;
+
+            $query = Order::with([
+                'paymentMethod',
+                'shippingMethod',
+            ]);
+
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->where('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->where('created_at', '<=', $endDate);
+            }
+
+            $orders = $query->orderBy('created_at', 'asc')->get();
+
+            $fileName = ($validated['export_name'] ?? 'orders_export')
+                . '.xlsx';
+
+            return Excel::download(
+                new OrdersExport($orders),
+                $fileName
+            );
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
+
+    public function archiveOrder(Request $request, $id)
+    {
+        try {
+            $order = Order::find($id);
+            if (!$order) abort(404, 'No order found');
+            $order->update(['archived' => true]);
+
+            return redirect()->back()->with('success', 'Order is archived');
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
+    public function archiveSelectedOrders(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No orders selected for archive.');
+            }
+
+            $orders = Order::whereIn('id', $ids)->get();
+
+            foreach ($orders as $order) {
+                $order->update(['archived' => true]);
+            }
+
+            return redirect()->back()->with('success', 'Selected orders archived successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while archiving selected orders.");
+        }
+    }
+
+    public function archiveAllOrders()
+    {
+        try {
+            $orders = Order::all();
+
+            foreach ($orders as $order) {
+                $order->update(['archived' => true]);
+            }
+
+            return redirect()->back()->with('success', 'All orders archived successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while archiving all orders.");
+        }
+    }
+
+    public function unarchiveOrder(Request $request, $id)
+    {
+        try {
+            $order = Order::find($id);
+            if (!$order) abort(404, 'No order found');
+            $order->update(['archived' => false]);
+
+            return redirect()->back()->with('success', 'Order is unarchived');
+        } catch (Exception $e) {
+            return handleErrors($e);
+        }
+    }
+
+    public function unarchiveSelectedOrders(Request $request)
+    {
+        try {
+            $ids = $request->input('ids', []);
+
+            if (empty($ids)) {
+                return redirect()->back()->with('error', 'No orders selected for unarchive.');
+            }
+
+            $orders = Order::whereIn('id', $ids)->get();
+
+            foreach ($orders as $order) {
+                $order->update(['archived' => false]);
+            }
+
+            return redirect()->back()->with('success', 'Selected orders unarchived successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while unarchiving selected orders.");
+        }
+    }
+
+    public function unarchiveAllOrders()
+    {
+        try {
+            $orders = Order::all();
+
+            foreach ($orders as $order) {
+                $order->update(['archived' => false]);
+            }
+
+            return redirect()->back()->with('success', 'All orders unarchived successfully.');
+        } catch (\Exception $error) {
+            return handleErrors($error, "Something went wrong while archiving all orders.");
+        }
+    }
 
     public function deleteOrder(Request $request, $id)
     {

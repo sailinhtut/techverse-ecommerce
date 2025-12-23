@@ -64,6 +64,7 @@ return new class extends Migration
             $table->timestamp('seen_at')->nullable();
             $table->boolean('archived')->default(false);
             $table->boolean('stock_consumed')->default(false);
+            $table->boolean('archived')->default(false);
             $table->timestamps();
         });
 
@@ -94,6 +95,7 @@ return new class extends Migration
             $table->enum('status', ['unpaid', 'paid', 'refunded'])->default('unpaid');
             $table->dateTime('issued_at')->useCurrent();
             $table->dateTime('due_at')->nullable();
+            $table->boolean('archived')->default(false);
             $table->timestamps();
         });
 
@@ -102,6 +104,7 @@ return new class extends Migration
             $table->foreignId('order_id')->nullable()->constrained('orders')->onDelete('set null');
             $table->foreignId('invoice_id')->nullable()->constrained('invoices')->onDelete('set null');
             $table->decimal('amount', 10, 2);
+            $table->boolean('archived')->default(false);
             $table->timestamps();
         });
 
@@ -113,6 +116,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->enum('status', ['succeeded', 'cancelled', 'refunded']);
             $table->decimal('amount', 10, 2);
+            $table->boolean('archived')->default(false);
             $table->timestamps();
         });
 

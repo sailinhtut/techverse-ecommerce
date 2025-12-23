@@ -13,12 +13,14 @@ class Payment extends Model
         'order_id',
         'invoice_id',
         'amount',
+        'archived'
     ];
 
     protected function casts(): array
     {
         return [
             'amount' => 'decimal:2',
+            'archived' => 'boolean',
         ];
     }
 
@@ -45,6 +47,7 @@ class Payment extends Model
             'order_id' => $this->order_id,
             'invoice_id' => $this->invoice_id,
             'amount' => (float) $this->amount ?? 0,
+            'archived' => $this->archived,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

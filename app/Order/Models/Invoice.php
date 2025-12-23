@@ -20,6 +20,7 @@ class Invoice extends Model
         'status',
         'issued_at',
         'due_at',
+        'archived'
     ];
 
     protected function casts(): array
@@ -33,6 +34,7 @@ class Invoice extends Model
             'grand_total' => 'decimal:2',
             'issued_at' => 'datetime',
             'due_at' => 'datetime',
+            'archived' => 'boolean',
         ];
     }
 
@@ -60,6 +62,7 @@ class Invoice extends Model
             'status' => $this->status,
             'issued_at' => $this->issued_at,
             'due_at' => $this->due_at,
+            'archived' => $this->archived,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -664,15 +664,54 @@
                     </select>
                 </form>
 
-                <button class="btn btn-sm bg-base-100 font-normal shadow-none border-slate-300" x-data x-transition x-cloak
-                    @click="$store.product_search_setting.showFilterOption = !$store.product_search_setting.showFilterOption;$store.product_search_setting.save()">
-                    <span x-text="$store.product_search_setting.showFilterOption ? 'Hide Filter' : 'Filter Option'"></span>
-                </button>
-                <button class="btn btn-sm bg-base-100 font-normal shadow-none border-slate-300" x-data x-transition x-cloak
-                    @click="$store.product_search_setting.showDisplayOption = !$store.product_search_setting.showDisplayOption;$store.product_search_setting.save()">
-                    <span
-                        x-text="$store.product_search_setting.showDisplayOption ? 'Hide Display' : 'Display Option'"></span>
-                </button>
+                <div tabindex="0" role="button" class="dropdown dropdown-end">
+                    <div class="btn btn-square btn-sm btn-ghost">
+                        <button class="btn btn-square btn-sm bg-base-100 border-slate-300 shadow-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <ul tabindex="0"
+                        class="menu dropdown-content bg-base-100 border border-base-300 w-[180px] rounded-box p-1 mt-1 shadow-sm">
+                        <li>
+                            <button x-data x-transition x-cloak
+                                @click="$store.product_search_setting.showFilterOption = !$store.product_search_setting.showFilterOption;$store.product_search_setting.save()">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                                </svg>
+                                <span
+                                    x-text="$store.product_search_setting.showFilterOption ? 'Hide Filter' : 'Filter Option'"></span>
+                            </button>
+                        </li>
+                        <li>
+                            <button x-data x-transition x-cloak
+                                @click="$store.product_search_setting.showDisplayOption = !$store.product_search_setting.showDisplayOption;$store.product_search_setting.save()">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z" />
+                                </svg>
+                                <span
+                                    x-text="$store.product_search_setting.showDisplayOption ? 'Hide Display' : 'Display Option'"></span>
+                            </button>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="size-5 text-success">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0 1 12 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M13.125 12h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125M20.625 12c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5M12 14.625v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 14.625c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m0 1.5v-1.5m0 0c0-.621.504-1.125 1.125-1.125m0 0h7.5" />
+                                </svg>
+                                Export Products
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -739,7 +778,7 @@
                 </div>
             </div>
             <div class="flex flex-row gap-2">
-                {{-- <button class="btn btn-primary btn-sm">Save</button> --}}
+                <button class="btn btn-sm" x-data @click="document.getElementById('queryForm').requestSubmit();">Search</button>
                 <button class="btn btn-sm" x-data @click="$store.product_search_setting.resetFilter()">Reset</button>
             </div>
         </div>
